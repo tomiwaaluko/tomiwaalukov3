@@ -533,7 +533,7 @@ export default function Hero() {
           >
             {/* BOTTOM LAYER: Philosophical Quote (Default) */}
             <div className="quote-default">
-              In a world where complexity is inevitable and failure is expected, engineering is the act of preparation.
+              Software scales fast; trust scales slowly with humility in debate and discipline in execution.
             </div>
 
             {/* TOP LAYER: Reality Check Quote (Revealed via Red Circle Mask) */}
