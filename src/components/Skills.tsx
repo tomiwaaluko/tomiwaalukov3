@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiServer, FiDatabase, FiTerminal, FiLayers } from 'react-icons/fi';
+import { FiCode, FiLayers, FiTerminal, FiCpu } from 'react-icons/fi';
 import ScrollRevealText from './ScrollRevealText';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,75 +12,85 @@ const Skills: React.FC = () => {
   const categoryRefs = useRef<(HTMLDivElement | null)[]>([]);
   const barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const logoCarouselRef = useRef<HTMLDivElement>(null);
-  const logoContainerRef = useRef<HTMLDivElement>(null);
   const logoCarouselRef2 = useRef<HTMLDivElement>(null);
-  const logoContainerRef2 = useRef<HTMLDivElement>(null);
 
-  // New Data Structure (Backend/DevOps Focused) - 4 Categories
   const skillCategories = [
     {
       id: '01',
-      title: 'Backend Engineering',
-      icon: <FiServer size={24} />,
+      title: 'Languages',
+      icon: <FiCode size={24} />,
       skills: [
-        { name: 'Java (Core & Advanced)', level: 95 },
-        { name: 'Spring Boot / MVC', level: 90 },
-        { name: 'Spring Security / JWT', level: 85 },
-        { name: 'Microservices Arch.', level: 85 },
-        { name: 'RESTful API Design', level: 90 },
+        { name: 'Python', level: 92 },
+        { name: 'Java', level: 90 },
+        { name: 'C', level: 80 },
+        { name: 'HTML', level: 94 },
+        { name: 'CSS', level: 92 },
+        { name: 'JavaScript', level: 91 },
+        { name: 'TypeScript', level: 88 },
       ],
     },
     {
       id: '02',
-      title: 'Database & Storage',
-      icon: <FiDatabase size={24} />,
+      title: 'Frameworks',
+      icon: <FiLayers size={24} />,
       skills: [
-        { name: 'MySQL / PostgreSQL', level: 85 },
-        { name: 'Hibernate / JPA', level: 85 },
-        { name: 'Redis / Caching', level: 80 },
-        { name: 'Database Design', level: 85 },
-        { name: 'Query Optimization', level: 75 },
+        { name: 'ReactJS', level: 90 },
+        { name: 'Node.js', level: 88 },
+        { name: 'Next.js', level: 85 },
+        { name: 'NestJS', level: 82 },
+        { name: 'Tailwind CSS', level: 93 },
+        { name: 'tRPC', level: 80 },
+        { name: 'FastAPI', level: 84 },
       ],
     },
     {
       id: '03',
-      title: 'DevOps & Cloud',
+      title: 'Developer Tools',
       icon: <FiTerminal size={24} />,
       skills: [
-        { name: 'Docker / Kubernetes', level: 80 },
-        { name: 'AWS (EC2, S3, RDS)', level: 75 },
-        { name: 'CI/CD (Jenkins)', level: 75 },
-        { name: 'Nginx / Reverse Proxy', level: 70 },
-        { name: 'Linux Administration', level: 80 },
+        { name: 'Git/GitHub', level: 92 },
+        { name: 'Vercel', level: 86 },
+        { name: 'Postman Agent', level: 83 },
+        { name: 'Resend', level: 78 },
+        { name: 'Prisma', level: 81 },
+        { name: 'Supabase', level: 85 },
       ],
     },
     {
       id: '04',
-      title: 'Architecture & Core',
-      icon: <FiLayers size={24} />,
+      title: 'Technologies',
+      icon: <FiCpu size={24} />,
       skills: [
-        { name: 'System Design', level: 80 },
-        { name: 'Data Structures & Algo', level: 85 },
-        { name: 'Message Queues (Kafka)', level: 75 },
-        { name: 'Shell Scripting', level: 75 },
-        { name: 'Git / Version Control', level: 90 },
+        { name: 'REST APIs', level: 91 },
+        { name: 'PostgreSQL', level: 86 },
+        { name: 'MySQL', level: 84 },
+        { name: 'Docker', level: 82 },
+        { name: 'Redis', level: 80 },
+        { name: 'Generative AI (Claude, ChatGPT, Gemini)', level: 83 },
+        { name: 'SolidWorks', level: 76 },
+        { name: 'Microsoft 365', level: 88 },
+        { name: 'Adobe CC', level: 75 },
       ],
     },
   ];
 
   const logos = [
+    { name: 'Python', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
     { name: 'Java', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-    { name: 'Spring', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg' },
+    { name: 'TypeScript', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
+    { name: 'JavaScript', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
+    { name: 'React', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
+    { name: 'Next.js', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
+    { name: 'Node.js', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
+    { name: 'NestJS', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-plain.svg' },
+    { name: 'Tailwind', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
+    { name: 'FastAPI', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg' },
     { name: 'Docker', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-    { name: 'Kubernetes', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg' },
-    { name: 'AWS', src: 'https://www.vectorlogo.zone/logos/amazon_aws/amazon_aws-icon.svg' },
-    { name: 'Linux', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg' },
-    { name: 'Jenkins', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jenkins/jenkins-original.svg' },
-    { name: 'MySQL', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
     { name: 'PostgreSQL', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
+    { name: 'MySQL', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
     { name: 'Redis', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg' },
     { name: 'Git', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
-    { name: 'Nginx', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nginx/nginx-original.svg' },
+    { name: 'Prisma', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg' },
   ];
 
   const logos2 = [...logos].reverse();
