@@ -167,7 +167,7 @@ const Loader: React.FC<LoaderProps> = ({ onComplete }) => {
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl font-bold tracking-tight uppercase">Tomiwa Aluko Portfolio</h1>
-            <span className="text-xs font-mono opacity-50">© 2026</span>
+            <span className="text-xs font-mono opacity-50">© {new Date().getFullYear()}</span>
           </div>
           <div className="text-right">
             <span className="text-xs font-mono block">SYSTEM_CHECK</span>
@@ -234,7 +234,7 @@ const Loader: React.FC<LoaderProps> = ({ onComplete }) => {
           </div>
           <div className="hidden md:block">
             <span className="block opacity-50">Location</span>
-            <span>New Delhi, IN</span>
+            <span>Orlando, FL | Miami, FL</span>
           </div>
           <div className="hidden md:block">
             <span className="block opacity-50">Mode</span>

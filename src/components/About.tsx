@@ -108,23 +108,42 @@ const AwardWinningAbout: React.FC = () => {
                     once: true,
                     onEnter: () => {
                         if (isNumber) {
-                            // Number Counter
-                            // Extract numeric part safely
-                            const numericPart = originalText.replace(/[^0-9]/g, '');
-                            const val = parseInt(numericPart, 10);
-                            const suffix = originalText.replace(/[0-9]/g, ''); // e.g. "+"
-                            const proxy = { val: 0 };
+                            const trimmed = originalText.trim();
+                            const decimalMatch = trimmed.match(/^(\d+\.\d+)(.*)$/);
 
-                            gsap.to(proxy, {
-                                val: val,
-                                duration: 2, // Slower for visibility
-                                ease: "power3.out",
-                                onUpdate: () => {
-                                    // Pad with leading zero if original had it (simple heuristic: length of numeric part)
-                                    // But user data is "02+", "10+". So padding to 2 is safe.
-                                    el.innerText = Math.floor(proxy.val).toString().padStart(2, '0') + suffix;
-                                }
-                            });
+                            if (decimalMatch) {
+                                const [, numPart, suffix] = decimalMatch;
+                                const val = parseFloat(numPart);
+                                const decPlaces = numPart.split('.')[1].length;
+                                const proxy = { val: 0 };
+
+                                gsap.to(proxy, {
+                                    val,
+                                    duration: 2,
+                                    ease: "power3.out",
+                                    onUpdate: () => {
+                                        el.innerText = proxy.val.toFixed(decPlaces) + suffix;
+                                    },
+                                    onComplete: () => {
+                                        el.innerText = trimmed;
+                                    },
+                                });
+                            } else {
+                                // Integer counter (e.g. "02+", "10+")
+                                const numericPart = originalText.replace(/[^0-9]/g, '');
+                                const val = parseInt(numericPart, 10);
+                                const suffix = originalText.replace(/[0-9]/g, ''); // e.g. "+"
+                                const proxy = { val: 0 };
+
+                                gsap.to(proxy, {
+                                    val: val,
+                                    duration: 2, // Slower for visibility
+                                    ease: "power3.out",
+                                    onUpdate: () => {
+                                        el.innerText = Math.floor(proxy.val).toString().padStart(2, '0') + suffix;
+                                    },
+                                });
+                            }
                         } else {
                             // Text Scramble
                             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -175,7 +194,7 @@ const AwardWinningAbout: React.FC = () => {
     const stats = [
         { label: "EXP_YRS", value: "02+", desc: "Years Experience" },
         { label: "PRJ_CMP", value: "10+", desc: "Projects Completed" },
-        { label: "CLOUD", value: "AWS", desc: "Native Solutions" },
+        { label: "GPA", value: "3.50", desc: "Cumulative GPA" },
         { label: "AVAIL", value: "OPEN", desc: "For New Opportunities", active: true },
     ];
 
@@ -226,10 +245,13 @@ const AwardWinningAbout: React.FC = () => {
                     </h2>
                     <div className="about-content-item relative md:absolute md:top-1/2 left-0 md:left-1/4 mt-12 md:mt-0 ml-0 md:ml-20 transform md:-translate-y-1/2 w-full md:w-2/3 pl-6 border-l-2 border-red-500">
                         <p className="text-lg md:text-2xl font-light leading-relaxed text-black dark:text-white mix-blend-difference">
-                            I architect <span className="font-bold">high-performance backend ecosystems</span> using <span className="font-bold text-red-500">Java</span> and <span className="font-bold text-red-500">Spring Boot</span>. My expertise lies in leveraging <span className="font-bold">Spring MVC</span>, <span className="font-bold">Spring Security</span>, and <span className="font-bold">JPA</span> to engineer robust APIs and optimize complex data layers.
+                            I&apos;m a <span className="font-bold">Computer Engineering</span> student at the <span className="font-bold">University of Central Florida</span>, focused on <span className="font-bold">full-stack development</span>, <span className="font-bold">AI integrations</span>, and <span className="font-bold">agentic workflows</span>. I build with <span className="font-bold text-red-500">Python</span>, <span className="font-bold text-red-500">Java</span>, <span className="font-bold text-red-500">C</span>, and core web technologies (<span className="font-bold text-red-500">HTML</span>, <span className="font-bold text-red-500">CSS</span>, <span className="font-bold text-red-500">JavaScript</span>, and <span className="font-bold text-red-500">TypeScript</span>) to ship end-to-end solutions. I&apos;m a problem solver at heart: I want what I build to meet real-world needs.
                         </p>
                         <p className="text-lg md:text-2xl font-light leading-relaxed text-black dark:text-white mix-blend-difference mt-6">
-                            Beyond key-strokes, I leverage <span className="font-bold">DevOps</span> principles to bridge development and operations. I utilize <span className="font-bold">CI/CD</span>, <span className="font-bold">Linux</span>, and <span className="font-bold">AWS</span> alongside <span className="font-bold">Docker</span> to orchestrate resilient infrastructure, ensuring seamless, automated delivery.
+                            Off-screen, I serve as <span className="font-bold text-red-500">Senator</span> for the UCF chapter of <span className="font-bold text-black dark:text-white">National Society of Black Engineers</span> and as a member of <span className="font-bold text-black dark:text-white">Alpha Phi Alpha Fraternity, Inc.</span>, serving as <span className="font-bold text-red-500">President</span> of the Xi Iota Chapter and <span className="font-bold text-red-500">Assistant East Area Director</span> for the Florida Federation of Alpha Chapters. Through Alpha, I&apos;ve contributed <span className="font-bold">1,500+</span> community service hours.
+                        </p>
+                        <p className="text-base md:text-lg font-light italic leading-relaxed text-black dark:text-white mix-blend-difference mt-6 border-l-2 border-black/20 dark:border-white/20 pl-4">
+                            Software scales fast; trust scales slowly, but it compounds when you show up consistently.
                         </p>
                     </div>
                 </div>
