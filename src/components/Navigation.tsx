@@ -62,7 +62,7 @@ const Navigation: React.FC = () => {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'Engineering', path: '/projects' },
-    { name: 'GuestBook', path: '/guestbook' },
+    // { name: 'GuestBook', path: '/guestbook' },
   ];
 
   return (

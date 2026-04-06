@@ -1,1132 +1,691 @@
-export interface ProjectArchitecture {
-    hld: string;
-    lld: string;
-    classDiagram: string;
-    dataFlow: string;
-    infrastructure: string;
-    erDiagram: string;
-}
+import type { Project } from './projectSchema';
+import { projectArchitectures as arch } from './projectArchitectures';
 
-export interface Project {
-    id: string;
-    title: string;
-    category: string;
-    description: string;
-    longDescription: string;
-    tech: string[];
-    year: string;
-    status: string;
-    image: string;
-    github: string;
-    live: string | null;
-    impact?: string[];
-    challenges?: { title: string; description: string; solution: string }[];
-    size?: 'small' | 'medium' | 'large';
-    color: string;
-    architecture?: ProjectArchitecture;
-}
+export type { Project, ProjectArchitecture } from './projectSchema';
 
+const GITHUB = 'https://github.com/tomiwaaluko';
+const IMG = {
+    a: '/collegiaMockup.png',
+    b: '/0xkidMockup.png',
+    c: '/cultural.png',
+    d: '/skillbloom.png',
+    e: '/portfolio.png',
+    x: 'https://images.pexels.com/photos/265087/pexels-photo-265087.jpeg?auto=compress&cs=tinysrgb&w=400',
+} as const;
+
+/** Engineering index + detail pages. Summaries from docs/projects/*.md; diagrams from docs/projects/architecture/. */
 export const projects: Project[] = [
     {
         id: 'civic-lens',
         title: 'CivicLens',
         category: 'Full-Stack / Civic Tech',
-        description: 'Transparent political data, RAG-backed Q&A with citations, and interactive maps and visualizations.',
+        description: 'Political data, RAG Q&A with citations, maps, 3D donor networks.',
         longDescription:
-            'CivicLens is a political data and analysis platform built to give people evidence-based access to voting records, donations, and policy context, without editorial rankings. It pairs a Next.js frontend (maps, charts, 3D relationship graphs) with a FastAPI backend, PostgreSQL with pgvector for retrieval-grounded Gemini Q&A, and PostGIS for geographic donation views.',
+            'Transparent political data and analysis: voting records, donations, and policy context without editorial rankings. Next.js 16 plus FastAPI, PostgreSQL with pgvector and PostGIS, Gemini RAG, and ingestion from FEC, Congress.gov, and OpenSecrets.',
         tech: ['Next.js', 'FastAPI', 'PostgreSQL', 'pgvector', 'Gemini', 'PostGIS', 'Docker'],
         year: '2025',
         status: 'Live',
-        image: '/collegiaMockup.png',
-        github: 'https://github.com/tomiwaaluko',
+        image: IMG.a,
+        github: GITHUB,
         live: null,
-        impact: ['RAG + citations', 'PostGIS maps', 'Full-stack monorepo'],
+        impact: ['RAG + citations', 'PostGIS + 3D graphs', 'Monorepo ingest'],
         challenges: [
             {
-                title: 'Grounded answers at scale',
-                description: 'LLM responses had to cite primary sources and avoid hallucinating policy claims.',
-                solution: 'Implemented pgvector similarity search over curated records and constrained prompts to retrieved context with explicit source links in the UI.',
+                title: 'Grounded answers',
+                description: 'LLM outputs had to cite primary sources.',
+                solution: 'pgvector retrieval plus constrained prompts and source links in the UI.',
             },
             {
-                title: 'Heavy visualization + data joins',
-                description: 'Multiple interactive views stressed the API and duplicated expensive queries.',
-                solution: 'Used async FastAPI handlers, SQL-side aggregations for geo and graph payloads, and frontend caching (e.g. SWR) to dedupe reads.',
+                title: 'Heavy viz load',
+                description: 'Many charts and maps duplicated expensive queries.',
+                solution: 'Async FastAPI, SQL aggregations, SWR deduplication on the client.',
             },
         ],
         size: 'large',
         color: 'from-slate-500/20 to-red-500/20',
+        architecture: arch['civic-lens'],
     },
     {
         id: 'apply-sense',
         title: 'ApplySense',
         category: 'Product / Full-Stack',
-        description: 'Job search tracker with screenshot intake: multimodal extraction plus a reliable OCR fallback.',
+        description: 'Job tracker with screenshot intake: GPT-4o Vision plus OCR fallback.',
         longDescription:
-            'ApplySense helps users manage applications from a real dashboard: card and table views, filters, and in-browser success metrics. Its differentiator is screenshot-based intake: uploads go to storage, then a server pipeline tries GPT-4o Vision and falls back to Tesseract (with a client-side Tesseract path if the server path stalls). Google OAuth and per-user isolation are enforced through NextAuth and tRPC protected procedures.',
-        tech: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL', 'NextAuth', 'Supabase Storage', 'OpenAI'],
+            'T3-style stack: Next.js, tRPC, Prisma, NextAuth Google OAuth, Supabase Storage. Multimodal extraction from application screenshots with Tesseract fallback and per-user data isolation.',
+        tech: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL', 'NextAuth', 'Supabase', 'OpenAI'],
         year: '2025',
         status: 'Live',
-        image: '/0xkidMockup.png',
-        github: 'https://github.com/tomiwaaluko',
+        image: IMG.b,
+        github: GITHUB,
         live: null,
-        impact: ['Multimodal OCR', 'Auth + isolation', 'T3 stack'],
+        impact: ['Vision + OCR pipeline', 'Type-safe API', 'Private by userId'],
         challenges: [
             {
                 title: 'Fragile screenshot formats',
-                description: 'Confirmation emails and forms vary wildly; a single parser misses edge cases.',
-                solution: 'Two-stage extraction with structured schema validation, timeouts, and a browser fallback so users are never dead-ended.',
+                description: 'Confirmations vary wildly across employers.',
+                solution: 'Two-stage extraction, timeouts, and browser Tesseract if the server path stalls.',
             },
             {
-                title: 'Privacy and tenancy',
-                description: 'Job data is sensitive; every query must be scoped to the signed-in user.',
-                solution: 'NextAuth session in tRPC context with protectedProcedure and Prisma filters on userId for all job CRUD.',
+                title: 'Tenancy',
+                description: 'Job data is sensitive.',
+                solution: 'NextAuth session in tRPC context; Prisma filters on every query.',
             },
         ],
         size: 'large',
         color: 'from-blue-500/20 to-violet-500/20',
+        architecture: arch['apply-sense'],
     },
     {
         id: 'nsbe-app',
-        title: 'NSBE APP',
+        title: 'NSBE UCF Event Tracker',
         category: 'Org Platform / Full-Stack',
-        description: 'NSBE UCF chapter app: events, QR check-ins, achievements, leaderboards, and member tools; ongoing build.',
+        description: 'Chapter events, QR check-ins, achievements, leaderboards, friends.',
         longDescription:
-            'Built for the UCF chapter of NSBE: admins create events and QR/short-code check-ins; members earn semester achievements (e.g. category balance badges), appear on leaderboards, and use social features like friends and plan-to-attend. NestJS REST API with Prisma on PostgreSQL (Supabase), Supabase Auth with JWT verification in guards, Next.js App Router client, caching for hot reads, and Dockerized backend deployment alongside a Vercel frontend.',
+            'NestJS REST API with Prisma on Supabase Postgres, JWT verification, Next.js 16 client, in-memory cache for hot reads, Dockerized backend on Railway and Vercel frontend.',
         tech: ['NestJS', 'Next.js', 'Prisma', 'PostgreSQL', 'Supabase', 'Docker', 'Railway'],
         year: '2025 · Ongoing',
         status: 'Ongoing',
-        image: '/cultural.png',
-        github: 'https://github.com/tomiwaaluko',
+        image: IMG.c,
+        github: 'https://github.com/tomiwaaluko/nsbe-ucf-eventtracker',
         live: null,
-        impact: ['Chapter operations', 'QR attendance', 'Achievements + social'],
+        impact: ['QR attendance', 'Achievement buckets', 'Member + admin flows'],
         challenges: [
             {
-                title: 'Correctness under real event load',
-                description: 'Check-ins and leaderboard recomputation must stay consistent when many members scan at once.',
-                solution: 'Transactional writes in Prisma, clear domain modules per feature, and in-memory caching for read-heavy leaderboard/event lists.',
+                title: 'Concurrent check-ins',
+                description: 'Many scans at once must stay consistent.',
+                solution: 'Transactional Prisma writes and cached read models for leaderboards.',
             },
             {
-                title: 'Auth across two runtimes',
-                description: 'Browser uses Supabase tokens; API must validate without round-trips per request.',
-                solution: 'JwtAuthGuard verifies Supabase JWT with shared secret, syncs member rows on login, and centralizes role checks.',
+                title: 'Auth across tiers',
+                description: 'Browser tokens must validate cheaply on the API.',
+                solution: 'JwtAuthGuard with Supabase secret; member sync on login.',
             },
         ],
         size: 'large',
         color: 'from-amber-500/20 to-orange-500/20',
+        architecture: arch['nsbe-app'],
     },
     {
-        id: '01',
-        title: 'Collegia',
-        category: 'Full-Stack Platform',
-        description: 'Comprehensive academic management system with real-time collaboration.',
-        longDescription: 'Collegia is a full-featured student management platform that streamlines academic processes. Built with Java Spring MVC and React.js, it features user authentication, course management, assignment tracking, and real-time notifications.',
-        tech: ['Java', 'Spring MVC', 'React.js', 'MySQL', 'Spring Security'],
-        year: '2024',
-        status: 'Live',
-        image: '/collegiaMockup.png',
-        github: 'https://github.com/tomiwaaluko',
-        live: 'https://github.com/tomiwaaluko',
-        impact: ['500+ Students', '15+ Institutions', '99.9% Uptime'],
+        id: 'tenderpilot',
+        title: 'TenderPilot',
+        category: 'AI / Legal Tech',
+        description: 'Multi-agent legal ops: classify, extract evidence, draft comms, HITL.',
+        longDescription:
+            'Google AI Hackathon 2025 project. Next.js 16 orchestrates Gemini 2.5 Pro agents (classifier, evidence sorter, client comms), human approvals, audit trail, and telemetry on Supabase.',
+        tech: ['Next.js', 'Gemini', 'TypeScript', 'Supabase', 'Framer Motion'],
+        year: '2025',
+        status: 'Demo',
+        image: IMG.a,
+        github: GITHUB,
+        live: null,
+        impact: ['Parallel agents', 'Audit timeline', 'HITL approvals'],
         challenges: [
             {
-                title: 'High Concurrency Access',
-                description: 'Handling thousands of students accessing exam modules simultaneously caused database bottlenecks.',
-                solution: 'Implemented database sharding and read-replicas, reducing query latency by 60% during peak loads.'
+                title: 'Multimodal evidence',
+                description: 'Scanned PDFs and billing tables need structured extraction.',
+                solution: 'Dedicated evidence agent plus orchestrated handoffs to comms drafts.',
             },
             {
-                title: 'Real-time System Updates',
-                description: 'Need to push grades and notifications instantly without page refreshes.',
-                solution: 'Built a WebSocket layer using Spring WebFlux for bi-directional communication.'
-            }
+                title: 'Trust',
+                description: 'Lawyers need traceability.',
+                solution: 'Persisted task graph, confidence scores, and approval gates.',
+            },
         ],
         size: 'large',
-        color: 'from-blue-500/20 to-cyan-500/20',
-        architecture: {
-            hld: `flowchart TB
-    Client["React.js SPA"]
-    GW["Spring Security / JWT"]
-    BL["Business Logic Layer\nCourseService | AuthService"]
-    DA["Data Access\nSpring JPA / Hibernate"]
-    DB[("MySQL Primary")]
-    RC[("Redis Cache")]
-    WS["WebSocket\nNotifications"]
-
-    Client -->|HTTPS| GW
-    GW -->|Authorized| BL
-    BL --> DA
-    DA --> DB
-    BL --> RC
-    BL --> WS
-    WS -->|Push Events| Client`,
-
-            lld: `flowchart LR
-    subgraph Controllers
-        AC["AuthController\nPOST /login\nPOST /register"]
-        CC["CourseController\nGET /courses\nPOST /enroll"]
-        ASC["AssignmentController\nPOST /submit\nPOST /grade"]
-    end
-    subgraph Services
-        AS["AuthService"]
-        CS["CourseService"]
-        NS["NotificationService"]
-    end
-    subgraph Repository
-        AR["AssignmentRepo"]
-        CR["CourseRepo"]
-        UR["UserRepo"]
-    end
-
-    AC --> AS
-    CC --> CS
-    ASC --> NS
-    AS --> UR
-    CS --> CR
-    NS --> AR`,
-
-            classDiagram: `classDiagram
-    class User {
-        +Long id
-        +String name
-        +String email
-        +Role role
-        +List~Course~ courses
-        +enroll(course)
-        +getGrades()
-        +updateProfile()
-    }
-    class Course {
-        +Long id
-        +String title
-        +int credits
-        +User instructor
-        +List~User~ students
-        +addStudent(user)
-        +getAssignments()
-    }
-    class Assignment {
-        +Long id
-        +String title
-        +Date dueDate
-        +int maxScore
-        +Course course
-        +submit(content)
-        +grade(score)
-    }
-    User "1" --> "*" Course : enrolls
-    Course "1" --> "*" Assignment : has`,
-
-            dataFlow: `sequenceDiagram
-    participant C as React Client
-    participant S as Spring Security
-    participant AC as AssignmentController
-    participant SVC as AssignmentService
-    participant DB as MySQL
-    participant WS as WebSocket
-
-    C->>S: POST /grade (JWT Bearer)
-    S->>AC: Validated & Authorized
-    AC->>SVC: grade(userId, assignmentId, score)
-    SVC->>DB: UPDATE assignments SET score=?
-    DB-->>SVC: OK
-    SVC->>WS: Push grade event
-    WS-->>C: Live grade notification
-    AC-->>C: 200 OK {grade, feedback}`,
-
-            infrastructure: `flowchart TB
-    subgraph Internet
-        User["User Browser"]
-    end
-    subgraph Cloud["AWS / VPS"]
-        CDN["CloudFront CDN\nStatic Assets"]
-        LB["Load Balancer\nNginx"]
-        subgraph App["App Servers"]
-            API1["Spring Boot\nInstance 1"]
-            API2["Spring Boot\nInstance 2"]
-        end
-        subgraph Data["Data Layer"]
-            MySQL[("MySQL Primary")]
-            Replica[("MySQL Replica")]
-            Redis[("Redis Cache")]
-        end
-    end
-
-    User --> CDN
-    CDN --> LB
-    LB --> API1
-    LB --> API2
-    API1 --> MySQL
-    API2 --> MySQL
-    MySQL --> Replica
-    API1 --> Redis
-    API2 --> Redis`,
-
-            erDiagram: `erDiagram
-    USER {
-        bigint id PK
-        varchar name
-        varchar email
-        varchar password_hash
-        enum role
-        timestamp created_at
-    }
-    COURSE {
-        bigint id PK
-        varchar title
-        int credits
-        bigint instructor_id FK
-    }
-    ENROLLMENT {
-        bigint id PK
-        bigint user_id FK
-        bigint course_id FK
-        date enrolled_at
-    }
-    ASSIGNMENT {
-        bigint id PK
-        bigint course_id FK
-        varchar title
-        date due_date
-        int max_score
-    }
-    SUBMISSION {
-        bigint id PK
-        bigint assignment_id FK
-        bigint user_id FK
-        text content
-        int score
-        timestamp submitted_at
-    }
-    USER ||--o{ ENROLLMENT : enrolls
-    COURSE ||--o{ ENROLLMENT : has
-    COURSE ||--o{ ASSIGNMENT : contains
-    USER ||--o{ SUBMISSION : submits
-    ASSIGNMENT ||--o{ SUBMISSION : receives`
-        }
+        color: 'from-zinc-500/20 to-emerald-500/20',
+        architecture: arch.tenderpilot,
     },
     {
-        id: '02',
-        title: 'The Cultural Circuit',
-        category: 'Community',
-        description: 'Preserving heritage through digital storytelling and community engagement.',
-        longDescription: 'The Cultural Circuit connects communities through cultural preservation. Features include cultural event management, heritage documentation, community forums, and multimedia galleries to share traditions.',
-        tech: ['MERN Stack', 'AWS S3', 'Socket.io', 'JWT'],
-        year: '2024',
-        status: 'Development',
-        image: '/cultural.png',
-        github: 'https://github.com/tomiwaaluko',
+        id: 'digiconvo',
+        title: 'DigiConvo',
+        category: 'AI / EdTech',
+        description: 'Practice hard conversations with AI personas, emotion panel, voice I/O.',
+        longDescription:
+            'KnightHacks build: T3 Stack, Zustand client state, tRPC to Gemini for persona replies and live tone analysis, Web Speech STT/TTS, optional Prisma persistence.',
+        tech: ['Next.js', 'tRPC', 'Gemini', 'Zustand', 'Framer Motion', 'Prisma'],
+        year: '2025',
+        status: 'Hackathon',
+        image: IMG.b,
+        github: GITHUB,
         live: null,
-        impact: ['Cultural Preservation', 'Community Building', 'Heritage Documentation'],
+        impact: ['Scenario library', 'Emotion timeline', 'Markdown replies'],
         challenges: [
             {
-                title: 'Digital Preservation',
-                description: 'Standardizing diverse cultural artifacts into a coherent digital format.',
-                solution: 'Developed a flexible metadata schema and used IPFS for decentralized, permanent storage.'
+                title: 'Dual AI calls',
+                description: 'Chat and emotion analysis run together without lag.',
+                solution: 'Parallel tRPC procedures and optimistic UI in Zustand.',
             },
             {
-                title: 'Community Engagement',
-                description: 'Encouraging active participation from non-technical users.',
-                solution: 'Created an intuitive "Story Studio" editor that simplifies rich-media content creation.'
-            }
-        ],
-        size: 'medium',
-        color: 'from-orange-500/20 to-red-500/20',
-        architecture: {
-            hld: `flowchart TB
-    Client["React.js SPA\nSocket.io Client"]
-    API["Express.js API\nJWT Middleware"]
-    S3["AWS S3\nMedia Storage"]
-    SIO["Socket.io Server\nReal-time Rooms"]
-    MDB[("MongoDB Atlas")]
-
-    Client -->|REST + JWT| API
-    Client -->|Socket Events| SIO
-    API -->|PutObject| S3
-    S3 -->|Signed URL| API
-    API --> MDB
-    SIO --> MDB`,
-
-            lld: `flowchart LR
-    subgraph Routes
-        SR["StoryRouter\nCRUD /stories"]
-        MR["MediaRouter\nUpload to S3"]
-        CR["CommunityRouter\n/forums /events"]
-    end
-    subgraph Handlers
-        SH["SocketHandler\nonConnect\njoinRoom\nemitUpdate"]
-    end
-    subgraph Storage
-        S3["AWS S3"]
-        MG["MongoDB"]
-    end
-
-    SR --> MG
-    MR --> S3
-    CR --> MG
-    SH --> MG`,
-
-            classDiagram: `classDiagram
-    class Story {
-        +ObjectId _id
-        +String title
-        +String content
-        +String[] mediaUrls
-        +User author
-        +publish()
-        +addMedia(url)
-        +archive()
-    }
-    class User {
-        +ObjectId _id
-        +String name
-        +String email
-        +Story[] stories
-        +createStory()
-        +joinForum()
-        +followUser()
-    }
-    class Event {
-        +ObjectId _id
-        +String title
-        +Date date
-        +String location
-        +User organizer
-        +register(user)
-        +notify()
-    }
-    User "1" --> "*" Story : authors
-    User "1" --> "*" Event : organizes`,
-
-            dataFlow: `sequenceDiagram
-    participant C as React Client
-    participant API as Express API
-    participant M as Multer
-    participant S3 as AWS S3
-    participant DB as MongoDB
-    participant SIO as Socket.io
-
-    C->>API: POST /upload (multipart)
-    API->>M: Parse & validate file
-    M->>S3: PutObject to bucket
-    S3-->>API: Signed S3 URL
-    API->>DB: Save Story with S3 URL
-    DB-->>API: Story saved
-    API->>SIO: Broadcast new story event
-    SIO-->>C: Community feed update
-    API-->>C: 201 Created {story, mediaUrl}`,
-
-            infrastructure: `flowchart TB
-    subgraph Client["Client Side"]
-        Browser["React SPA\nSocket.io Client"]
-    end
-    subgraph AWS["AWS Infrastructure"]
-        CF["CloudFront"]
-        S3["S3 Bucket\nMedia Storage"]
-        EC2["EC2 Instance\nExpress API"]
-    end
-    subgraph Atlas["MongoDB Atlas"]
-        MDB[("MongoDB\nM10 Cluster")]
-    end
-    SIO["Socket.io\nServer (EC2)"]
-
-    Browser --> CF
-    CF --> EC2
-    CF --> S3
-    EC2 --> S3
-    EC2 --> MDB
-    EC2 --> SIO
-    SIO --> Browser`,
-
-            erDiagram: `erDiagram
-    USER {
-        objectid _id PK
-        string name
-        string email
-        string avatar_url
-        datetime joined_at
-    }
-    STORY {
-        objectid _id PK
-        string title
-        text content
-        string[] media_urls
-        objectid author_id FK
-        boolean published
-        datetime created_at
-    }
-    EVENT {
-        objectid _id PK
-        string title
-        string location
-        date event_date
-        objectid organizer_id FK
-    }
-    MEDIA {
-        objectid _id PK
-        string s3_url
-        string mime_type
-        objectid story_id FK
-    }
-    USER ||--o{ STORY : authors
-    USER ||--o{ EVENT : organizes
-    STORY ||--o{ MEDIA : contains`
-        }
-    },
-    {
-        id: '03',
-        title: '0xKid',
-        category: 'EdTech',
-        description: 'Gamified coding platform for children with AI mentorship.',
-        longDescription: '0xKid makes learning programming exciting for children through gamified challenges and AI-powered mentorship. The platform offers structured lessons, real-time feedback, and a visual learning environment.',
-        tech: ['Spring Boot', 'React.js', 'MongoDB', 'OpenAI API'],
-        year: '2024',
-        status: 'Development',
-        image: '/0xkidMockup.png',
-        github: '#',
-        live: '#',
-        impact: ['Gamified Learning', 'AI Mentorship', 'Child-Friendly UI'],
-        challenges: [
-            {
-                title: 'Safe Code Execution',
-                description: 'Running untrusted user-submitted code securely in the browser.',
-                solution: 'Engineered a sandboxed execution environment using WebAssembly (Wasm) to isolate code runtime.'
+                title: 'Voice UX',
+                description: 'Browser APIs differ by platform.',
+                solution: 'Progressive enhancement with fallbacks to typed input.',
             },
-            {
-                title: 'AI Cost Optimization',
-                description: 'Providing personalized AI mentorship was becoming cost-prohibitive at scale.',
-                solution: 'Implemented a semantic caching layer to serve cached responses for common coding queries.'
-            }
         ],
-        size: 'medium',
-        color: 'from-purple-500/20 to-pink-500/20',
-        architecture: {
-            hld: `flowchart TB
-    Client["React.js UI\nMonaco Editor"]
-    WASM["WebAssembly\nSandbox Runtime"]
-    API["Spring Boot API\nSpring Security"]
-    AI["OpenAI GPT-4o\nAI Mentorship"]
-    Cache[("Redis\nSemantic Cache")]
-    DB[("MongoDB\nProgress & Challenges")]
-
-    Client -->|Run Code| WASM
-    WASM -->|stdout / errors| Client
-    Client -->|Submit| API
-    API -->|Hint Request| Cache
-    Cache -->|Miss| AI
-    AI -->|Response| Cache
-    Cache -->|Hint| API
-    API --> DB`,
-
-            lld: `flowchart LR
-    subgraph Controllers
-        CC["ChallengeController\nGET /challenges\nPOST /submit"]
-        AIC["AIController\nPOST /hint\nPOST /review"]
-    end
-    subgraph Services
-        ES["ExecutionSandbox\ncompileWasm\nrunSandboxed"]
-        PS["ProgressService\nawardXP\nunlockBadge"]
-        AIS["AIService\ncacheCheck\ncallOpenAI"]
-    end
-
-    CC --> ES
-    CC --> PS
-    AIC --> AIS`,
-
-            classDiagram: `classDiagram
-    class Kid {
-        +String id
-        +String username
-        +int xp
-        +int level
-        +String[] badges
-        +String[] completed
-        +attemptChallenge(id)
-        +askHint()
-        +viewProgress()
-    }
-    class Challenge {
-        +String id
-        +String title
-        +Enum difficulty
-        +String starterCode
-        +TestCase[] testCases
-        +int xpReward
-        +validate(submission)
-        +runTests(code)
-    }
-    class AISession {
-        +String id
-        +String kidId
-        +Message[] history
-        +String cacheKey
-        +ask(prompt)
-        +getFromCache()
-        +storeInCache()
-    }
-    Kid "1" --> "*" AISession : has
-    Kid "*" --> "*" Challenge : attempts`,
-
-            dataFlow: `sequenceDiagram
-    participant E as Monaco Editor
-    participant W as Wasm Runtime
-    participant C as React Client
-    participant API as Spring Boot API
-    participant R as Redis Cache
-    participant OAI as OpenAI GPT-4o
-
-    E->>W: Compile & run code (sandboxed)
-    W-->>C: stdout / errors (no server trip)
-    C->>API: POST /submit {code, challengeId}
-    API->>W: Run test cases
-    W-->>API: All tests pass
-    API-->>C: XP awarded + badge unlocked
-    C->>API: POST /hint {challengeId, code}
-    API->>R: Check semantic cache
-    alt Cache Hit
-        R-->>API: Cached hint
-    else Cache Miss
-        API->>OAI: GPT-4o prompt
-        OAI-->>API: Contextual hint
-        API->>R: Store in cache
-    end
-    API-->>C: Hint response`,
-
-            infrastructure: `flowchart TB
-    subgraph Client
-        Browser["React SPA\nMonaco + Wasm"]
-    end
-    subgraph Render["Render.com / Railway"]
-        SB["Spring Boot API\nDocker Container"]
-        RD[("Redis\nSemantic Cache")]
-    end
-    subgraph Atlas["MongoDB Atlas"]
-        DB[("MongoDB Cluster")]
-    end
-    OAI["OpenAI API\ngpt-4o"]
-
-    Browser -->|HTTPS| SB
-    Browser -->|Wasm runtime| Browser
-    SB --> RD
-    SB --> DB
-    SB -->|Cache miss| OAI`,
-
-            erDiagram: `erDiagram
-    KID {
-        string _id PK
-        string username
-        string email
-        int xp
-        int level
-        string[] badges
-    }
-    CHALLENGE {
-        string _id PK
-        string title
-        enum difficulty
-        string starter_code
-        int xp_reward
-    }
-    ATTEMPT {
-        string _id PK
-        string kid_id FK
-        string challenge_id FK
-        string submitted_code
-        boolean passed
-        datetime attempted_at
-    }
-    AI_SESSION {
-        string _id PK
-        string kid_id FK
-        string cache_key
-        json[] messages
-        datetime created_at
-    }
-    KID ||--o{ ATTEMPT : makes
-    CHALLENGE ||--o{ ATTEMPT : receives
-    KID ||--o{ AI_SESSION : has`
-        }
+        size: 'large',
+        color: 'from-violet-500/20 to-fuchsia-500/20',
+        architecture: arch.digiconvo,
     },
     {
-        id: '04',
-        title: 'SkillBloom+',
-        category: 'LMS',
-        description: 'Advanced learning platform with GitHub tracking.',
-        longDescription: 'SkillBloom+ tracks student progress through GitHub integration. Features include course management, skill assessments, progress tracking, and automated certificate generation based on code commits.',
-        tech: ['Spring Boot', 'PostgreSQL', 'Docker', 'GitHub API'],
-        year: '2023',
+        id: 'the-paint',
+        title: 'Tha Paint',
+        category: 'ML / Sports Analytics',
+        description: 'NBA statline and team predictions; O/U distributions; fantasy scoring.',
+        longDescription:
+            'Python chalk package: XGBoost and LightGBM, MAPIE intervals, MLflow, Optuna, async FastAPI, Redis cache, TimescaleDB, React dashboard, Railway cron ingestion.',
+        tech: ['FastAPI', 'XGBoost', 'PostgreSQL', 'Redis', 'React', 'MLflow'],
+        year: '2024–2025',
         status: 'Live',
-        image: '/skillbloom.png',
-        github: 'https://github.com/tomiwaaluko',
-        live: 'https://github.com/tomiwaaluko',
-        impact: ['1000+ Learners', 'GitHub Integration', 'Automated Assessments'],
-        challenges: [
-            {
-                title: 'Authentic Assessment',
-                description: 'Verifying that code submissions actually represent student work.',
-                solution: 'Integrated GitHub Webhooks to analyze commit velocity and coding patterns for authenticity.'
-            },
-            {
-                title: 'Scalable Leaderboards',
-                description: 'Real-time ranking updates became slow with growing user base.',
-                solution: 'Utilized Redis Sorted Sets to handle leaderboard operations with O(log(N)) time complexity.'
-            }
-        ],
-        size: 'medium',
-        color: 'from-green-500/20 to-emerald-500/20',
-        architecture: {
-            hld: `flowchart TB
-    GH["GitHub Repository\nWebhook Push"]
-    Nginx["Nginx Reverse Proxy\nDocker Network"]
-    API["Spring Boot API\nJWT Auth"]
-    Redis[("Redis\nLeaderboard SortedSet")]
-    PG[("PostgreSQL\nACID Transactions")]
-    Cert["Certificate\nGenerator"]
-
-    GH -->|Webhook POST| Nginx
-    Nginx --> API
-    API -->|ZADD score| Redis
-    API -->|UPDATE learner| PG
-    API --> Cert
-    Cert --> PG`,
-
-            lld: `flowchart LR
-    subgraph Ingress
-        WH["WebhookHandler\nonPush\nanalyzeCommits"]
-    end
-    subgraph Core
-        CS["CourseController\nenroll / progress"]
-        LS["LeaderboardService\naddScore\ngetTopN"]
-        CERT["CertificateService\ngenerate\nverify"]
-    end
-    subgraph Storage
-        RD["Redis Sorted Sets"]
-        PG["PostgreSQL"]
-    end
-
-    WH --> CS
-    WH --> LS
-    CS --> CERT
-    LS --> RD
-    CERT --> PG`,
-
-            classDiagram: `classDiagram
-    class Learner {
-        +UUID id
-        +String name
-        +String githubHandle
-        +int totalXP
-        +Course[] enrolled
-        +enroll(course)
-        +linkGitHub(token)
-        +getCertificates()
-    }
-    class Course {
-        +UUID id
-        +String title
-        +int requiredCommits
-        +Module[] modules
-        +checkCompletion(learner)
-        +issueCertificate()
-        +getLeaderboard()
-    }
-    class Certificate {
-        +UUID id
-        +UUID learnerId
-        +UUID courseId
-        +Date issuedAt
-        +String verifyHash
-        +verify()
-        +share()
-    }
-    Learner "1" --> "*" Course : enrolls in
-    Learner "1" --> "*" Certificate : earns`,
-
-            dataFlow: `sequenceDiagram
-    participant GH as GitHub
-    participant WH as WebhookHandler
-    participant GHAPI as GitHub API
-    participant PS as ProgressService
-    participant RD as Redis
-    participant PG as PostgreSQL
-    participant CERT as CertificateService
-
-    GH->>WH: POST /webhook (push event)
-    WH->>GHAPI: GET /commits/{sha} verify authenticity
-    GHAPI-->>WH: Commit metadata
-    WH->>PS: Increment XP + commit count
-    PS->>RD: ZADD leaderboard {score} {userId}
-    PS->>PG: UPDATE learner SET xp=?, commits=?
-    PS->>CERT: Threshold met? Generate certificate
-    CERT->>PG: INSERT certificate {verifyHash}`,
-
-            infrastructure: `flowchart TB
-    GH["GitHub Repositories"]
-    subgraph Docker["Docker Compose"]
-        Nginx["Nginx\nReverse Proxy\n:443"]
-        SB["Spring Boot\nApp Container\n:8080"]
-        PG[("PostgreSQL\nContainer")]
-        RD[("Redis\nContainer")]
-    end
-    GHAPI["GitHub API\nWebhook Receiver"]
-
-    GH -->|Webhook POST| Nginx
-    Nginx --> SB
-    SB --> PG
-    SB --> RD
-    SB --> GHAPI`,
-
-            erDiagram: `erDiagram
-    LEARNER {
-        uuid id PK
-        varchar name
-        varchar github_handle
-        int total_xp
-        timestamp joined_at
-    }
-    COURSE {
-        uuid id PK
-        varchar title
-        int required_commits
-    }
-    ENROLLMENT {
-        uuid id PK
-        uuid learner_id FK
-        uuid course_id FK
-        int commits_done
-        boolean completed
-    }
-    CERTIFICATE {
-        uuid id PK
-        uuid learner_id FK
-        uuid course_id FK
-        varchar verify_hash
-        timestamp issued_at
-    }
-    LEARNER ||--o{ ENROLLMENT : has
-    COURSE ||--o{ ENROLLMENT : tracks
-    LEARNER ||--o{ CERTIFICATE : earns
-    COURSE ||--o{ CERTIFICATE : grants`
-        }
-    },
-    {
-        id: '05',
-        title: 'E-Commerce API',
-        category: 'Backend',
-        description: 'Robust RESTful API with advanced security and payment integration.',
-        longDescription: 'A production-ready e-commerce API featuring user management, product catalog, order processing, and Stripe payment integration. Includes comprehensive security measures and optimized database queries.',
-        tech: ['Spring Security', 'JWT', 'Stripe API', 'MySQL'],
-        year: '2023',
-        status: 'Live',
-        image: 'https://images.pexels.com/photos/5650040/pexels-photo-5650040.jpeg',
-        github: 'https://github.com/tomiwaaluko',
+        image: IMG.d,
+        github: 'https://github.com/tomiwaaluko/thepaint',
         live: null,
-        impact: ['Secure Payments', 'RESTful Design', 'Scalable Architecture'],
+        impact: ['Player + team APIs', 'Calibrated intervals', 'Fantasy optimizers'],
         challenges: [
             {
-                title: 'Transaction Integrity',
-                description: 'Ensuring inventory stays accurate during simultaneous purchases.',
-                solution: 'Used database row-level locking and ACID compliant transactions to prevent race conditions.'
+                title: 'Data leakage',
+                description: 'Features must respect as-of game date.',
+                solution: 'Explicit as_of_date in pipelines and walk-forward validation.',
             },
             {
-                title: 'Security Compliance',
-                description: 'Meeting PCI-DSS requirements for handling payment data.',
-                solution: 'Offloaded sensitive data handling to Stripe elements and implemented strict JWT authorization policies.'
-            }
+                title: 'Latency at tip-off',
+                description: 'Spike traffic on predictions.',
+                solution: 'Redis TTL caching and warm model load in FastAPI lifespan.',
+            },
+        ],
+        size: 'large',
+        color: 'from-green-500/20 to-teal-500/20',
+        architecture: arch['the-paint'],
+    },
+    {
+        id: 'pullup',
+        title: 'PullUp',
+        category: 'Mobile / Campus',
+        description: 'Discover and RSVP to campus events; org dashboards.',
+        longDescription:
+            'Expo 54 and React Native with Expo Router, TanStack Query, Supabase Auth (email, Google, Apple), PostgREST, and Storage for avatars.',
+        tech: ['Expo', 'React Native', 'TypeScript', 'Supabase', 'TanStack Query'],
+        year: '2025',
+        status: 'Development',
+        image: IMG.c,
+        github: GITHUB,
+        live: null,
+        impact: ['Dual role UX', 'RSVP flow', 'Org event CRUD'],
+        challenges: [
+            {
+                title: 'Offline-ish lists',
+                description: 'Feeds should feel instant.',
+                solution: 'Query cache keys per school plus background refetch.',
+            },
+            {
+                title: 'Auth providers',
+                description: 'Apple and Google differ in token shape.',
+                solution: 'Single Supabase session abstraction in the API layer.',
+            },
+        ],
+        size: 'medium',
+        color: 'from-sky-500/20 to-blue-500/20',
+        architecture: arch.pullup,
+    },
+    {
+        id: 'stacks',
+        title: 'Stacks (Wealthly)',
+        category: 'FinTech / Hackathon',
+        description: 'Personal finance: Plaid, AI coach, budgets, goals, STX-style rewards.',
+        longDescription:
+            'Next.js 14, Supabase with RLS, Plaid linking, Google Generative AI coach, Recharts, Polygon rewards narrative — extended from a hackathon base for Gen Z literacy.',
+        tech: ['Next.js', 'Supabase', 'Plaid', 'Google AI', 'Tailwind', 'pnpm'],
+        year: '2025',
+        status: 'Live',
+        image: IMG.a,
+        github: GITHUB,
+        live: 'https://wealthly-phi.vercel.app',
+        impact: ['Bank link flow', 'RLS data layer', 'AI spend insights'],
+        challenges: [
+            {
+                title: 'Secure money data',
+                description: 'Tokens and PII cannot leak client-side.',
+                solution: 'Server-only Plaid exchange and Supabase RLS policies.',
+            },
+            {
+                title: 'Coach quality',
+                description: 'Generic advice feels hollow.',
+                solution: 'Ground prompts on aggregated category totals only.',
+            },
+        ],
+        size: 'large',
+        color: 'from-emerald-500/20 to-lime-500/20',
+        architecture: arch.stacks,
+    },
+    {
+        id: 'ucf-alphas-website',
+        title: 'UCF Alphas (Xi Iota)',
+        category: 'Community / Web',
+        description: 'Official chapter site: history, brothers, service, contact, admin CMS.',
+        longDescription:
+            'Vite React SPA with shadcn and Radix, TanStack Query, Supabase for dynamic content, Resend for contact email, 30+ routes, Vercel hosting.',
+        tech: ['React', 'Vite', 'TypeScript', 'Tailwind', 'Supabase', 'Resend'],
+        year: '2024–2025',
+        status: 'Live',
+        image: IMG.c,
+        github: 'https://github.com/tomiwaaluko/ucf-alphas-website',
+        live: 'https://xi-iota-beacon-site.vercel.app',
+        impact: ['Public chapter presence', 'Accessible components', 'Serverless email'],
+        challenges: [
+            {
+                title: 'Content without a CMS vendor',
+                description: 'Brothers need safe updates.',
+                solution: 'Supabase tables plus admin routes with RLS and allow-lists.',
+            },
+            {
+                title: 'Email security',
+                description: 'Keys must not ship to the browser.',
+                solution: 'Vercel serverless handler calling Resend.',
+            },
+        ],
+        size: 'large',
+        color: 'from-yellow-500/20 to-amber-500/20',
+        architecture: arch['ucf-alphas-website'],
+    },
+    {
+        id: 'airfryhub',
+        title: 'AirFryHub',
+        category: 'Community / Vite SPA',
+        description: 'Air fryer forum: anonymous Supabase auth, posts, comments, upvotes.',
+        longDescription:
+            'React 19 and Vite 7 course final: TanStack Query, Zod, Supabase Realtime, Storage uploads, RPC upvotes, no custom backend server.',
+        tech: ['React', 'Vite', 'Tailwind', 'Supabase', 'TanStack Query', 'Zod'],
+        year: '2025',
+        status: 'Complete',
+        image: IMG.b,
+        github: 'https://github.com/tomiwaaluko/airfryhub',
+        live: null,
+        impact: ['Anonymous sessions', 'Optimistic votes', 'Image posts'],
+        challenges: [
+            {
+                title: 'Ownership without accounts',
+                description: 'Edit/delete must map to anon user ids.',
+                solution: 'Supabase anonymous sign-in and RLS on user_id.',
+            },
+            {
+                title: 'Hot feed sorts',
+                description: 'Sort and search without N+1.',
+                solution: 'Indexed queries and query key segmentation in React Query.',
+            },
+        ],
+        size: 'medium',
+        color: 'from-orange-500/20 to-rose-500/20',
+        architecture: arch.airfryhub,
+    },
+    {
+        id: 'poosd-small-project',
+        title: 'POOSD Contact Manager',
+        category: 'Academic / Full-Stack',
+        description: 'UCF COP4331c LAMP contacts app: React SPA plus PHP API and MySQL.',
+        longDescription:
+            'Group project: Vite React 19 client with login, signup, and CRUD search against PHP endpoints on shared hosting and MySQL.',
+        tech: ['React', 'Vite', 'PHP', 'MySQL'],
+        year: '2025',
+        status: 'Complete',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['20+ REST endpoints', 'Session auth pattern', 'Search UX'],
+        challenges: [
+            {
+                title: 'CORS and shared hosting',
+                description: 'Student servers differ by environment.',
+                solution: 'Configurable API base URL and JSON error handling.',
+            },
+            {
+                title: 'Password hygiene',
+                description: 'Teaching project still needs hashing.',
+                solution: 'Server-side password_hash in PHP with prepared statements.',
+            },
+        ],
+        size: 'medium',
+        color: 'from-stone-500/20 to-neutral-500/20',
+        architecture: arch['poosd-small-project'],
+    },
+    {
+        id: 'bbit-market-watch',
+        title: 'BBIT Market Watch (RabbitMQ)',
+        category: 'Backend / Education',
+        description: 'Bloomberg lab: producer-consumer RabbitMQ, Docker, Jupyter.',
+        longDescription:
+            'Python OOP interfaces for mqProducer and mqConsumer, pika AMQP, topic exchange, docker-compose for broker, pytest and bqplot exercises.',
+        tech: ['Python', 'RabbitMQ', 'Docker', 'Jupyter', 'pytest'],
+        year: '2025',
+        status: 'Complete',
+        image: IMG.d,
+        github: GITHUB,
+        live: null,
+        impact: ['AMQP 5672', 'Topic routing', 'Lab automation'],
+        challenges: [
+            {
+                title: 'Connection lifecycle',
+                description: 'Notebooks restart often.',
+                solution: 'Context managers and explicit channel close in classes.',
+            },
+            {
+                title: 'Fair dispatch',
+                description: 'Multiple consumers must balance load.',
+                solution: 'QoS prefetch and manual acks in consumer loop.',
+            },
         ],
         size: 'small',
-        color: 'from-slate-500/20 to-gray-500/20',
-        architecture: {
-            hld: `flowchart TB
-    Client["Client / Storefront"]
-    SEC["Spring Security\nJWT Filter Chain"]
-    CTRL["API Controllers\nProduct | Order | Payment | User"]
-    Stripe["Stripe API\nCheckout + Webhooks"]
-    DB[("MySQL\nACID Transactions")]
-
-    Client -->|HTTPS + JWT| SEC
-    SEC --> CTRL
-    CTRL -->|Create Session| Stripe
-    Stripe -->|Webhook Event| CTRL
-    CTRL -->|SQL Transactions| DB`,
-
-            lld: `flowchart LR
-    subgraph Controllers
-        PC["ProductController\nGET/POST/PUT/DELETE"]
-        OC["OrderController\nPOST /orders\nCANCEL"]
-        PAY["PaymentController\nPOST /checkout\nPOST /webhook"]
-        UC["UserController\nRegister / Login"]
-    end
-    subgraph Services
-        OS["OrderService\ncalcTotal\nconfirm\nrefund"]
-        PS["PaymentService\ncreateSession\nverifyWebhook"]
-        StockS["StockService\nlock\ndecrement"]
-    end
-
-    PAY --> PS
-    OC --> OS
-    OS --> StockS`,
-
-            classDiagram: `classDiagram
-    class Product {
-        +Long id
-        +String name
-        +BigDecimal price
-        +int stock
-        +Category category
-        +decrementStock(qty)
-        +isAvailable()
-        +applyDiscount(pct)
-    }
-    class Order {
-        +Long id
-        +User user
-        +OrderItem[] items
-        +BigDecimal total
-        +OrderStatus status
-        +String stripeSessionId
-        +calculateTotal()
-        +confirm()
-        +cancel()
-        +refund()
-    }
-    class OrderItem {
-        +Long id
-        +Product product
-        +int quantity
-        +BigDecimal unitPrice
-        +getSubtotal()
-        +validate()
-    }
-    Order "1" --> "*" OrderItem : contains
-    OrderItem "*" --> "1" Product : references`,
-
-            dataFlow: `sequenceDiagram
-    participant C as Client
-    participant API as PaymentController
-    participant Stripe as Stripe API
-    participant WH as Webhook Handler
-    participant OS as OrderService
-    participant DB as MySQL
-
-    C->>API: POST /checkout/create-session {orderId}
-    API->>Stripe: Create Checkout Session
-    Stripe-->>API: Session URL
-    API-->>C: Redirect to Stripe Checkout
-    C->>Stripe: User completes payment
-    Stripe->>WH: POST /webhook payment_intent.succeeded
-    WH->>OS: verify signature + confirm(orderId)
-    OS->>DB: BEGIN TX decrement stock UPDATE status COMMIT
-    DB-->>OS: Committed
-    OS-->>C: Order confirmation`,
-
-            infrastructure: `flowchart TB
-    Client["Client / Mobile App"]
-    subgraph Spring["Spring Boot App"]
-        SEC["Security Filter"]
-        API["REST Controllers"]
-    end
-    Stripe["Stripe\nPayment Gateway"]
-    subgraph DB["Database"]
-        MySQL[("MySQL\nRDS Instance")]
-        CP["Connection Pool\nHikariCP"]
-    end
-
-    Client -->|HTTPS + JWT| SEC
-    SEC --> API
-    API -->|Checkout Session| Stripe
-    Stripe -->|Webhook| API
-    API --> CP
-    CP --> MySQL`,
-
-            erDiagram: `erDiagram
-    USER {
-        bigint id PK
-        varchar name
-        varchar email
-        varchar password_hash
-        enum role
-    }
-    PRODUCT {
-        bigint id PK
-        varchar name
-        decimal price
-        int stock
-        bigint category_id FK
-    }
-    ORDER {
-        bigint id PK
-        bigint user_id FK
-        decimal total
-        enum status
-        varchar stripe_session_id
-        timestamp created_at
-    }
-    ORDER_ITEM {
-        bigint id PK
-        bigint order_id FK
-        bigint product_id FK
-        int quantity
-        decimal unit_price
-    }
-    CATEGORY {
-        bigint id PK
-        varchar name
-    }
-    USER ||--o{ ORDER : places
-    ORDER ||--o{ ORDER_ITEM : contains
-    PRODUCT ||--o{ ORDER_ITEM : referenced_in
-    CATEGORY ||--o{ PRODUCT : groups`
-        }
+        color: 'from-cyan-500/20 to-blue-500/20',
+        architecture: arch['bbit-market-watch'],
     },
     {
-        id: '06',
-        title: 'Portfolio',
+        id: 'linkedin-scraper',
+        title: 'LinkedIn Link Scraper',
+        category: 'Browser Extension',
+        description: 'MV3 extension: scrape /in/ links from Discord and GroupMe chats.',
+        longDescription:
+            'Vanilla JS Manifest V3: service worker, content scripts, platform detectors, chrome.storage, optional auto-connect flow with keep-alive alarms.',
+        tech: ['JavaScript', 'Chrome APIs', 'Manifest V3'],
+        year: '2024',
+        status: 'Utility',
+        image: IMG.e,
+        github: 'https://github.com/tomiwaaluko/scraper',
+        live: null,
+        impact: ['Shortcut driven', 'Copy-all UX', 'Lazy DOM scroll'],
+        challenges: [
+            {
+                title: 'MV3 worker lifetime',
+                description: 'Workers sleep after seconds.',
+                solution: 'chrome.alarms periodic wake during long jobs.',
+            },
+            {
+                title: 'Virtualized chats',
+                description: 'Messages not in DOM until scrolled.',
+                solution: 'Progressive scroll and debounced rescans.',
+            },
+        ],
+        size: 'small',
+        color: 'from-slate-500/20 to-zinc-500/20',
+        architecture: arch['linkedin-scraper'],
+    },
+    {
+        id: 'tomiwa-eportfolio',
+        title: 'Tomiwa ePortfolio (Next.js)',
+        category: 'Portfolio',
+        description: 'Earlier single-page portfolio: Framer Motion, Resend contact, Vercel.',
+        longDescription:
+            'Next.js 15 App Router personal site with typed hero, achievements, projects grid, and api/send using Resend — distinct from this Vite portfolio v3.',
+        tech: ['Next.js', 'Tailwind', 'Framer Motion', 'Resend', 'Vercel Analytics'],
+        year: '2024–2025',
+        status: 'Live',
+        image: IMG.e,
+        github: 'https://github.com/tomiwaaluko/TomiwaPortfolio',
+        live: 'https://tomiwaaluko.com',
+        impact: ['Serverless mail', 'Motion polish', 'Analytics'],
+        challenges: [
+            {
+                title: 'Spam protection',
+                description: 'Public form attracts bots.',
+                solution: 'Rate limits and honeypots at the route layer.',
+            },
+            {
+                title: 'Single bundle size',
+                description: 'Many sections on one page.',
+                solution: 'Dynamic imports for below-fold sections.',
+            },
+        ],
+        size: 'medium',
+        color: 'from-indigo-500/20 to-purple-500/20',
+        architecture: arch['tomiwa-eportfolio'],
+    },
+    {
+        id: 'portfolio-v3',
+        title: 'Portfolio v3 (this site)',
         category: 'Frontend',
-        description: 'The site you are looking at right now.',
-        longDescription: 'A fully responsive personal portfolio designed to highlight professional skills and projects. Built with a focus on clean design, smooth GSAP animations, and user-friendly navigation.',
-        tech: ['React.js', 'GSAP', 'Tailwind CSS', 'Vite'],
-        year: '2023',
+        description: 'Vite React portfolio: GSAP, engineering index, project blueprints.',
+        longDescription:
+            'This repository: Swiss-style engineering page, Mermaid system design tabs, theme and audio context, optional Express API for guestbook when enabled.',
+        tech: ['React', 'Vite', 'TypeScript', 'Tailwind', 'GSAP', 'Mermaid'],
+        year: '2025–2026',
         status: 'Live',
-        image: '/portfolio.png',
-        github: 'https://github.com/tomiwaaluko',
-        live: 'https://github.com/tomiwaaluko',
-        impact: ['Showcased Skills', 'Professional Branding', 'Interactive UI/UX'],
+        image: IMG.e,
+        github: 'https://github.com/tomiwaaluko/tomiwaalukov3',
+        live: 'https://tomiwaaluko.com',
+        impact: ['Blueprint UX', 'PWA capable', 'Smooth scroll Lenis'],
         challenges: [
             {
-                title: 'Performance vs. Visuals',
-                description: 'Balancing high-end animations with smooth 60fps performance.',
-                solution: 'Optimized React rendering with useMemo and utilized GSAP for GPU-accelerated animations.'
+                title: 'Diagram theming',
+                description: 'Mermaid must work in dark and light.',
+                solution: 'Theme-aware init and remount on tab change.',
             },
             {
-                title: 'Theme Consistency',
-                description: 'Managing complex dark/light mode transitions across dynamic components.',
-                solution: 'Built a centralized ThemeContext with CSS variables for seamless state-driven styling.'
-            }
+                title: 'Animation cost',
+                description: 'Many sections animating at once.',
+                solution: 'ScrollTrigger batching and layout effect cleanup.',
+            },
         ],
+        size: 'medium',
+        color: 'from-violet-500/20 to-indigo-500/20',
+        architecture: arch['portfolio-v3'],
+    },
+
+    /* --- docs/projects overviews without dedicated system-design diagrams --- */
+    {
+        id: 'fisch-macro',
+        title: 'Fisch Macro',
+        category: 'Desktop / Automation',
+        description: 'Python Tkinter macros for Roblox Fisch plus SHAKE image detect.',
+        longDescription:
+            'Single-script Windows tool: pynput record and replay, global hotkeys via keyboard lib, pyautogui template match for SHAKE button.',
+        tech: ['Python', 'Tkinter', 'pynput', 'pyautogui'],
+        year: '2024',
+        status: 'Personal',
+        image: IMG.x,
+        github: 'https://github.com/tomiwaaluko/Fisch-Macro',
+        live: null,
+        impact: ['Local only', 'Hotkey driven'],
         size: 'small',
-        color: 'from-indigo-500/20 to-violet-500/20',
-        architecture: {
-            hld: `flowchart TB
-    Entry["Vite Entry\nindex.html + main.tsx"]
-    Shell["App Shell\nReact Router + Contexts"]
-    Pages["Pages\nHome | ProjectDetail | Contact"]
-    Comps["Components\nNav | Hero | Projects | About | Footer"]
-    GSAP["GSAP Engine\nScrollTrigger + SplitText"]
-    CSS["CSS Layer\nTailwind + CSS Variables"]
-
-    Entry --> Shell
-    Shell --> Pages
-    Pages --> Comps
-    Comps --> GSAP
-    Shell --> CSS`,
-
-            lld: `flowchart LR
-    subgraph Contexts
-        TC["ThemeContext\ntoggleTheme\napplyTheme"]
-        MC["MusicContext\ntoggle\nvolume"]
-    end
-    subgraph Pages
-        PD["ProjectDetail\nloadData\ntabSwitch\ninitGSAP"]
-        HP["HomePage\nscrollSections"]
-    end
-    subgraph Animation
-        ST["ScrollTrigger\nrevealOnScroll"]
-        SPT["SplitText\nletterReveal"]
-    end
-
-    PD --> ST
-    HP --> SPT
-    PD --> TC`,
-
-            classDiagram: `classDiagram
-    class Project {
-        +String id
-        +String title
-        +String category
-        +String[] tech
-        +String[] impact
-        +Challenge[] challenges
-        +ProjectArchitecture architecture
-    }
-    class ProjectArchitecture {
-        +String hld
-        +String lld
-        +String classDiagram
-        +String dataFlow
-    }
-    class ThemeContext {
-        +boolean isDark
-        +toggleTheme()
-        +applyTheme(mode)
-        +useTheme()
-    }
-    class MusicContext {
-        +boolean isPlaying
-        +number volume
-        +toggle()
-        +useMusic()
-    }
-    Project "1" --> "1" ProjectArchitecture : has`,
-
-            dataFlow: `sequenceDiagram
-    participant U as User
-    participant RR as React Router
-    participant PD as ProjectDetail
-    participant DS as projects.ts
-    participant GSAP as GSAP Engine
-    participant TC as ThemeContext
-
-    U->>RR: Navigate to /projects/01
-    RR->>PD: Render with useParams({id})
-    PD->>DS: projects.find(p => p.id === id)
-    DS-->>PD: Project data
-    PD->>GSAP: useLayoutEffect register animations
-    GSAP->>GSAP: ScrollTrigger bind to .content-block
-    TC->>PD: isDark state
-    PD-->>U: Fully animated page rendered`,
-
-            infrastructure: `flowchart TB
-    subgraph Dev["Development"]
-        Vite["Vite Dev Server\nlocalhost:5173"]
-        BE["Express Backend\nlocalhost:3001"]
-    end
-    subgraph Prod["Production - Vercel"]
-        Edge["Vercel Edge Network\nGlobal CDN"]
-        Static["Static Assets\nHTML + JS + CSS"]
-    end
-    GH["GitHub\nSource Repo"]
-
-    GH -->|Push to main| Edge
-    Edge --> Static
-    Vite -->|npm run build| Static
-    BE -->|API Proxy| Vite`,
-
-            erDiagram: `erDiagram
-    PROJECT {
-        string id PK
-        string title
-        string category
-        string[] tech
-        string year
-        string status
-    }
-    ARCHITECTURE {
-        string project_id FK
-        string hld
-        string lld
-        string class_diagram
-        string data_flow
-        string infrastructure
-        string er_diagram
-    }
-    CHALLENGE {
-        string id PK
-        string project_id FK
-        string title
-        string description
-        string solution
-    }
-    PROJECT ||--|| ARCHITECTURE : has
-    PROJECT ||--o{ CHALLENGE : overcame`
-        }
+        color: 'from-gray-500/20 to-slate-500/20',
+    },
+    {
+        id: 'resume-latex',
+        title: 'Resume (LaTeX)',
+        category: 'Document',
+        description: 'Letter-style resume in LaTeX (Fullpage, titlesec, hyperref).',
+        longDescription:
+            'Author Olatomiwa Aluko; source lives in docs/projects/resumelatex.md — version-controlled PDF pipeline for recruiting.',
+        tech: ['LaTeX', 'pdfTeX'],
+        year: '—',
+        status: 'Maintained',
+        image: IMG.e,
+        github: GITHUB,
+        live: null,
+        impact: ['Print perfect', 'ATS friendly layout'],
+        size: 'small',
+        color: 'from-neutral-500/20 to-stone-500/20',
+    },
+    {
+        id: 'game-glitch-investigator',
+        title: 'Game Glitch Investigator',
+        category: 'Academic / Python',
+        description: 'CodePath AI-110 M1: debug Streamlit number game, pytest on pure logic.',
+        longDescription:
+            'Streamlit UI plus logic_utils pure functions; students fix six seeded bugs and validate with pytest.',
+        tech: ['Python', 'Streamlit', 'pytest', 'Altair'],
+        year: '2025',
+        status: 'Coursework',
+        image: IMG.b,
+        github: GITHUB,
+        live: null,
+        impact: ['14 tests', 'Session state patterns'],
+        size: 'small',
+        color: 'from-pink-500/20 to-rose-500/20',
+    },
+    {
+        id: 'pawpal',
+        title: 'PawPal+',
+        category: 'Academic / Python',
+        description: 'CodePath AI-110 M2: pet care scheduler, CLI plus Streamlit, JSON store.',
+        longDescription:
+            'OOP scheduling with conflicts, recurrence, and dual UI: tabulate CLI and Streamlit session state over shared pawpal_system.py.',
+        tech: ['Python', 'Streamlit', 'tabulate', 'pytest'],
+        year: '2025',
+        status: 'Coursework',
+        image: IMG.c,
+        github: GITHUB,
+        live: null,
+        impact: ['14 pytest cases', 'Conflict detection'],
+        size: 'small',
+        color: 'from-amber-500/20 to-yellow-500/20',
+    },
+    {
+        id: 'application-6',
+        title: 'LidarSafe (application6)',
+        category: 'Embedded / RTOS',
+        description: 'ESP32 FreeRTOS obstacle detection with HC-SR04 and RMS-style tasks.',
+        longDescription:
+            'PlatformIO C++ for ESP32: periodic sensor task, warning LEDs, telemetry, Wokwi simulation.',
+        tech: ['C++', 'FreeRTOS', 'ESP32', 'PlatformIO', 'Wokwi'],
+        year: '2025',
+        status: 'Coursework',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['RTOS mutexes', 'Deterministic periods'],
+        size: 'medium',
+        color: 'from-red-500/20 to-orange-500/20',
+    },
+    {
+        id: 'frontend-testing',
+        title: 'SkyGo Private Jets (AI Studio)',
+        category: 'Frontend / AI',
+        description: 'Luxury jet hero for Google AI Studio; Next.js 15, Gemini, Cloud Run.',
+        longDescription:
+            'Next standalone output, Tailwind v4, motion, booking hero with env-injected Gemini key for the applet runtime.',
+        tech: ['Next.js', 'React', 'Gemini', 'Tailwind', 'Cloud Run'],
+        year: '2025',
+        status: 'Experiment',
+        image: IMG.a,
+        github: GITHUB,
+        live: null,
+        impact: ['ADHD-friendly copy', 'Gemini applet pattern'],
+        size: 'small',
+        color: 'from-blue-500/20 to-cyan-500/20',
+    },
+    {
+        id: 'junior-design',
+        title: 'Junior Design (MSP430)',
+        category: 'Embedded / Hardware',
+        description: 'EEL3926: ultrasonic LCD, ADC pot, PWM LED on MSP430G2553.',
+        longDescription:
+            'TI CCS and msp430-gcc build; HC-SR04 ranging, I2C LCD, sprintf formatting, duty display.',
+        tech: ['C', 'MSP430', 'PWM', 'ADC', 'I2C'],
+        year: '2024',
+        status: 'Coursework',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['Subsystems integration', 'SBW flash scripts'],
+        size: 'small',
+        color: 'from-lime-500/20 to-green-500/20',
+    },
+    {
+        id: 'bytebites-tinker',
+        title: 'ByteBites Tinker',
+        category: 'Backend / OOP Lab',
+        description: 'Fast-food domain model: catalog, transactions, Decimal money, pytest only.',
+        longDescription:
+            'Pure Python per bytebites_design.md — no HTTP or DB; teaches OOP and TDD.',
+        tech: ['Python', 'pytest', 'Decimal'],
+        year: '2025',
+        status: 'Lab',
+        image: IMG.d,
+        github: GITHUB,
+        live: null,
+        impact: ['100% test driven', 'No float currency'],
+        size: 'small',
+        color: 'from-orange-500/20 to-amber-500/20',
+    },
+    {
+        id: 'gpt-scheduler',
+        title: 'gptscheduler',
+        category: 'Systems / Rust',
+        description: 'Rust PA1 CPU scheduler: FCFS, preemptive SJF, RR, simplified CFS stats.',
+        longDescription:
+            'Single main.rs, zero external crates, ANSI color option; nine reference workloads.',
+        tech: ['Rust', 'Cargo', 'std only'],
+        year: '2024',
+        status: 'Coursework',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['4 algorithms compared', 'Deterministic sim'],
+        size: 'small',
+        color: 'from-orange-600/20 to-red-600/20',
+    },
+    {
+        id: 'pmf-mortgage-site',
+        title: 'PMF (Pioneer Mortgage Funding)',
+        category: 'Marketing Site',
+        description: 'React Vite broker site: calculators, loan pages, EmailJS leads.',
+        longDescription:
+            'Frontend-only Netlify or Vercel SPA; quote forms post via EmailJS; links to external 1003 application.',
+        tech: ['React', 'Vite', 'React Router', 'EmailJS', 'Netlify'],
+        year: '2024',
+        status: 'Client',
+        image: IMG.c,
+        github: GITHUB,
+        live: null,
+        impact: ['Multi-page funnels', 'Calculator UX'],
+        size: 'small',
+        color: 'from-teal-500/20 to-cyan-500/20',
+    },
+    {
+        id: 'fee-invoice-project',
+        title: 'Fee Invoice (Valence College)',
+        category: 'Academic / Java',
+        description: 'COP3300 console Java: students, CSV catalog, typed invoices.',
+        longDescription:
+            'Single ProjectDriver.java hierarchy Undergraduate MS PhD; loads lec.txt; no Maven.',
+        tech: ['Java', 'CSV', 'OOP'],
+        year: '2023',
+        status: 'Coursework',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['Inheritance demo', 'CLI menus'],
+        size: 'small',
+        color: 'from-yellow-600/20 to-amber-600/20',
+    },
+    {
+        id: 'mortgage-app',
+        title: 'Mortgage App (Flutter + Node)',
+        category: 'Full-Stack / Mobile',
+        description: 'Flutter mobile, Vite web, Node API for mortgage scenarios.',
+        longDescription:
+            'Monorepo with Provider state, go_router, Jest on backend, stepped coursework docs.',
+        tech: ['Flutter', 'Node.js', 'Vite', 'TypeScript', 'Provider'],
+        year: '2024',
+        status: 'Learning',
+        image: IMG.b,
+        github: GITHUB,
+        live: null,
+        impact: ['Cross-platform UI', 'Shared API'],
+        size: 'medium',
+        color: 'from-blue-600/20 to-indigo-600/20',
+    },
+    {
+        id: 'agent-a-thon-nsbe-2026',
+        title: 'NSBE Agent-a-thon (1st Place)',
+        category: 'AI / Event',
+        description: 'Microsoft Copilot Studio: convention agent, resume review, schedule to Outlook.',
+        longDescription:
+            '60-minute sprint at NSBE50; team agent for event discovery, ATS resume scoring, interview prep, and Outlook schedule delivery — 1st of 100+ teams.',
+        tech: ['Copilot Studio', 'Microsoft 365', 'Outlook'],
+        year: '2026',
+        status: 'Award',
+        image: IMG.a,
+        github: GITHUB,
+        live: null,
+        impact: ['1st place', '100+ competitors'],
+        size: 'small',
+        color: 'from-blue-500/20 to-violet-500/20',
     },
 ];

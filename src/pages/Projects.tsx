@@ -102,7 +102,7 @@ const Projects: React.FC = () => {
 
               {/* ID */}
               <div className="col-span-12 md:col-span-1 py-6 md:py-8 flex items-center justify-center font-mono text-xs text-gray-400 group-hover:text-black dark:group-hover:text-white relative z-10">
-                {`0${index + 1}`}
+                {String(index + 1).padStart(2, '0')}
               </div>
 
               {/* Main Content (Image + Title) */}

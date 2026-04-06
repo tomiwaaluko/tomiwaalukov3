@@ -10,7 +10,7 @@ import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
-import GuestBook from './pages/GuestBook';
+// import GuestBook from './pages/GuestBook';
 import Loader from './components/Loader';
 
 import CustomCursor from './components/CustomCursor';
@@ -106,7 +106,7 @@ function App() {
                   <Route path="/" element={<Home startAnimation={showContent} />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />
-                  <Route path="/guestbook" element={<GuestBook />} />
+                  {/* <Route path="/guestbook" element={<GuestBook />} /> */}
                 </Routes>
               </div>
             </div>

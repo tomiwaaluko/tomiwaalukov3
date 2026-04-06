@@ -211,7 +211,11 @@ const ProjectDetail: React.FC = () => {
                         <div className="h-px w-full bg-black dark:bg-white mb-2" />
                         <div className="flex items-center gap-4 mt-2">
                             <span className="font-mono text-xs uppercase tracking-widest text-gray-400">System Design</span>
-                            <span className="font-mono text-xs text-gray-300 dark:text-gray-600">· 4 views</span>
+                            {project.architecture ? (
+                                <span className="font-mono text-xs text-gray-300 dark:text-gray-600">· Data flow · HLD · LLD</span>
+                            ) : (
+                                <span className="font-mono text-xs text-gray-300 dark:text-gray-600">· Lightweight project</span>
+                            )}
                         </div>
                     </div>
                     <div className="col-span-12">

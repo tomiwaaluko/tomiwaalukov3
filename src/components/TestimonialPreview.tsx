@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiArrowUpRight } from 'react-icons/fi';
+// import { FiArrowUpRight } from 'react-icons/fi';
 
 const TestimonialPreview: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -89,7 +89,7 @@ const TestimonialPreview: React.FC = () => {
           ))}
         </div>
 
-        <div className="text-center">
+        {/* <div className="text-center">
           <Link
             to="/guestbook"
             className="inline-flex items-center text-lg font-light tracking-wide hover:text-gray-600 dark:hover:text-gray-400 transition-colors duration-300"
@@ -98,7 +98,7 @@ const TestimonialPreview: React.FC = () => {
             View all testimonials
             <FiArrowUpRight className="ml-2" size={20} />
           </Link>
-        </div>
+        </div> */}
       </div>
     </section>
   );
