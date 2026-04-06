@@ -1,8 +1,8 @@
-# NSBE UCF Event Tracker — Project Overview
+# NSBE App — Project Overview
 
 ## Project Purpose
 
-NSBE UCF Event Tracker is a full-stack web application built for the UCF chapter of the National Society of Black Engineers (NSBE). Its core function is to manage chapter events and track member attendance via QR-code and short-code check-ins.
+NSBE App is a full-stack web application built for the UCF chapter of the National Society of Black Engineers (NSBE). Its core function is to manage chapter events and track member attendance via QR-code and short-code check-ins.
 
 Beyond attendance, the system rewards member engagement through an achievement framework: members earn the "111" badge (one event from each of three activity categories) and the "333" badge (three events from each category) within a given semester. Public leaderboards rank members by total attendance count and by achievement completion order, creating visibility and incentive for participation.
 

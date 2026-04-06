@@ -95,7 +95,7 @@ const Blog: React.FC = () => {
                   href={blog.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-red-600 hover:text-red-700 transition-colors duration-300"
+                  className="inline-flex items-center text-cream-600 hover:text-cream-700 transition-colors duration-300"
                 >
                   Read more
                   <FiArrowRight className="ml-2" />
@@ -110,7 +110,7 @@ const Blog: React.FC = () => {
             href="https://medium.com/@tomiwaaluko"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
+            className="inline-flex items-center px-6 py-3 bg-cream-600 text-white rounded-lg hover:bg-cream-700 transition-colors duration-300"
           >
             Read more blogs
             <FiArrowRight className="ml-2" />

@@ -1,4 +1,4 @@
-# NSBE UCF Event Tracker — System Design Architecture
+# NSBE App — System Design Architecture
 
 ## Overview
 Full-stack platform for managing National Society of Black Engineers (NSBE) UCF chapter events and tracking member attendance via QR-code check-ins. Includes a real-time achievement leaderboard, friend management, and admin controls.

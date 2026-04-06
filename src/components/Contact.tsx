@@ -93,8 +93,8 @@ const Contact: React.FC = () => {
               <div className="-mt-2 md:-mt-4 block py-1">
                 <span className="block">
                   <ScrollRevealText text="CONNECT" className="inline-block" />
-                  <span className="text-red-600 inline-block overflow-hidden align-top">
-                    <ScrollRevealText text="." className="text-red-600" />
+                  <span className="text-cream-400 inline-block overflow-hidden align-top">
+                    <ScrollRevealText text="." className="text-cream-400" />
                   </span>
                 </span>
               </div>
@@ -124,7 +124,7 @@ const Contact: React.FC = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-red-600 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
+                  className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-cream-400 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
                 />
               </div>
               <div className="group relative contact-form-item">
@@ -135,7 +135,7 @@ const Contact: React.FC = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-red-600 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
+                  className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-cream-400 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
                 />
               </div>
             </div>
@@ -147,7 +147,7 @@ const Contact: React.FC = () => {
                 placeholder="SUBJECT (E.G. TECHNICAL CONSULTATION, OPPORTUNITY)"
                 value={formData.subject}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-red-600 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
+                className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-cream-400 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest"
               />
             </div>
 
@@ -159,7 +159,7 @@ const Contact: React.FC = () => {
                 required
                 value={formData.message}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-red-600 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest resize-none"
+                className="w-full bg-transparent border-b border-white/50 py-4 text-xl font-light tracking-wide outline-none focus:border-cream-400 transition-colors placeholder:text-gray-400 placeholder:text-sm placeholder:tracking-widest resize-none"
               ></textarea>
             </div>
 
@@ -167,7 +167,7 @@ const Contact: React.FC = () => {
               <button
                 type="submit"
                 disabled={submitted}
-                className="group flex items-center gap-4 px-8 py-4 bg-white text-black text-sm font-bold tracking-widest uppercase hover:bg-red-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group flex items-center gap-4 px-8 py-4 bg-white text-black text-sm font-bold tracking-widest uppercase hover:bg-cream-500 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitted ? 'Message Sent' : 'Send Message'}
                 {submitted ? <FiCheck size={18} /> : <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}

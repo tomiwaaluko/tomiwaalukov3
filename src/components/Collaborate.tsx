@@ -51,7 +51,7 @@ return (
       <a
         ref={buttonRef}
         onClick={scrollToContact}
-        className="inline-flex items-center px-8 py-4 bg-red-600 text-white text-lg font-medium rounded-lg hover:bg-red-700 transition-all duration-300 hover:scale-105 cursor-pointer"
+        className="inline-flex items-center px-8 py-4 bg-cream-600 text-white text-lg font-medium rounded-lg hover:bg-cream-700 transition-all duration-300 hover:scale-105 cursor-pointer"
       >
         Contact Me
       </a>

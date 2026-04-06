@@ -11,7 +11,7 @@ type Milestone = {
     title: string;
     description: string;
     tags: string[];
-    /** When true, only the substring before the first " · " is styled red (company name). */
+    /** When true, only the substring before the first " · " is styled with accent (company name). */
     redCompany?: boolean;
 };
 
@@ -22,7 +22,7 @@ function MilestoneTitle({ title, redCompany }: { title: string; redCompany?: boo
     if (i === -1) return <>{title}</>;
     return (
         <>
-            <span className="text-red-500">{title.slice(0, i)}</span>
+            <span className="text-cream-600">{title.slice(0, i)}</span>
             <span className="text-inherit">{sep}{title.slice(i + sep.length)}</span>
         </>
     );
@@ -169,7 +169,7 @@ const Timeline: React.FC = () => {
                     });
                 }
 
-                gsap.to(year, { opacity: 0.8, scale: 1.5, color: "#ef4444", duration: 0.3 });
+                gsap.to(year, { opacity: 0.8, scale: 1.5, color: "#C4A572", duration: 0.3 });
                 gsap.to(line, { height: "100%", opacity: 1, duration: 0.4, ease: "power2.out" });
 
                 gsap.to(item, {
@@ -241,13 +241,13 @@ const Timeline: React.FC = () => {
                             {/* Mobile: Small Red Label above Title | Desktop: Static Left Column */}
                             <div className="w-full md:w-20 shrink-0 pt-1 relative md:h-full md:min-h-[2rem]">
                                 <span className="timeline-year-text font-mono font-bold
-                                    text-sm text-red-500 mb-1 block
+                                    text-sm text-cream-600 mb-1 block
                                     md:text-sm md:font-normal md:tracking-widest md:text-inherit md:text-stroke-0 md:opacity-60 md:mb-0
                                     transition-colors duration-300 origin-left">
                                     {item.year}
                                 </span>
                                 {/* Vertical Progress Line - Desktop Only */}
-                                <div className="timeline-progress-line absolute left-0 top-0 w-[2px] bg-red-500 h-0 opacity-0 md:-left-6 hidden md:block"></div>
+                                <div className="timeline-progress-line absolute left-0 top-0 w-[2px] bg-cream-500 h-0 opacity-0 md:-left-6 hidden md:block"></div>
                             </div>
 
                             {/* Content Column */}

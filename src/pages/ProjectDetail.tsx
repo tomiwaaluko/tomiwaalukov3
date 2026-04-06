@@ -13,8 +13,16 @@ const ProjectDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
+    const heroVideoRef = useRef<HTMLVideoElement>(null);
 
     const project = projects.find(p => p.id === id);
+
+    const toggleHeroVideo = () => {
+        const el = heroVideoRef.current;
+        if (!el) return;
+        if (el.paused) void el.play();
+        else el.pause();
+    };
 
     useLayoutEffect(() => {
         if (!project) return;
@@ -45,9 +53,9 @@ const ProjectDetail: React.FC = () => {
             <div className="fixed top-24 left-6 md:top-32 md:left-12 z-50">
                 <button
                     onClick={() => navigate('/projects')}
-                    className="group flex items-center gap-3 backdrop-blur-md bg-white/50 dark:bg-black/50 px-4 py-2 rounded-full border border-red-500/30 shadow-[0_0_15px_rgba(255,0,0,0.2)] hover:shadow-[0_0_25px_rgba(255,0,0,0.6)] hover:bg-white dark:hover:bg-black transition-all duration-300"
+                    className="group flex items-center gap-3 backdrop-blur-md bg-white/50 dark:bg-black/50 px-4 py-2 rounded-full border border-cream-500/30 shadow-[0_0_15px_rgba(196,165,114,0.22)] hover:shadow-[0_0_25px_rgba(196,165,114,0.45)] hover:bg-white dark:hover:bg-black transition-all duration-300"
                 >
-                    <FiArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-red-500" />
+                    <FiArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1 text-cream-500" />
                     <span className="text-xs font-mono uppercase tracking-widest hidden md:inline-block text-black dark:text-white">Back to Index</span>
                 </button>
             </div>
@@ -116,7 +124,24 @@ const ProjectDetail: React.FC = () => {
                     </div>
                     <div className="col-span-12 md:col-span-8 content-block">
                         <div className="relative aspect-[16/9] bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                            <img src={project.image} alt="Project Preview" className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                            {project.heroVideo ? (
+                                <video
+                                    ref={heroVideoRef}
+                                    className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                                    autoPlay
+                                    muted
+                                    loop
+                                    playsInline
+                                    preload="auto"
+                                    poster={project.image}
+                                    onClick={toggleHeroVideo}
+                                    aria-label="Project demo video. Click to pause or play."
+                                >
+                                    <source src={project.heroVideo} type="video/mp4" />
+                                </video>
+                            ) : (
+                                <img src={project.image} alt="Project Preview" className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                            )}
                         </div>
                     </div>
                 </div>
@@ -188,11 +213,11 @@ const ProjectDetail: React.FC = () => {
                                     </div>
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse flex-shrink-0"></div>
-                                            <span className="font-mono text-[10px] text-red-500 tracking-widest uppercase">Critical Challenge</span>
+                                            <div className="w-1.5 h-1.5 bg-cream-500 rounded-full animate-pulse flex-shrink-0"></div>
+                                            <span className="font-mono text-[10px] text-cream-500 tracking-widest uppercase">Critical Challenge</span>
                                         </div>
                                         <h3 className="text-base md:text-lg font-bold mb-2 leading-tight">{challenge.title}</h3>
-                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-4 font-light leading-relaxed border-l-2 border-red-500/20 pl-3">
+                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 mb-4 font-light leading-relaxed border-l-2 border-cream-500/20 pl-3">
                                             {challenge.description}
                                         </p>
                                         <div className="pt-4 border-t border-black/5 dark:border-white/5">

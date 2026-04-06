@@ -60,13 +60,16 @@ export const projects: Project[] = [
         id: 'frontend-testing',
         title: 'SkyGo Private Jets',
         category: 'Frontend / AI',
-        description: 'Luxury jet hero for Google AI Studio; Next.js 15, Gemini, Cloud Run.',
+        description:
+            'A luxury private-jet booking hero to practice premium marketing UI: calm copy, strong type, and motion that sells trust without clutter.',
         longDescription:
-            'Next standalone output, Tailwind v4, motion, booking hero with env-injected Gemini key for the applet runtime.',
+            'SkyGo is a landing-first experiment: imagine booking a private jet without wading through noise. The point is a credible, high-end hero section—clear hierarchy, breathing room, and animation that guides the eye instead of competing with it. Built as a Google AI Studio applet (Next.js on Cloud Run) so Gemini and hosting can be injected at runtime; the real goal is frontend craft and UX empathy, including copy tuned for quick scanning and ADHD-friendly pacing—not a full booking engine.',
         tech: ['Next.js', 'React', 'Gemini', 'Tailwind', 'Cloud Run'],
         year: '2026',
         status: 'Experiment',
         image: IMG.a,
+        heroVideo: '/project-images/skygo/skygo.mp4',
+        listHoverVideo: '/project-images/skygo/skygo-front.mp4',
         github: GITHUB,
         live: null,
         impact: ['ADHD-friendly copy', 'Gemini applet pattern'],
@@ -190,33 +193,37 @@ export const projects: Project[] = [
             },
         ],
         size: 'large',
-        color: 'from-slate-500/20 to-red-500/20',
+        color: 'from-slate-500/20 to-cream-500/20',
         architecture: arch['civic-lens'],
     },
     {
         id: 'nsbe-app',
-        title: 'NSBE UCF Event Tracker',
+        title: 'NSBE App',
         category: 'Org Platform / Full-Stack',
-        description: 'Chapter events, QR check-ins, achievements, leaderboards, friends.',
+        description:
+            'The chapter operating system for NSBE UCF: run events, check members in, reward engagement, and keep the community connected in one place.',
         longDescription:
-            'NestJS REST API with Prisma on Supabase Postgres, JWT verification, Next.js 16 client, in-memory cache for hot reads, Dockerized backend on Railway and Vercel frontend.',
+            'Built so members actually use it: admins publish events and QR check-ins; members earn semester achievements and show up on leaderboards; everyone can plan attendance, add friends, and manage profiles without bouncing between spreadsheets and group chats. The goal is less manual tracking for e-board and clearer visibility into who is showing up and how the chapter is doing.',
         tech: ['NestJS', 'Next.js', 'Prisma', 'PostgreSQL', 'Supabase', 'Docker', 'Railway'],
         year: '2025 · Ongoing',
         status: 'Ongoing',
         image: IMG.c,
+        heroVideo: '/project-images/nsbe-app/NSBEAPP2.mp4',
         github: 'https://github.com/tomiwaaluko/nsbe-ucf-eventtracker',
         live: null,
         impact: ['QR attendance', 'Achievement buckets', 'Member + admin flows'],
         challenges: [
             {
+                title: 'OAuth plus legacy email accounts',
+                description:
+                    'Shipping Google and Discord sign-in while members had already registered with email and password—we needed one coherent member identity in the API.',
+                solution:
+                    'Used Supabase’s OAuth flows and account-linking patterns so OAuth logins attach to the same member row as existing credentials, with JWT verification in Nest guards and sync on first OAuth login.',
+            },
+            {
                 title: 'Concurrent check-ins',
                 description: 'Many scans at once must stay consistent.',
                 solution: 'Transactional Prisma writes and cached read models for leaderboards.',
-            },
-            {
-                title: 'Auth across tiers',
-                description: 'Browser tokens must validate cheaply on the API.',
-                solution: 'JwtAuthGuard with Supabase secret; member sync on login.',
             },
         ],
         size: 'large',
@@ -588,7 +595,7 @@ export const projects: Project[] = [
         live: null,
         impact: ['RTOS mutexes', 'Deterministic periods'],
         size: 'medium',
-        color: 'from-red-500/20 to-orange-500/20',
+        color: 'from-cream-500/20 to-orange-500/20',
     },
     {
         id: 'junior-design',
@@ -639,7 +646,7 @@ export const projects: Project[] = [
         live: null,
         impact: ['4 algorithms compared', 'Deterministic sim'],
         size: 'small',
-        color: 'from-orange-600/20 to-red-600/20',
+        color: 'from-orange-600/20 to-cream-600/20',
     },
     {
         id: 'pmf-mortgage-site',

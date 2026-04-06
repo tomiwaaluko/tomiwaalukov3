@@ -70,9 +70,9 @@ const Footer: React.FC = () => {
           <div>
             <Link to="/" onClick={scrollToTop} className="block group">
               <div className="flex items-center text-4xl sm:text-4xl md:text-3xl lg:text-4xl tracking-tighter">
-                <span className="text-red-600 font-bold">TOMIWA</span>
+                <span className="text-cream-600 font-bold">TOMIWA</span>
                 <span className="font-light ml-2 dark:text-white">ALUKO</span>
-                <span className="text-red-600 font-bold ml-1">.</span>
+                <span className="text-cream-600 font-bold ml-1">.</span>
               </div>
             </Link>
             <p className="font-mono text-xs mt-6 text-gray-500 uppercase tracking-widest">

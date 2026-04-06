@@ -169,7 +169,7 @@
 \resumeItem{Built a \textbf{three-tier caching strategy} reducing API calls by 85\% and response times from 3s to 300ms; aggregated FEC, Congress.gov, and OpenSecrets APIs into interactive 3D network graphs serving \textbf{535+ congressional representatives}.}
 \resumeItemListEnd
 
-\resumeProjectHeading[Next.js (React), TypeScript, NestJS, Prisma, PostgreSQL, OAuth, Railway, Vercel, Git/Github]{\href{https://github.com/tomiwaaluko/nsbe-ucf-eventtracker}{NSBE UCF Event Tracker | Organization Management Platform}}{}
+\resumeProjectHeading[Next.js (React), TypeScript, NestJS, Prisma, PostgreSQL, OAuth, Railway, Vercel, Git/Github]{\href{https://github.com/tomiwaaluko/nsbe-ucf-eventtracker}{NSBE App | Organization Management Platform}}{}
 \resumeItemListStart
 \resumeItem{Architected and shipped a full-stack event management platform serving \textbf{100+ users} across 50+ annual events, owning the project from requirements gathering through deployment and continuous improvement.}
 \resumeItem{Implemented role-based access control, real-time check-in, and analytics dashboards --- reducing manual attendance processing time by \textbf{75\%} and translating messy organizational workflows into automated, repeatable systems.}

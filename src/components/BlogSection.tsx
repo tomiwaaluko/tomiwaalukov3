@@ -58,8 +58,8 @@ const BlogSection: React.FC = () => {
         {/* --- HEADER --- */}
         <div className="mb-8 md:mb-16 relative">
           <div className="flex items-center gap-4 mb-4">
-            <FiCornerDownRight className="text-red-500 w-6 h-6" />
-            <span className="font-mono text-xs uppercase tracking-widest text-red-500">Thinking // Journals</span>
+            <FiCornerDownRight className="text-cream-600 w-6 h-6" />
+            <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Thinking // Journals</span>
           </div>
           <h2 ref={titleRef} className="text-[15vw] md:text-[8vw] leading-[0.8] font-bold uppercase tracking-tighter text-transparent text-stroke-responsive select-none pointer-events-none whitespace-nowrap opacity-60">
             <ScrollRevealText text="INSIGHTS" />
@@ -86,7 +86,7 @@ const BlogSection: React.FC = () => {
                   {/* Background Texture on Hover? Maybe too much "banner". Keep strict. */}
 
                   <div className="flex justify-between items-center text-xs font-mono uppercase tracking-widest opacity-60 mb-8 mix-blend-difference">
-                    <span className="text-red-500 font-bold group-hover:text-white dark:group-hover:text-black transition-colors">01 // Latest Feature</span>
+                    <span className="text-cream-600 font-bold group-hover:text-white dark:group-hover:text-black transition-colors">01 // Latest Feature</span>
                     <span>{formatDate(posts[0].pubDate)}</span>
                   </div>
 
@@ -105,7 +105,7 @@ const BlogSection: React.FC = () => {
                       {posts[0].categories?.[0] || 'Article'}
                     </div>
                     <div className="flex items-center gap-2 text-sm font-mono uppercase tracking-widest group-hover:translate-x-2 transition-transform duration-300">
-                      Read Story <FiArrowUpRight className="text-red-500 group-hover:text-white dark:group-hover:text-black" />
+                      Read Story <FiArrowUpRight className="text-cream-600 group-hover:text-white dark:group-hover:text-black" />
                     </div>
                   </div>
                 </a>
@@ -149,7 +149,7 @@ const BlogSection: React.FC = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <a href="https://medium.com/@tomiwaaluko" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-mono uppercase tracking-widest hover:text-red-500 transition-colors group">
+          <a href="https://medium.com/@tomiwaaluko" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-mono uppercase tracking-widest hover:text-cream-600 transition-colors group">
             View All on Medium <FiArrowUpRight className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
           </a>
         </div>

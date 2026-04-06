@@ -2,15 +2,23 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiArrowUpRight } from 'react-icons/fi';
+import type { Project } from '../data/projects';
 import { projects as allProjects } from '../data/projects';
 
-const featured = allProjects.slice(0, 3);
+/** Home featured block: fixed order (not first rows of engineering index). */
+const FEATURED_IDS = ['civic-lens', 'chalk', 'nsbe-app'] as const;
 
-/** Hero typography (multiline) + timeline labels; synced to first three `projects` entries */
+const featured: Project[] = FEATURED_IDS.map((id) => {
+  const p = allProjects.find((x) => x.id === id);
+  if (!p) throw new Error(`Home featured: missing project "${id}" in data/projects`);
+  return p;
+});
+
+/** Hero typography (multiline) + index labels; titles are display names, years from project data */
 const featuredDisplay = [
-  { title: 'NSBE\nAGENT-A-THON', dateLine: '01 / Mar 2026' },
-  { title: 'SKYGO\nPRIVATE JETS', dateLine: '02 / 2026' },
-  { title: 'PULL\nUP', dateLine: '03 / 2026' },
+  { title: 'CIVIC\nLENS', dateLine: `01 / ${featured[0].year}` },
+  { title: 'CHALK', dateLine: `02 / ${featured[1].year}` },
+  { title: 'NSBE\nApp', dateLine: `03 / ${featured[2].year}` },
 ] as const;
 
 const Projects: React.FC = () => {
@@ -69,7 +77,7 @@ const Projects: React.FC = () => {
         <div className="group relative mb-24 md:mb-8 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start">
           {/* Meta (Absolute Left) */}
           <div className="col-span-12 md:col-span-2 md:sticky md:top-32 self-start mb-8 md:mb-0">
-            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[0].dateLine}</span>
+            <span className="text-sm font-mono block mb-2 text-cream-600">{featuredDisplay[0].dateLine}</span>
             <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[0].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
@@ -113,7 +121,7 @@ const Projects: React.FC = () => {
 
           {/* Meta (Right) */}
           <div className="col-span-12 md:col-span-2 order-1 md:order-3 md:sticky md:top-32 self-start mb-8 md:mb-0 text-right flex flex-col items-end">
-            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[1].dateLine}</span>
+            <span className="text-sm font-mono block mb-2 text-cream-600">{featuredDisplay[1].dateLine}</span>
             <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[1].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
@@ -127,7 +135,7 @@ const Projects: React.FC = () => {
         <div className="group relative mb-4 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start pb-24">
           {/* Meta (Absolute Left) */}
           <div className="col-span-12 md:col-span-2 md:sticky md:top-32 self-start mb-8 md:mb-0">
-            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[2].dateLine}</span>
+            <span className="text-sm font-mono block mb-2 text-cream-600">{featuredDisplay[2].dateLine}</span>
             <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[2].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">

@@ -79,9 +79,9 @@ const Navigation: React.FC = () => {
             style={{ cursor: 'none' }}
           >
             <div className="flex items-center tracking-tighter text-xl">
-              <span className="text-red-600 font-bold">TOMIWA</span>
+              <span className="text-cream-600 font-bold">TOMIWA</span>
               <span className="font-light ml-1 dark:text-white">ALUKO</span>
-              <span className="text-red-600 font-bold ml-0.5">.</span>
+              <span className="text-cream-600 font-bold ml-0.5">.</span>
             </div>
           </TransitionLink>
 
@@ -99,7 +99,7 @@ const Navigation: React.FC = () => {
               >
                 <div className={`absolute inset-0 bg-black/5 dark:bg-white/5 transform origin-left transition-transform duration-300 ${location.pathname === item.path ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></div>
                 <span className="relative z-10 flex items-center gap-2">
-                  {location.pathname === item.path && <span className="w-1 h-1 bg-red-500 rounded-full"></span>}
+                  {location.pathname === item.path && <span className="w-1 h-1 bg-cream-500 rounded-full"></span>}
                   {item.name}
                 </span>
               </TransitionLink>
@@ -171,7 +171,7 @@ const Navigation: React.FC = () => {
               key={item.name}
               to={item.path}
               onClick={() => setIsMenuOpen(false)}
-              className="menu-item text-4xl font-mono uppercase font-light tracking-tighter hover:text-red-500 transition-colors duration-300 flex items-center gap-4 group"
+              className="menu-item text-4xl font-mono uppercase font-light tracking-tighter hover:text-cream-500 transition-colors duration-300 flex items-center gap-4 group"
               style={{ cursor: 'none' }}
             >
               <span className="text-xs text-gray-400 font-mono tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-300">0{index + 1}</span>

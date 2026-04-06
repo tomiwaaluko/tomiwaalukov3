@@ -242,7 +242,7 @@ const GuestBook: React.FC = () => {
                                         </span>
                                     )}
                                     {status === 'error' && (
-                                        <span className="font-mono text-xs text-red-600 flex items-center gap-2">
+                                        <span className="font-mono text-xs text-cream-600 flex items-center gap-2">
                                             <FiX /> ERROR
                                         </span>
                                     )}
@@ -302,7 +302,7 @@ const GuestBook: React.FC = () => {
 
                                                 {/* Delete Menu */}
                                                 {openMenuId === entry.id && (
-                                                    <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black text-white text-xs font-mono uppercase px-3 py-2 z-20 flex items-center gap-2 cursor-pointer hover:bg-red-600"
+                                                    <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black text-white text-xs font-mono uppercase px-3 py-2 z-20 flex items-center gap-2 cursor-pointer hover:bg-cream-600"
                                                         onClick={() => { handleDelete(entry.id); setOpenMenuId(null); }}
                                                     >
                                                         <FiTrash2 className="w-3 h-3" /> DELETE

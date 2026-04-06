@@ -265,10 +265,10 @@ const Skills: React.FC = () => {
                           const index = catIndex * 10 + skillIndex;
                           barRefs.current[index] = el;
                         }}
-                        className="h-full bg-black dark:bg-white origin-left relative"
+                        className="h-full bg-cream-600 dark:bg-cream-500 origin-left relative"
                         style={{ width: `${skill.level}%` }}
                       >
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-2 bg-black dark:bg-white"></div>
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-2 bg-cream-600 dark:bg-cream-500"></div>
                       </div>
                     </div>
                   </div>

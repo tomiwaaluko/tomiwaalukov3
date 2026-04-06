@@ -44,9 +44,9 @@ const CustomCursor: React.FC = () => {
     const handleMouseEnter = (e: Event) => {
       const target = e.target as HTMLElement;
       if (target.tagName.toLowerCase() === 'a') {
-        gsap.to(cursor, { backgroundColor: '#CB0404', scale: 5.8, duration: 0.2 });
-        gsap.to(follower, { borderColor: '#8A0000', scale: 1.5, duration: 0.2 });
-        target.style.color = '#DC2525';
+        gsap.to(cursor, { backgroundColor: '#C4A572', scale: 5.8, duration: 0.2 });
+        gsap.to(follower, { borderColor: '#8B7355', scale: 1.5, duration: 0.2 });
+        target.style.color = '#A68B5B';
       } else {
         gsap.to(cursor, { scale: 5.8, duration: 0.3 });
         gsap.to(follower, { scale: 1.5, duration: 0.3 });

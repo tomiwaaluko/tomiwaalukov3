@@ -1,13 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiGithub, FiExternalLink, FiArrowUpRight } from 'react-icons/fi';
+import { FiArrowUpRight } from 'react-icons/fi';
+import { AiFillStar } from 'react-icons/ai';
 import { useNavigate } from 'react-router-dom';
 import { projects } from '../data/projects';
 import Footer from '../components/Footer';
 
 // Register ScrollTrigger plugin
 gsap.registerPlugin(ScrollTrigger);
+
+/** Gold star — highlighted projects */
+const HIGHLIGHT_PROJECT_IDS = new Set([
+  'agent-a-thon-nsbe-2026',
+  'chalk',
+  'civic-lens',
+  'nsbe-app',
+  'ucf-alphas-website',
+]);
+
+/** Blue star — frontend UI/UX practice builds */
+const UI_UX_PRACTICE_PROJECT_IDS = new Set(['frontend-testing']);
 
 const Projects: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -92,8 +105,19 @@ const Projects: React.FC = () => {
         <div className="projects-grid">
           {projects.map((project, index) => (
             <div
-              key={index}
+              key={project.id}
               onClick={() => navigate(`/projects/${project.id}`)}
+              onMouseEnter={(e) => {
+                const v = e.currentTarget.querySelector('video[data-list-hover]') as HTMLVideoElement | null;
+                if (v) void v.play().catch(() => {});
+              }}
+              onMouseLeave={(e) => {
+                const v = e.currentTarget.querySelector('video[data-list-hover]') as HTMLVideoElement | null;
+                if (v) {
+                  v.pause();
+                  v.currentTime = 0;
+                }
+              }}
               className="grid-cell group grid grid-cols-1 md:grid-cols-12 gap-0 border-b border-gray-200 dark:border-gray-800 hover:border-black dark:hover:border-white transition-colors duration-300 cursor-pointer overflow-hidden relative"
             >
 
@@ -108,10 +132,43 @@ const Projects: React.FC = () => {
               {/* Main Content (Image + Title) */}
               <div className="col-span-12 md:col-span-5 py-6 md:py-8 px-4 flex items-center gap-6 relative z-10">
                 <div className="w-16 h-16 md:w-24 md:h-16 bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
-                  <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                  {project.listHoverVideo ? (
+                    <video
+                      data-list-hover
+                      className="w-full h-full object-cover pointer-events-none"
+                      muted
+                      playsInline
+                      loop
+                      preload="metadata"
+                      poster={project.image}
+                      aria-hidden
+                    >
+                      <source src={project.listHoverVideo} type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                  )}
                 </div>
-                <div>
-                  <h2 className="text-2xl md:text-3xl font-light tracking-tight group-hover:translate-x-2 transition-transform duration-300">{project.title}</h2>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 md:gap-3">
+                    <h2 className="text-2xl md:text-3xl font-light tracking-tight group-hover:translate-x-2 transition-transform duration-300">
+                      {project.title}
+                    </h2>
+                    {HIGHLIGHT_PROJECT_IDS.has(project.id) && (
+                      <AiFillStar
+                        className="w-5 h-5 md:w-6 md:h-6 shrink-0 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.45)]"
+                        aria-label="Highlighted project"
+                        title="Highlighted project"
+                      />
+                    )}
+                    {UI_UX_PRACTICE_PROJECT_IDS.has(project.id) && (
+                      <AiFillStar
+                        className="w-5 h-5 md:w-6 md:h-6 shrink-0 text-blue-500 drop-shadow-[0_0_8px_rgba(59,130,246,0.45)]"
+                        aria-label="Frontend UI/UX practice project"
+                        title="Frontend UI/UX practice project"
+                      />
+                    )}
+                  </div>
                   <span className="md:hidden font-mono text-xs text-gray-400 uppercase tracking-widest mt-1 block">{project.category}</span>
                 </div>
               </div>
@@ -138,6 +195,22 @@ const Projects: React.FC = () => {
 
             </div>
           ))}
+        </div>
+
+        <div className="mt-16 pt-8 border-t border-black/10 dark:border-white/10 relative z-10">
+          <p className="font-mono text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-4">
+            Legend
+          </p>
+          <ul className="flex flex-col sm:flex-row sm:flex-wrap gap-4 sm:gap-10 font-mono text-sm text-gray-600 dark:text-gray-300">
+            <li className="flex items-center gap-2.5">
+              <AiFillStar className="w-4 h-4 shrink-0 text-amber-500 drop-shadow-[0_0_6px_rgba(245,158,11,0.4)]" aria-hidden />
+              <span>Gold star — highlighted project</span>
+            </li>
+            <li className="flex items-center gap-2.5">
+              <AiFillStar className="w-4 h-4 shrink-0 text-blue-500 drop-shadow-[0_0_6px_rgba(59,130,246,0.4)]" aria-hidden />
+              <span>Blue star — practicing frontend UI/UX development</span>
+            </li>
+          </ul>
         </div>
 
       </section>

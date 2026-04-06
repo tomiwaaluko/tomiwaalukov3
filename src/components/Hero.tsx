@@ -189,6 +189,7 @@ export default function Hero() {
           filter: grayscale(100%);
           position: relative;
           z-index: 2;
+          transition: filter 0.5s ease;
         }
 
         .photo1-wrapper {
@@ -229,6 +230,17 @@ export default function Hero() {
           height: 100%;
           object-fit: cover;
           filter: grayscale(100%);
+          transition: filter 0.5s ease;
+        }
+
+        /* Color on hover (desktop / fine pointer only — avoids sticky hover on touch) */
+        @media (hover: hover) and (pointer: fine) {
+          .photo2-wrapper:hover .photo2-img {
+            filter: grayscale(0%);
+          }
+          .photo1-wrapper:hover .photo1-img img {
+            filter: grayscale(0%);
+          }
         }
 
         /* ARROW IMAGE */
@@ -278,7 +290,7 @@ export default function Hero() {
           line-height: 1.1; /* Tighter line height to reduce vertical space */
           letter-spacing: 0.02em;
           font-weight: 600;
-          cursor: none; /* Hide default cursor to show the red circle cleanly */
+          cursor: none; /* Hide default cursor to show the spotlight circle cleanly */
         }
 
         /* Default Philosophical Quote */
@@ -287,11 +299,13 @@ export default function Hero() {
         }
         .dark .quote-default { color: #ffffff; }
 
-        /* Reality Check Quote Reveal */
+        /* Reality Check Quote Reveal (cream panel — dark text for contrast) */
         .quote-reveal {
-          color: #ffffff;
+          color: #1a1510;
         }
-        .dark .quote-reveal { color: #000000; }
+        .dark .quote-reveal {
+          color: #14110d;
+        }
 
         /* INVERT IMAGES FOR LIGHT/DARK IF THEY ARE WHITE BY DEFAULT */
         /* Assuming arrow.png and quote.png are white PNGs because the background was previously black.
@@ -546,7 +560,7 @@ export default function Hero() {
                 right: -150,  //
                 bottom: -150, //
                 padding: 150, // Counters the absolute expansion to keep text aligned
-                backgroundColor: "#d80711ff", // Vibrant Red background
+                backgroundColor: "#E8DCC8", // Cream accent panel
                 WebkitMaskImage: maskImage,
                 maskImage: maskImage,
                 pointerEvents: "none",

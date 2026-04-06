@@ -43,7 +43,7 @@ const FloatingShapes: React.FC = () => {
   }, []);
 
   const shapes = [
-    { size: 'w-16 h-16', color: 'bg-red-500', shape: 'rounded-full' },
+    { size: 'w-16 h-16', color: 'bg-cream-500', shape: 'rounded-full' },
     { size: 'w-12 h-12', color: 'bg-blue-500', shape: 'rounded-lg' },
     { size: 'w-20 h-20', color: 'bg-green-500', shape: 'rounded-full' },
     { size: 'w-8 h-8', color: 'bg-purple-500', shape: 'rounded-full' },

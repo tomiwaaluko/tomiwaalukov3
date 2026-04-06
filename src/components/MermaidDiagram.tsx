@@ -69,7 +69,7 @@ const MermaidDiagram: React.FC<MermaidDiagramProps> = ({ code, id, maxWidth = '1
             .catch(() => {
                 if (cancelled || !containerRef.current) return;
                 containerRef.current.innerHTML =
-                    `<div style="color:#ef4444;font-size:11px;padding:16px;font-family:monospace">
+                    `<div style="color:#C4A572;font-size:11px;padding:16px;font-family:monospace">
                         ⚠ Diagram render error: check Mermaid syntax
                     </div>`;
             });

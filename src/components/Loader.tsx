@@ -105,7 +105,7 @@ const Loader: React.FC<LoaderProps> = ({ onComplete }) => {
   const borderColor = isDark ? "border-white/5" : "border-gray-900/5";
   const accentColor = isDark ? "text-green-400" : "text-green-600";
   const barBg = isDark ? "bg-white/20" : "bg-gray-900/20";
-  const barFill = isDark ? "bg-red-600" : "bg-red-600";
+  const barFill = isDark ? "bg-cream-600" : "bg-cream-600";
 
   return (
     <motion.div

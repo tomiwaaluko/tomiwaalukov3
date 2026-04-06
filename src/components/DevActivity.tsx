@@ -418,7 +418,7 @@ const DevActivity: React.FC = () => {
   if (error || !data) {
     return (
       <section className="min-h-[20vh] flex items-center justify-center bg-white dark:bg-black">
-        <div className="flex flex-col items-center gap-2 text-red-500">
+        <div className="flex flex-col items-center gap-2 text-cream-600">
           <FiAlertCircle />
           <span className="font-mono text-[9px] uppercase tracking-widest">{error || "Data Unavailable"}</span>
         </div>
@@ -437,8 +437,8 @@ const DevActivity: React.FC = () => {
         <div ref={titleRef} className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 border-b border-black/20 dark:border-white/20 pb-8">
           <div className="md:col-span-8">
             <div className="flex items-center gap-4 mb-4">
-              <FiCornerDownRight className="text-red-500 w-6 h-6" />
-              <span className="font-mono text-xs uppercase tracking-widest text-red-500">Activity // Log</span>
+              <FiCornerDownRight className="text-cream-600 w-6 h-6" />
+              <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Activity // Log</span>
             </div>
             <h2 className="text-[15vw] md:text-[8vw] leading-[0.8] font-bold uppercase tracking-tighter text-transparent text-stroke-responsive opacity-60 select-none pointer-events-none">
               <ScrollRevealText text="CODE_BASE " />
@@ -462,7 +462,7 @@ const DevActivity: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg md:text-2xl font-bold uppercase tracking-tight">{data.user.login}</h3>
-                <a href={data.user.html_url} target="_blank" rel="noopener noreferrer" className="text-[10px] md:text-xs font-mono text-zinc-500 hover:text-red-500 transition-colors">
+                <a href={data.user.html_url} target="_blank" rel="noopener noreferrer" className="text-[10px] md:text-xs font-mono text-zinc-500 hover:text-cream-600 transition-colors">
                   @github_profile
                 </a>
               </div>
@@ -516,7 +516,7 @@ const DevActivity: React.FC = () => {
           <div className="lg:col-span-8 order-2 lg:order-1">
             <div className="flex items-baseline justify-between mb-8 border-b-2 border-black dark:border-white pb-2">
               <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tight">Recent Projects</h3>
-              <span className="font-mono text-xs uppercase tracking-widest text-red-600">Latest_Push</span>
+              <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Latest_Push</span>
             </div>
             <div className="flex flex-col">
               {data.repos.slice(0, 2).map((repo) => (
@@ -546,7 +546,7 @@ const DevActivity: React.FC = () => {
           <div ref={languageBarsRef} className="lg:col-span-4 order-1 lg:order-2">
             <div className="flex items-baseline justify-between mb-8 border-b-2 border-black dark:border-white pb-2">
               <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tight">Top language</h3>
-              <span className="font-mono text-xs uppercase tracking-widest text-red-600">Usage%</span>
+              <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Usage%</span>
             </div>
 
             <div className="space-y-6">
@@ -559,8 +559,8 @@ const DevActivity: React.FC = () => {
                   {/* Thin sharp line instead of rounded bar */}
                   <div className="w-full h-[1px] bg-zinc-200 dark:bg-zinc-800 relative">
                     <div
-                      className="bar-fill absolute top-0 left-0 h-[2px] -mt-[1px] bg-black dark:bg-white"
-                      style={{ width: `${percentage}%`, backgroundColor: "#dc2626" }}
+                      className="bar-fill absolute top-0 left-0 h-[2px] -mt-[1px] bg-cream-500"
+                      style={{ width: `${percentage}%` }}
                     ></div>
                   </div>
                 </div>

@@ -21,7 +21,7 @@ const RepoCard: React.FC<RepoCardProps> = ({ name, stars, forks, language, url, 
             <div className="flex items-baseline justify-between gap-4">
                 {/* Left: Name and Language */}
                 <div className="flex flex-col md:flex-row md:items-baseline gap-1 md:gap-4 flex-1 min-w-0">
-                    <h4 className="text-lg font-bold text-black dark:text-white truncate group-hover:text-red-600 dark:group-hover:text-red-500 transition-colors">
+                    <h4 className="text-lg font-bold text-black dark:text-white truncate group-hover:text-cream-600 dark:group-hover:text-cream-500 transition-colors">
                         {name}
                     </h4>
                     <span className="font-mono text-[10px] uppercase text-zinc-500 dark:text-zinc-400">

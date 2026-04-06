@@ -237,18 +237,18 @@ const AwardWinningAbout: React.FC = () => {
                 {/* Header: Monumental Outline Text */}
                 <div className="mb-16 md:mb-24 relative">
                     <div className="flex items-center gap-4 mb-4">
-                        <FiCornerDownRight className="text-red-500 w-6 h-6" />
-                        <span className="font-mono text-xs uppercase tracking-widest text-red-500">Identity</span>
+                        <FiCornerDownRight className="text-cream-600 w-6 h-6" />
+                        <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Identity</span>
                     </div>
                     <h2 ref={titleRef} className="text-[25vw] md:text-[10vw] leading-[0.8] font-bold uppercase tracking-tighter text-transparent text-stroke-responsive opacity-60 select-none pointer-events-none break-words">
                         <ScrollRevealText text="WHO_" />
                     </h2>
-                    <div className="about-content-item relative md:absolute md:top-1/2 left-0 md:left-1/4 mt-12 md:mt-0 ml-0 md:ml-20 transform md:-translate-y-1/2 w-full md:w-2/3 pl-6 border-l-2 border-red-500">
+                    <div className="about-content-item relative md:absolute md:top-1/2 left-0 md:left-1/4 mt-12 md:mt-0 ml-0 md:ml-20 transform md:-translate-y-1/2 w-full md:w-2/3 pl-6 border-l-2 border-cream-500">
                         <p className="text-lg md:text-2xl font-light leading-relaxed text-black dark:text-white mix-blend-difference">
-                            I&apos;m a <span className="font-bold">Computer Engineering</span> student at the <span className="font-bold">University of Central Florida</span>, focused on <span className="font-bold">full-stack development</span>, <span className="font-bold">AI integrations</span>, and <span className="font-bold">agentic workflows</span>. I build with <span className="font-bold text-red-500">Python</span>, <span className="font-bold text-red-500">Java</span>, <span className="font-bold text-red-500">C</span>, and core web technologies (<span className="font-bold text-red-500">HTML</span>, <span className="font-bold text-red-500">CSS</span>, <span className="font-bold text-red-500">JavaScript</span>, and <span className="font-bold text-red-500">TypeScript</span>) to ship end-to-end solutions. I&apos;m a problem solver at heart: I want what I build to meet real-world needs.
+                            I&apos;m a <span className="font-bold">Computer Engineering</span> student at the <span className="font-bold">University of Central Florida</span>, focused on <span className="font-bold">full-stack development</span>, <span className="font-bold">AI integrations</span>, and <span className="font-bold">agentic workflows</span>. I build with <span className="font-bold text-cream-600">Python</span>, <span className="font-bold text-cream-600">Java</span>, <span className="font-bold text-cream-600">C</span>, and core web technologies (<span className="font-bold text-cream-600">HTML</span>, <span className="font-bold text-cream-600">CSS</span>, <span className="font-bold text-cream-600">JavaScript</span>, and <span className="font-bold text-cream-600">TypeScript</span>) to ship end-to-end solutions. I&apos;m a problem solver at heart: I want what I build to meet real-world needs.
                         </p>
                         <p className="text-lg md:text-2xl font-light leading-relaxed text-black dark:text-white mix-blend-difference mt-6">
-                            Off-screen, I serve as <span className="font-bold text-red-500">Senator</span> for the UCF chapter of <span className="font-bold text-black dark:text-white">National Society of Black Engineers</span> and as a member of <span className="font-bold text-black dark:text-white">Alpha Phi Alpha Fraternity, Inc.</span>, serving as <span className="font-bold text-red-500">President</span> of the Xi Iota Chapter and <span className="font-bold text-red-500">Assistant East Area Director</span> for the Florida Federation of Alpha Chapters. Through Alpha, I&apos;ve contributed <span className="font-bold">1,500+</span> community service hours.
+                            Off-screen, I serve as <span className="font-bold text-cream-600">Senator</span> for the UCF chapter of <span className="font-bold text-black dark:text-white">National Society of Black Engineers</span> and as a member of <span className="font-bold text-black dark:text-white">Alpha Phi Alpha Fraternity, Inc.</span>, serving as <span className="font-bold text-cream-600">President</span> of the Xi Iota Chapter and <span className="font-bold text-cream-600">Assistant East Area Director</span> for the Florida Federation of Alpha Chapters. Through Alpha, I&apos;ve contributed <span className="font-bold">1,500+</span> community service hours.
                         </p>
                         <p className="text-base md:text-lg font-light italic leading-relaxed text-black dark:text-white mix-blend-difference mt-6 border-l-2 border-black/20 dark:border-white/20 pl-4">
                             Software scales fast; trust scales slowly, but it compounds when you show up consistently.
@@ -261,7 +261,7 @@ const AwardWinningAbout: React.FC = () => {
                     {stats.map((stat, index) => (
                         <div key={index} className="about-content-item border-r border-b border-black/10 dark:border-white/10 p-6 md:p-8 hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-300 group">
                             <div className="flex justify-between items-start mb-4">
-                                <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-red-500 transition-colors">{stat.label}</span>
+                                <span className="font-mono text-[10px] uppercase tracking-widest text-gray-500 group-hover:text-cream-600 transition-colors">{stat.label}</span>
                                 {stat.active && <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>}
                             </div>
                             <div className="stat-value text-4xl md:text-5xl font-mono font-light mb-2 text-black dark:text-white" data-value={stat.value}>{stat.value}</div>
