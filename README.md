@@ -1,89 +1,81 @@
-# 🚀 Tomiwa Aluko | Backend & DevOps Portfolio
+# Tomiwa Aluko — Portfolio
 
-![Java](https://img.shields.io/badge/Java-17-orange?logo=openjdk)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.1-green?logo=springboot)
-![AWS](https://img.shields.io/badge/AWS-Cloud-232F3E?logo=amazon-aws)
-![Docker](https://img.shields.io/badge/Docker-Container-blue?logo=docker)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white)
 
-> **"Robust systems, scalable architecture, and automated deployments."**
+> **Computer Engineering @ UCF** · Minor in Technology Entrepreneurship · Full-stack software & AI integrations
 
-## 👨‍💻 Overview
-This portfolio is engineered to showcase my expertise in **Backend Development** and **DevOps**. While the frontend is modern and interactive (featuring ambient music and a custom cursor), the core value lies in the **distributed systems** and **cloud infrastructure** projects I build.
+Personal site showcasing projects, experience, and contact—built as a fast **React** SPA with **GSAP** motion, dark/light theme, and an optional **Express + PostgreSQL** API for the guestbook and related features.
 
-## 🏗️ System Architecture (Featured Project)
-Below is the high-level architecture for my **Campus Management ERP** project, demonstrating microservices communication and deployment strategy.
+## Links
+
+- **Site:** [tomiwaaluko.com](https://tomiwaaluko.com)
+- **GitHub:** [@tomiwaaluko](https://github.com/tomiwaaluko)
+- **LinkedIn:** [in/olatomiwaaluko](https://www.linkedin.com/in/olatomiwaaluko/)
+- **Email:** tomiwaaluko02@gmail.com
+
+## Architecture (this repo)
+
+High-level flow for the full-stack dev setup (`npm run dev:all`):
 
 ```mermaid
-graph TD
-    User[Client (Web/Mobile)] -->|HTTPS| CDN[CloudFront CDN]
-    CDN -->|Static Assets| S3[AWS S3 Bucket]
-    User -->|API Requests| LB[Application Load Balancer]
-    
-    subgraph "VPC (Private Cloud)"
-        LB -->|Route Traffic| API[API Gateway]
-        
-        subgraph "ECS Cluster (Fargate)"
-            API --> Auth[Auth Service (Spring Security)]
-            API --> Core[Core Service (Spring Boot)]
-            API --> Pay[Payment Service (Node.js)]
-        end
-        
-        Auth -->|Read/Write| DB1[(PostgreSQL - Users)]
-        Core -->|Read/Write| DB2[(MongoDB - Logs)]
-        Core -->|Cache| Redis[(Redis - Session)]
-        
-        Core -->|Async Events| Kafka[Apache Kafka]
-        Kafka -->|Consume| Notif[Notification Service]
-    end
-    
-    Notif -->|Send| SES[AWS SES (Email)]
+graph LR
+  Browser[Browser] -->|HTTPS| Vite[Vite + React SPA]
+  Browser -->|REST| API[Express API]
+  API -->|SQL| PG[(PostgreSQL / Neon)]
+  API -->|optional| Mail[Email via Nodemailer]
 ```
 
-## 🛠️ Tech Stack
-### Backend Core
-*   **Languages**: Java 17, Python, TypeScript
-*   **Frameworks**: Spring Boot, Express.js, Django
-*   **Database**: PostgreSQL, MongoDB, Redis
+## Tech stack
 
-### DevOps & Cloud
-*   **Containerization**: Docker, Kubernetes
-*   **Cloud Provider**: AWS (EC2, S3, RDS, ECS, Lambda)
-*   **CI/CD**: GitHub Actions, Jenkins
+### Frontend
 
-### Frontend (Experience)
-*   React 18 + TypeScript
-*   **Ambience**: Integrated Background Music (Hans Zimmer) & Custom Interactive Cursor
-*   GSAP Animations
+- React 18, TypeScript, Vite
+- Tailwind CSS, Framer Motion, GSAP (+ ScrollTrigger)
+- React Router, Mermaid (project diagrams), PWA support (`vite-plugin-pwa`)
 
-## 🚀 Quick Start (Local DevOps)
+### Backend (`api/`)
 
-Run both the **Frontend** (Vite) and **Backend** (Express/Node) concurrently with a single command:
+- Express, TypeScript
+- PostgreSQL (e.g. Neon) for guestbook persistence
+- Swagger docs at `/api/docs` when the server is running
+
+## Quick start
 
 ```bash
-# 1. Install dependencies (Root & API)
+# Frontend only
+npm install
+npm run dev
+# → http://localhost:5173
+
+# Frontend + API (needs API env: DATABASE_URL, email vars as required)
 npm install
 cd api && npm install && cd ..
-
-# 2. Start the Full Stack Environment
 npm run dev:all
 # Frontend: http://localhost:5173
-# Backend:  http://localhost:5000
+# API:      http://localhost:5000
 ```
 
-## 📂 Project Structure
+Copy or create `api/.env` with your database URL and any email credentials the API expects.
+
+## Project structure
+
 ```text
 /
-├── .github/           # CI/CD Workflows
-├── api/               # Express Backend (Microservice Demo)
-├── public/            # Static Assets
-├── src/               # React Frontend
-│   ├── components/    # Reusable UI (MusicPrompt, CustomCursor)
-│   ├── pages/         # Route Views (Projects, GuestBook)
-│   └── context/       # Global State (Theme, Music)
-├── Dockerfile         # Container Config
-└── compose.yaml       # Local orchestration
+├── .github/           # CI workflows
+├── api/               # Express + TypeScript backend
+├── public/            # Static assets (resume, previews, PWA icons)
+├── src/
+│   ├── components/    # UI sections (Hero, Projects, Timeline, etc.)
+│   ├── pages/         # Routes (Home, Projects, Guestbook, …)
+│   ├── data/          # Project metadata
+│   └── context/       # Theme, audio, and global state
+├── Dockerfile
+└── compose.yaml
 ```
 
 ---
-**[Download Resume](/public/previews/resume.pdf)** | **[View Engineering Projects](/projects)**
+
+**[Download resume](./public/previews/resume.pdf)** · **[Engineering / projects](https://tomiwaaluko.com/projects)** (or `/projects` when running locally)

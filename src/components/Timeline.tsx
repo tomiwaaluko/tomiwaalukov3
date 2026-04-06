@@ -60,20 +60,20 @@ const milestones: Milestone[] = [
             'Architected a full-stack event management system for 100+ users with role-based access, OAuth, and REST APIs for attendance and 50+ annual events. Cut manual attendance processing time by roughly 75% using real-time check-in, validation, and analytics dashboards with Prisma and PostgreSQL. Deployed on Railway and Vercel with Docker, CI/CD, and resilient handling for peak database load.',
         tags: ['Next.js', 'TypeScript', 'NestJS', 'Prisma', 'PostgreSQL', 'Docker'],
     },
-    {
-        year: '2025',
-        title: 'CodePath · Intermediate Technical Interview Prep (TIP102)',
-        description:
-            'Issued Aug 2025. Intensive interview preparation covering data structures, algorithms, and technical communication. Credential ID 67716.',
-        tags: ['CodePath', 'Algorithms', 'Interview Prep', 'DSA'],
-    },
-    {
-        year: '2025',
-        title: 'CodePath · Intermediate Web Development Course (WEB102)',
-        description:
-            'Issued Aug 2025. Full-stack web development fundamentals and project-based coursework. Credential ID 336457.',
-        tags: ['CodePath', 'Web Development', 'JavaScript', 'React'],
-    },
+    // {
+    //     year: '2025',
+    //     title: 'CodePath · Intermediate Technical Interview Prep (TIP102)',
+    //     description:
+    //         'Issued Aug 2025. Intensive interview preparation covering data structures, algorithms, and technical communication. Credential ID 67716.',
+    //     tags: ['CodePath', 'Algorithms', 'Interview Prep', 'DSA'],
+    // },
+    // {
+    //     year: '2025',
+    //     title: 'CodePath · Intermediate Web Development Course (WEB102)',
+    //     description:
+    //         'Issued Aug 2025. Full-stack web development fundamentals and project-based coursework. Credential ID 336457.',
+    //     tags: ['CodePath', 'Web Development', 'JavaScript', 'React'],
+    // },
     {
         year: '2024',
         title: 'NSBE UCF · Senator',
@@ -114,12 +114,12 @@ const milestones: Milestone[] = [
         description: 'Chapter secretary (Apr 2022 to Apr 2023): records, correspondence, and administrative support for Xi Iota.',
         tags: ['Administration', 'Organization', 'Written Communication'],
     },
-    {
-        year: '2022',
-        title: 'NSBE UCF · AEx Committee Member',
-        description: 'Academic Excellence committee service for the UCF chapter (Aug 2022 to May 2023).',
-        tags: ['NSBE', 'Academic Programs', 'Teamwork'],
-    },
+    // {
+    //     year: '2022',
+    //     title: 'NSBE UCF · AEx Committee Member',
+    //     description: 'Academic Excellence committee service for the UCF chapter (Aug 2022 to May 2023).',
+    //     tags: ['NSBE', 'Academic Programs', 'Teamwork'],
+    // },
 ];
 
 const Timeline: React.FC = () => {
