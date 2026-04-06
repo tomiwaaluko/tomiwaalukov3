@@ -28,6 +28,93 @@ export interface Project {
 
 export const projects: Project[] = [
     {
+        id: 'civic-lens',
+        title: 'CivicLens',
+        category: 'Full-Stack / Civic Tech',
+        description: 'Transparent political data, RAG-backed Q&A with citations, and interactive maps and visualizations.',
+        longDescription:
+            'CivicLens is a political data and analysis platform built to give people evidence-based access to voting records, donations, and policy context—without editorial rankings. It pairs a Next.js frontend (maps, charts, 3D relationship graphs) with a FastAPI backend, PostgreSQL with pgvector for retrieval-grounded Gemini Q&A, and PostGIS for geographic donation views.',
+        tech: ['Next.js', 'FastAPI', 'PostgreSQL', 'pgvector', 'Gemini', 'PostGIS', 'Docker'],
+        year: '2025',
+        status: 'Live',
+        image: '/collegiaMockup.png',
+        github: 'https://github.com/tomiwaaluko',
+        live: null,
+        impact: ['RAG + citations', 'PostGIS maps', 'Full-stack monorepo'],
+        challenges: [
+            {
+                title: 'Grounded answers at scale',
+                description: 'LLM responses had to cite primary sources and avoid hallucinating policy claims.',
+                solution: 'Implemented pgvector similarity search over curated records and constrained prompts to retrieved context with explicit source links in the UI.',
+            },
+            {
+                title: 'Heavy visualization + data joins',
+                description: 'Multiple interactive views stressed the API and duplicated expensive queries.',
+                solution: 'Used async FastAPI handlers, SQL-side aggregations for geo and graph payloads, and frontend caching (e.g. SWR) to dedupe reads.',
+            },
+        ],
+        size: 'large',
+        color: 'from-slate-500/20 to-red-500/20',
+    },
+    {
+        id: 'apply-sense',
+        title: 'ApplySense',
+        category: 'Product / Full-Stack',
+        description: 'Job search tracker with screenshot intake: multimodal extraction plus a reliable OCR fallback.',
+        longDescription:
+            'ApplySense helps users manage applications from a real dashboard—card and table views, filters, and in-browser success metrics. Its differentiator is screenshot-based intake: uploads go to storage, then a server pipeline tries GPT-4o Vision and falls back to Tesseract (with a client-side Tesseract path if the server path stalls). Google OAuth and per-user isolation are enforced through NextAuth and tRPC protected procedures.',
+        tech: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL', 'NextAuth', 'Supabase Storage', 'OpenAI'],
+        year: '2025',
+        status: 'Live',
+        image: '/0xkidMockup.png',
+        github: 'https://github.com/tomiwaaluko',
+        live: null,
+        impact: ['Multimodal OCR', 'Auth + isolation', 'T3 stack'],
+        challenges: [
+            {
+                title: 'Fragile screenshot formats',
+                description: 'Confirmation emails and forms vary wildly; a single parser misses edge cases.',
+                solution: 'Two-stage extraction with structured schema validation, timeouts, and a browser fallback so users are never dead-ended.',
+            },
+            {
+                title: 'Privacy and tenancy',
+                description: 'Job data is sensitive; every query must be scoped to the signed-in user.',
+                solution: 'NextAuth session in tRPC context with protectedProcedure and Prisma filters on userId for all job CRUD.',
+            },
+        ],
+        size: 'large',
+        color: 'from-blue-500/20 to-violet-500/20',
+    },
+    {
+        id: 'nsbe-app',
+        title: 'NSBE APP',
+        category: 'Org Platform / Full-Stack',
+        description: 'NSBE UCF chapter app: events, QR check-ins, achievements, leaderboards, and member tools—ongoing build.',
+        longDescription:
+            'Built for the UCF chapter of NSBE: admins create events and QR/short-code check-ins; members earn semester achievements (e.g. category balance badges), appear on leaderboards, and use social features like friends and plan-to-attend. NestJS REST API with Prisma on PostgreSQL (Supabase), Supabase Auth with JWT verification in guards, Next.js App Router client, caching for hot reads, and Dockerized backend deployment alongside a Vercel frontend.',
+        tech: ['NestJS', 'Next.js', 'Prisma', 'PostgreSQL', 'Supabase', 'Docker', 'Railway'],
+        year: '2025 · Ongoing',
+        status: 'Ongoing',
+        image: '/cultural.png',
+        github: 'https://github.com/tomiwaaluko',
+        live: null,
+        impact: ['Chapter operations', 'QR attendance', 'Achievements + social'],
+        challenges: [
+            {
+                title: 'Correctness under real event load',
+                description: 'Check-ins and leaderboard recomputation must stay consistent when many members scan at once.',
+                solution: 'Transactional writes in Prisma, clear domain modules per feature, and in-memory caching for read-heavy leaderboard/event lists.',
+            },
+            {
+                title: 'Auth across two runtimes',
+                description: 'Browser uses Supabase tokens; API must validate without round-trips per request.',
+                solution: 'JwtAuthGuard verifies Supabase JWT with shared secret, syncs member rows on login, and centralizes role checks.',
+            },
+        ],
+        size: 'large',
+        color: 'from-amber-500/20 to-orange-500/20',
+    },
+    {
         id: '01',
         title: 'Collegia',
         category: 'Full-Stack Platform',

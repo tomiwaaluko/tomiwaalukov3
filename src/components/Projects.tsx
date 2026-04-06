@@ -2,39 +2,16 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { FiArrowUpRight } from 'react-icons/fi';
+import { projects as allProjects } from '../data/projects';
 
-const projects = [
-  {
-    id: '01',
-    title: 'COLLEGIA',
-    category: 'System\nArchitecture',
-    year: '2024',
-    description: 'A scalable campus ERP system built with Microservices (Spring Boot). Handles discrete academic modules with independent scaling.',
-    tech: ['Java', 'Microservices', 'Docker'],
-    link: '/projects/01',
-    color: '#FF4D00', // A vibrant Swiss orange/red
-  },
-  {
-    id: '02',
-    title: '0XKID',
-    category: 'Backend\nEngineering',
-    year: '2024',
-    description: 'Interactive ed-tech platform with AI code analysis. Sandboxed execution environments for safe code running.',
-    tech: ['MongoDB', 'WebSockets', 'OpenAI'],
-    link: '/projects/03',
-    color: '#FF4D00', // International Klein Blue
-  },
-  {
-    id: '03',
-    title: 'SKILL\nBLOOM',
-    category: 'API\nIntegration',
-    year: '2023',
-    description: 'Gamified LMS with automated GitHub verification Webhooks and Redis caching for leaderboards.',
-    tech: ['PostgreSQL', 'Redis', 'OAuth2'],
-    link: '/projects/04',
-    color: '#FF4D00', // Jade
-  }
-];
+const featured = allProjects.slice(0, 3);
+
+/** Hero typography (multiline) + timeline labels; synced to first three `projects` entries */
+const featuredDisplay = [
+  { title: 'CIVIC\nLENS', dateLine: '01 / Dec 2025' },
+  { title: 'APPLY\nSENSE', dateLine: '02 / Aug 2025' },
+  { title: 'NSBE\nAPP', dateLine: '03 / Nov 2025 — Ongoing' },
+] as const;
 
 const Projects: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,7 +60,7 @@ const Projects: React.FC = () => {
             }}
             className="text-xl font-mono uppercase tracking-widest origin-center whitespace-nowrap"
           >
-            Selected Works
+            Featured Projects
           </motion.h2>
 
         </div>
@@ -92,25 +69,25 @@ const Projects: React.FC = () => {
         <div className="group relative mb-24 md:mb-8 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start">
           {/* Meta (Absolute Left) */}
           <div className="col-span-12 md:col-span-2 md:sticky md:top-32 self-start mb-8 md:mb-0">
-            <span className="text-sm font-mono block mb-2 text-red-600">01 / 2024</span>
-            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{projects[0].category}</h4>
+            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[0].dateLine}</span>
+            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[0].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
-              {projects[0].tech.map(t => <li key={t}>{t}</li>)}
+              {featured[0].tech.map(t => <li key={t}>{t}</li>)}
             </ul>
           </div>
 
           {/* Title (Massive, Spanning) */}
           <div className="col-span-12 md:col-span-10 md:col-start-3 relative z-20">
-            <Link to={projects[0].link} className="block">
-              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white]">
-                {projects[0].title}
+            <Link to={`/projects/${featured[0].id}`} className="block">
+              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
+                {featuredDisplay[0].title}
               </h3>
             </Link>
             <div className="mt-8 max-w-md text-black dark:text-white">
-              <p className="text-lg leading-snug">{projects[0].description}</p>
+              <p className="text-lg leading-snug">{featured[0].description}</p>
               <div className="mt-6 flex gap-4">
-                <Link to={projects[0].link} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#FF4D00]">Live <FiArrowUpRight /></Link>
+                <Link to={`/projects/${featured[0].id}`} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#FF4D00]">View <FiArrowUpRight /></Link>
               </div>
             </div>
           </div>
@@ -121,26 +98,26 @@ const Projects: React.FC = () => {
         <div className="group relative mb-24 md:mb-8 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start">
           {/* Title (Massive, Right Aligned) */}
           <div className="col-span-12 md:col-span-10 md:col-start-1 order-2 md:order-2 text-right relative z-20">
-            <Link to={projects[1].link} className="block">
-              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-right text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white]">
-                {projects[1].title}
+            <Link to={`/projects/${featured[1].id}`} className="block">
+              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-right text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
+                {featuredDisplay[1].title}
               </h3>
             </Link>
             <div className="mt-8 max-w-md ml-auto text-left text-black dark:text-white">
-              <p className="text-lg leading-snug">{projects[1].description}</p>
+              <p className="text-lg leading-snug">{featured[1].description}</p>
               <div className="mt-6 flex gap-4">
-                <Link to={projects[1].link} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#0057FF]">Live <FiArrowUpRight /></Link>
+                <Link to={`/projects/${featured[1].id}`} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#0057FF]">View <FiArrowUpRight /></Link>
               </div>
             </div>
           </div>
 
           {/* Meta (Right) */}
           <div className="col-span-12 md:col-span-2 order-1 md:order-3 md:sticky md:top-32 self-start mb-8 md:mb-0 text-right flex flex-col items-end">
-            <span className="text-sm font-mono block mb-2 text-red-600">02 / 2024</span>
-            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{projects[1].category}</h4>
+            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[1].dateLine}</span>
+            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[1].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
-              {projects[1].tech.map(t => <li key={t}>{t}</li>)}
+              {featured[1].tech.map(t => <li key={t}>{t}</li>)}
             </ul>
           </div>
         </div>
@@ -150,25 +127,25 @@ const Projects: React.FC = () => {
         <div className="group relative mb-4 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start pb-24">
           {/* Meta (Absolute Left) */}
           <div className="col-span-12 md:col-span-2 md:sticky md:top-32 self-start mb-8 md:mb-0">
-            <span className="text-sm font-mono block mb-2 text-red-600">03 / 2023</span>
-            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{projects[2].category}</h4>
+            <span className="text-sm font-mono block mb-2 text-red-600">{featuredDisplay[2].dateLine}</span>
+            <h4 className="text-xl font-bold uppercase leading-tight whitespace-pre-wrap text-black dark:text-white">{featured[2].category.replace(/ \/ /g, '\n')}</h4>
             <div className="h-px w-8 bg-black dark:bg-white my-4"></div>
             <ul className="text-xs font-mono text-gray-600 dark:text-gray-400 space-y-1">
-              {projects[2].tech.map(t => <li key={t}>{t}</li>)}
+              {featured[2].tech.map(t => <li key={t}>{t}</li>)}
             </ul>
           </div>
 
           {/* Title (Massive, Spanning) */}
           <div className="col-span-12 md:col-span-10 md:col-start-3 relative z-20">
-            <Link to={projects[2].link} className="block">
-              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white]">
-                SKILL<br />BLOOM+
+            <Link to={`/projects/${featured[2].id}`} className="block">
+              <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
+                {featuredDisplay[2].title}
               </h3>
             </Link>
             <div className="mt-8 max-w-md text-black dark:text-white">
-              <p className="text-lg leading-snug">{projects[2].description}</p>
+              <p className="text-lg leading-snug">{featured[2].description}</p>
               <div className="mt-6 flex gap-4">
-                <Link to={projects[2].link} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#00A86B]">Live <FiArrowUpRight /></Link>
+                <Link to={`/projects/${featured[2].id}`} className="flex items-center gap-2 text-xs font-bold uppercase border-b border-current pb-1 hover:text-[#00A86B]">View <FiArrowUpRight /></Link>
               </div>
             </div>
           </div>
