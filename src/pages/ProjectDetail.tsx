@@ -97,8 +97,13 @@ const ProjectDetail: React.FC = () => {
                         <h2 className="text-sm font-mono uppercase tracking-widest mb-8 text-black dark:text-white border-b border-black dark:border-white pb-4 inline-block">The Brief</h2>
                         <p className="text-2xl md:text-3xl font-light leading-snug">{project.longDescription}</p>
                         <div className="mt-12 flex flex-col gap-4">
-                            <a href={project.github} target="_blank" rel="noopener noreferrer" className="group flex items-center justify-between border-b border-gray-200 dark:border-gray-800 py-4 hover:border-black dark:hover:border-white transition-colors">
-                                <span className="text-lg font-light">View Source Code</span>
+                            <a
+                                href={project.primaryCta?.href ?? project.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex items-center justify-between border-b border-gray-200 dark:border-gray-800 py-4 hover:border-black dark:hover:border-white transition-colors"
+                            >
+                                <span className="text-lg font-light">{project.primaryCta?.label ?? 'View Source Code'}</span>
                                 <FiArrowUpRight className="w-5 h-5 group-hover:rotate-45 transition-transform" />
                             </a>
                             {project.live && (

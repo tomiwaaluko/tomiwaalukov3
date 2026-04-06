@@ -8,9 +8,9 @@ const featured = allProjects.slice(0, 3);
 
 /** Hero typography (multiline) + timeline labels; synced to first three `projects` entries */
 const featuredDisplay = [
-  { title: 'CIVIC\nLENS', dateLine: '01 / Dec 2025' },
-  { title: 'APPLY\nSENSE', dateLine: '02 / Aug 2025' },
-  { title: 'NSBE\nAPP', dateLine: '03 / Nov 2025 — Ongoing' },
+  { title: 'NSBE\nAGENT-A-THON', dateLine: '01 / Mar 2026' },
+  { title: 'SKYGO\nPRIVATE JETS', dateLine: '02 / 2026' },
+  { title: 'PULL\nUP', dateLine: '03 / 2026' },
 ] as const;
 
 const Projects: React.FC = () => {

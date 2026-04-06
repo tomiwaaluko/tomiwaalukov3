@@ -232,7 +232,7 @@ export const projectArchitectures: Record<string, ProjectArchitecture> = {
     end`,
     },
 
-    'the-paint': {
+    chalk: {
         hld: `flowchart TB
     ING["Ingestion nba_api Odds cron"]
     FEAT["Feature pipelines sklearn"]

@@ -16,6 +16,8 @@ export interface Project {
     status: string;
     image: string;
     github: string;
+    /** When set, replaces the default View Source Code row (href overrides github for that link). */
+    primaryCta?: { label: string; href: string };
     live: string | null;
     impact?: string[];
     challenges?: { title: string; description: string; solution: string }[];
