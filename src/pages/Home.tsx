@@ -21,10 +21,10 @@ const Home: React.FC<HomeProps> = ({ startAnimation = false }) => {
     <div className="relative overflow-x-hidden">
       <Hero startAnimation={startAnimation} />
       <About />
+      <Timeline />
       <Skills />
       <Projects />
       <DevActivity />
-      <Timeline />
       <BlogSection />
       {/* <TestimonialPreview /> */}
       <Contact />

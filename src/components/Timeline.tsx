@@ -6,42 +6,119 @@ import ScrollRevealText from './ScrollRevealText';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const milestones = [
+type Milestone = {
+    year: string;
+    title: string;
+    description: string;
+    tags: string[];
+    /** When true, only the substring before the first " · " is styled red (company name). */
+    redCompany?: boolean;
+};
+
+function MilestoneTitle({ title, redCompany }: { title: string; redCompany?: boolean }) {
+    if (!redCompany) return <>{title}</>;
+    const sep = ' · ';
+    const i = title.indexOf(sep);
+    if (i === -1) return <>{title}</>;
+    return (
+        <>
+            <span className="text-red-500">{title.slice(0, i)}</span>
+            <span className="text-inherit">{sep}{title.slice(i + sep.length)}</span>
+        </>
+    );
+}
+
+const milestones: Milestone[] = [
     {
-        year: '2022',
-        title: 'Genesis',
-        description: 'First lines of code written. Explored the fundamentals of Java and web development with HTML & CSS.',
-        tags: ['Java', 'OOP', 'HTML/CSS']
+        year: '2026',
+        title: 'Bank of New York · Software Engineering Intern (Incoming)',
+        redCompany: true,
+        description:
+            'Summer 2026. Selected for a competitive Software Engineering internship at a global financial technology and investment services company.',
+        tags: ['Software Engineering', 'FinTech', 'Internship'],
     },
     {
-        year: '2023',
-        title: 'Full Stack',
-        description: 'Built and deployed end-to-end applications using Spring Boot and React.js. Deep dive into databases.',
-        tags: ['Spring Boot', 'React', 'MySQL']
-    },
-    {
-        year: '2023',
-        title: 'Algorithms',
-        description: 'Intensive focus on Data Structures and Algorithms to sharpen problem-solving capabilities.',
-        tags: ['DSA', 'LeetCode', 'Optimization']
-    },
-    {
-        year: '2024',
-        title: 'Innovation',
-        description: 'Participated in competitive hackathons, fostering rapid prototyping and teamwork skills.',
-        tags: ['Hackathons', 'Teamwork', 'Rapid Dev']
-    },
-    {
-        year: '2024',
-        title: 'Open Source',
-        description: 'Contributed to global repositories on Git, learning collaborative workflows and code reviews.',
-        tags: ['Open Source', 'GitHub', 'CI/CD']
+        year: '2026',
+        title: 'Bloomberg · Tech Lab Fellow',
+        redCompany: true,
+        description:
+            'On-campus Bloomberg Tech Lab introducing RabbitMQ and the producer–consumer model for securities-style updates. Implemented Python mqProducer and mqConsumer classes (queues, exchanges, bindings, UTF-8 publish/consume). Ran RabbitMQ and services with Docker Compose and verified flows in the RabbitMQ Management UI.',
+        tags: ['Python', 'RabbitMQ', 'Docker', 'Messaging'],
     },
     {
         year: '2025',
-        title: 'Cloud Native',
-        description: 'Mastering Docker, Kubernetes, and cloud infrastructure for scalable deployment.',
-        tags: ['Docker', 'K8s', 'AWS']
+        title: 'Handshake · AI Research & Evaluation Auditor',
+        redCompany: true,
+        description:
+            'Contract · Remote. Conduct quality assurance and review work supporting large-scale AI systems; collaborate cross-functionally for consistency, accuracy, and quality standards across multimodal datasets. Parallel role since Oct 2025: AI Model Quality & Data Annotation Researcher—data review and annotation work to improve reliability and performance across diverse modalities.',
+        tags: ['AI Quality Assurance', 'Multimodal Review', 'Model Evaluation', 'Remote'],
+    },
+    {
+        year: '2025',
+        title: 'NSBE UCF · Software Engineer',
+        description:
+            'Architected a full-stack event management system for 100+ users with role-based access, OAuth, and REST APIs for attendance and 50+ annual events. Cut manual attendance processing time by roughly 75% using real-time check-in, validation, and analytics dashboards with Prisma and PostgreSQL. Deployed on Railway and Vercel with Docker, CI/CD, and resilient handling for peak database load.',
+        tags: ['Next.js', 'TypeScript', 'NestJS', 'Prisma', 'PostgreSQL', 'Docker'],
+    },
+    {
+        year: '2025',
+        title: 'CodePath · Intermediate Technical Interview Prep (TIP102)',
+        description:
+            'Issued Aug 2025. Intensive interview preparation covering data structures, algorithms, and technical communication. Credential ID 67716.',
+        tags: ['CodePath', 'Algorithms', 'Interview Prep', 'DSA'],
+    },
+    {
+        year: '2025',
+        title: 'CodePath · Intermediate Web Development Course (WEB102)',
+        description:
+            'Issued Aug 2025. Full-stack web development fundamentals and project-based coursework. Credential ID 336457.',
+        tags: ['CodePath', 'Web Development', 'JavaScript', 'React'],
+    },
+    {
+        year: '2024',
+        title: 'NSBE UCF · Senator',
+        description:
+            'Facilitated chapter participation in regional and national conventions: voting and conference logistics, procedural guidance, budgeting oversight, and member communications.',
+        tags: ['Organization', 'Event Management', 'Leadership'],
+    },
+    {
+        year: '2024',
+        title: 'Alpha Phi Alpha · Assistant East Area Director',
+        description:
+            'Coordinated communications and district operations for college chapters in the East Area of the Florida district, aligning chapters and supporting collaboration.',
+        tags: ['Communication', 'Organization', 'Student Orgs'],
+    },
+    {
+        year: '2024',
+        title: 'Outlier · AI Data Quality Specialist',
+        description:
+            'Contract remote work on AI evaluation and data quality: guideline-driven generalist and skill-informed tasks, using programming, math, and language skills to assess outputs and support reliability of general-purpose AI systems.',
+        tags: ['AI Evaluation', 'Data Quality', 'Python', 'React'],
+    },
+    {
+        year: '2023',
+        title: 'UCF · Office Assistant',
+        description: 'Part-time on-campus role supporting departmental operations (Apr 2023 – Nov 2024).',
+        tags: ['Operations', 'Customer Service', 'UCF'],
+    },
+    {
+        year: '2023',
+        title: 'Alpha Phi Alpha · Xi Iota Chapter · President',
+        description:
+            'Chief administrative officer: presided over meetings, chapter representation, and duties required by the office.',
+        tags: ['Team Leadership', 'Governance', 'Organization'],
+    },
+    {
+        year: '2022',
+        title: 'Alpha Phi Alpha · Xi Iota Chapter · Secretary',
+        description: 'Chapter secretary (Apr 2022 – Apr 2023): records, correspondence, and administrative support for Xi Iota.',
+        tags: ['Administration', 'Organization', 'Written Communication'],
+    },
+    {
+        year: '2022',
+        title: 'NSBE UCF · AEx Committee Member',
+        description: 'Academic Excellence committee service for the UCF chapter (Aug 2022 – May 2023).',
+        tags: ['NSBE', 'Academic Programs', 'Teamwork'],
     },
 ];
 
@@ -177,7 +254,7 @@ const Timeline: React.FC = () => {
                             <div className="flex-grow w-full z-10 relative">
                                 <div className="flex items-center justify-between w-full">
                                     <h3 className="timeline-title text-xl md:text-4xl font-bold uppercase tracking-tight leading-[0.9] md:leading-tight transition-all duration-300 origin-left mb-2 md:mb-0">
-                                        {item.title}
+                                        <MilestoneTitle title={item.title} redCompany={item.redCompany} />
                                     </h3>
                                     <FiArrowUpRight className="timeline-arrow w-5 h-5 shrink-0 transition-transform duration-300 opacity-30" />
                                 </div>
