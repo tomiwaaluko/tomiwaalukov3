@@ -72,7 +72,7 @@ const Projects: React.FC = () => {
           </div>
           <div className="col-span-12 md:col-span-6 lg:col-span-4 lg:col-start-9 text-right">
             <p className="font-mono text-xs uppercase tracking-widest text-gray-400 dark:text-gray-600">
-              Index v2.4 — {new Date().getFullYear()}
+              Index v2.4 · {new Date().getFullYear()}
             </p>
           </div>
         </div>

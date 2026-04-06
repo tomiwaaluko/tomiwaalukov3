@@ -33,7 +33,7 @@ export const projects: Project[] = [
         category: 'Full-Stack / Civic Tech',
         description: 'Transparent political data, RAG-backed Q&A with citations, and interactive maps and visualizations.',
         longDescription:
-            'CivicLens is a political data and analysis platform built to give people evidence-based access to voting records, donations, and policy context—without editorial rankings. It pairs a Next.js frontend (maps, charts, 3D relationship graphs) with a FastAPI backend, PostgreSQL with pgvector for retrieval-grounded Gemini Q&A, and PostGIS for geographic donation views.',
+            'CivicLens is a political data and analysis platform built to give people evidence-based access to voting records, donations, and policy context, without editorial rankings. It pairs a Next.js frontend (maps, charts, 3D relationship graphs) with a FastAPI backend, PostgreSQL with pgvector for retrieval-grounded Gemini Q&A, and PostGIS for geographic donation views.',
         tech: ['Next.js', 'FastAPI', 'PostgreSQL', 'pgvector', 'Gemini', 'PostGIS', 'Docker'],
         year: '2025',
         status: 'Live',
@@ -62,7 +62,7 @@ export const projects: Project[] = [
         category: 'Product / Full-Stack',
         description: 'Job search tracker with screenshot intake: multimodal extraction plus a reliable OCR fallback.',
         longDescription:
-            'ApplySense helps users manage applications from a real dashboard—card and table views, filters, and in-browser success metrics. Its differentiator is screenshot-based intake: uploads go to storage, then a server pipeline tries GPT-4o Vision and falls back to Tesseract (with a client-side Tesseract path if the server path stalls). Google OAuth and per-user isolation are enforced through NextAuth and tRPC protected procedures.',
+            'ApplySense helps users manage applications from a real dashboard: card and table views, filters, and in-browser success metrics. Its differentiator is screenshot-based intake: uploads go to storage, then a server pipeline tries GPT-4o Vision and falls back to Tesseract (with a client-side Tesseract path if the server path stalls). Google OAuth and per-user isolation are enforced through NextAuth and tRPC protected procedures.',
         tech: ['Next.js', 'tRPC', 'Prisma', 'PostgreSQL', 'NextAuth', 'Supabase Storage', 'OpenAI'],
         year: '2025',
         status: 'Live',
@@ -89,7 +89,7 @@ export const projects: Project[] = [
         id: 'nsbe-app',
         title: 'NSBE APP',
         category: 'Org Platform / Full-Stack',
-        description: 'NSBE UCF chapter app: events, QR check-ins, achievements, leaderboards, and member tools—ongoing build.',
+        description: 'NSBE UCF chapter app: events, QR check-ins, achievements, leaderboards, and member tools; ongoing build.',
         longDescription:
             'Built for the UCF chapter of NSBE: admins create events and QR/short-code check-ins; members earn semester achievements (e.g. category balance badges), appear on leaderboards, and use social features like friends and plan-to-attend. NestJS REST API with Prisma on PostgreSQL (Supabase), Supabase Auth with JWT verification in guards, Next.js App Router client, caching for hot reads, and Dockerized backend deployment alongside a Vercel frontend.',
         tech: ['NestJS', 'Next.js', 'Prisma', 'PostgreSQL', 'Supabase', 'Docker', 'Railway'],

@@ -42,7 +42,7 @@ const milestones: Milestone[] = [
         title: 'Bloomberg · Tech Lab Fellow',
         redCompany: true,
         description:
-            'On-campus Bloomberg Tech Lab introducing RabbitMQ and the producer–consumer model for securities-style updates. Implemented Python mqProducer and mqConsumer classes (queues, exchanges, bindings, UTF-8 publish/consume). Ran RabbitMQ and services with Docker Compose and verified flows in the RabbitMQ Management UI.',
+            'On-campus Bloomberg Tech Lab introducing RabbitMQ and the producer-consumer model for securities-style updates. Implemented Python mqProducer and mqConsumer classes (queues, exchanges, bindings, UTF-8 publish/consume). Ran RabbitMQ and services with Docker Compose and verified flows in the RabbitMQ Management UI.',
         tags: ['Python', 'RabbitMQ', 'Docker', 'Messaging'],
     },
     {
@@ -50,7 +50,7 @@ const milestones: Milestone[] = [
         title: 'Handshake · AI Research & Evaluation Auditor',
         redCompany: true,
         description:
-            'Contract · Remote. Conduct quality assurance and review work supporting large-scale AI systems; collaborate cross-functionally for consistency, accuracy, and quality standards across multimodal datasets. Parallel role since Oct 2025: AI Model Quality & Data Annotation Researcher—data review and annotation work to improve reliability and performance across diverse modalities.',
+            'Contract · Remote. Conduct quality assurance and review work supporting large-scale AI systems; collaborate cross-functionally for consistency, accuracy, and quality standards across multimodal datasets. Parallel role since Oct 2025: AI Model Quality & Data Annotation Researcher: data review and annotation work to improve reliability and performance across diverse modalities.',
         tags: ['AI Quality Assurance', 'Multimodal Review', 'Model Evaluation', 'Remote'],
     },
     {
@@ -98,7 +98,7 @@ const milestones: Milestone[] = [
     {
         year: '2023',
         title: 'UCF · Office Assistant',
-        description: 'Part-time on-campus role supporting departmental operations (Apr 2023 – Nov 2024).',
+        description: 'Part-time on-campus role supporting departmental operations (Apr 2023 to Nov 2024).',
         tags: ['Operations', 'Customer Service', 'UCF'],
     },
     {
@@ -111,13 +111,13 @@ const milestones: Milestone[] = [
     {
         year: '2022',
         title: 'Alpha Phi Alpha · Xi Iota Chapter · Secretary',
-        description: 'Chapter secretary (Apr 2022 – Apr 2023): records, correspondence, and administrative support for Xi Iota.',
+        description: 'Chapter secretary (Apr 2022 to Apr 2023): records, correspondence, and administrative support for Xi Iota.',
         tags: ['Administration', 'Organization', 'Written Communication'],
     },
     {
         year: '2022',
         title: 'NSBE UCF · AEx Committee Member',
-        description: 'Academic Excellence committee service for the UCF chapter (Aug 2022 – May 2023).',
+        description: 'Academic Excellence committee service for the UCF chapter (Aug 2022 to May 2023).',
         tags: ['NSBE', 'Academic Programs', 'Teamwork'],
     },
 ];

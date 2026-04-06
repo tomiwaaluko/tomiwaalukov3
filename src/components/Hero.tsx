@@ -430,7 +430,7 @@ export default function Hero() {
 
         {/* GROUPED GRAPHICS: PHOTOS + ARROW */}
         <div className="hero-graphics">
-          {/* PHOTO 2 – behind */}
+          {/* PHOTO 2 - behind */}
           <motion.div className="photo2-wrapper" style={{ y: photo2ScrollY, x: photo2X }}>
             <motion.div
               className="photo2-outline"
@@ -456,7 +456,7 @@ export default function Hero() {
             </motion.div>
           </motion.div>
 
-          {/* PHOTO 1 – front */}
+          {/* PHOTO 1 - front */}
           <motion.div className="photo1-wrapper" style={{ y: photo1ScrollY, x: photo1X }}>
             <motion.div
               className="photo1-outline"

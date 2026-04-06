@@ -102,10 +102,10 @@ const Contact: React.FC = () => {
 
             <div className="space-y-6 max-w-md">
               <p className="contact-info-text text-lg md:text-xl text-gray-400 font-light leading-relaxed">
-                I specialize in engineering robust backend systems and scalable DevOps infrastructures.
+                I&apos;m a Computer Engineering student at UCF building full-stack software (web platforms, APIs, and data layers) alongside AI integrations and agentic workflows.
               </p>
               <p className="contact-info-text text-lg md:text-xl text-gray-400 font-light leading-relaxed">
-                Currently open to discussing technical challenges, architectural consulting, or full-time opportunities.
+                Currently seeking Fall/Spring co-op roles and full-time software engineering opportunities. Open to discussing technical challenges, system design, and how I can contribute to your team.
               </p>
             </div>
           </div>

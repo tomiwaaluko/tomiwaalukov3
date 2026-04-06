@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FiArrowUpRight, FiInstagram, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FiArrowUpRight, FiGithub, FiLinkedin, FiMail } from 'react-icons/fi';
 import { CONTACT_EMAIL } from '../constants/contact';
 
 const Footer: React.FC = () => {
   const [time, setTime] = useState<string>("");
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setTime(now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+      setTime(
+        now.toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'America/New_York',
+        })
+      );
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -27,17 +37,28 @@ const Footer: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const scrollToDigitalEvolution = () => {
+    if (pathname === '/') {
+      scrollToSection('timeline');
+    } else {
+      navigate('/');
+      window.setTimeout(() => {
+        document.getElementById('timeline')?.scrollIntoView({ behavior: 'smooth' });
+      }, 250);
+    }
+  };
+
   const socialLinks = [
-    { name: "LINKEDIN", url: "https://www.linkedin.com/in/tomiwa-aluko/", icon: <FiLinkedin /> },
+    { name: "LINKEDIN", url: "https://www.linkedin.com/in/olatomiwaaluko/", icon: <FiLinkedin /> },
     { name: "GITHUB", url: "https://github.com/tomiwaaluko", icon: <FiGithub /> },
     { name: "EMAIL", url: `mailto:${CONTACT_EMAIL}`, icon: <FiMail /> },
-    { name: "INSTAGRAM", url: "https://www.instagram.com/tomiwaaluko/", icon: <FiInstagram /> },
+    // { name: "INSTAGRAM", url: "https://www.instagram.com/tomiwaaluko/", icon: <FiInstagram /> },
   ];
 
   const navLinks = [
     { name: "HOME", action: () => scrollToTop() },
     { name: "ABOUT", action: () => scrollToSection('about') },
-    { name: "WORK", action: () => scrollToSection('projects') },
+    { name: "WORK", action: () => scrollToDigitalEvolution() },
     { name: "CONTACT", action: () => scrollToSection('contact') }, // Assuming contact section exists or just footer
   ];
 
@@ -55,13 +76,13 @@ const Footer: React.FC = () => {
               </div>
             </Link>
             <p className="font-mono text-xs mt-6 text-gray-500 uppercase tracking-widest">
-              Digital Craftsman<br />
-              Backend & DevOps Engineer
+              Computer Engineering @ UCF<br />
+              Full-Stack Software & AI
             </p>
           </div>
           <div className="mt-12 md:mt-0 font-mono text-xs uppercase text-gray-400">
-            <div className="mb-1">Based in India</div>
-            <div className="text-black dark:text-white">{time} IST</div>
+            <div className="mb-1">Based in Orlando, FL</div>
+            <div className="text-black dark:text-white">{time} ET</div>
           </div>
         </div>
 
@@ -137,7 +158,7 @@ const Footer: React.FC = () => {
           &copy; {new Date().getFullYear()} Tomiwa Aluko. All Rights Reserved.
         </div>
         <div className="flex gap-6">
-          <span>Designed & Built by Me</span>
+          {/* <span>Designed & Built by Me</span> */}
           <span>System Status: Operational</span>
         </div>
       </div>

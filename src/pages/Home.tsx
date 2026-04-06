@@ -2,7 +2,7 @@ import React from 'react';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Skills from '../components/Skills';
-import BlogSection from '../components/BlogSection';
+// import BlogSection from '../components/BlogSection';
 import TestimonialPreview from '../components/TestimonialPreview';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
@@ -25,7 +25,7 @@ const Home: React.FC<HomeProps> = ({ startAnimation = false }) => {
       <Skills />
       <Projects />
       <DevActivity />
-      <BlogSection />
+      {/* <BlogSection /> */}
       {/* <TestimonialPreview /> */}
       <Contact />
       <Footer />

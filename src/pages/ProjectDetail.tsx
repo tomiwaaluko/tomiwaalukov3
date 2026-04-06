@@ -122,7 +122,7 @@ const ProjectDetail: React.FC = () => {
                     {/* LEFT: Tech Stack & Impact */}
                     <div className="col-span-12 md:col-span-7 content-block flex flex-col gap-20">
 
-                        {/* Tech Stack — Mosaic Grid Cells */}
+                        {/* Tech Stack: Mosaic Grid Cells */}
                         <div>
                             <h2 className="text-sm font-mono uppercase tracking-widest mb-8 text-black dark:text-white border-b border-black dark:border-white pb-4 inline-block">Tech Stack</h2>
                             <div className="grid grid-cols-2 sm:grid-cols-3 border-t border-l border-black/10 dark:border-white/10">
@@ -146,7 +146,7 @@ const ProjectDetail: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Impact — Horizontal stats */}
+                        {/* Impact: Horizontal stats */}
                         <div>
                             <h2 className="text-sm font-mono uppercase tracking-widest mb-6 text-black dark:text-white border-b border-black dark:border-white pb-4 inline-block">Impact & Metrics</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-black/10 dark:divide-white/10 border border-black/10 dark:border-white/10 mt-4 bg-white dark:bg-black">
@@ -211,7 +211,7 @@ const ProjectDetail: React.FC = () => {
                         <div className="h-px w-full bg-black dark:bg-white mb-2" />
                         <div className="flex items-center gap-4 mt-2">
                             <span className="font-mono text-xs uppercase tracking-widest text-gray-400">System Design</span>
-                            <span className="font-mono text-xs text-gray-300 dark:text-gray-600">— 4 views</span>
+                            <span className="font-mono text-xs text-gray-300 dark:text-gray-600">· 4 views</span>
                         </div>
                     </div>
                     <div className="col-span-12">
