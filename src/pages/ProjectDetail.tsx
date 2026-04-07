@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect } from 'react';
+import { useRef, useLayoutEffect, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -14,14 +14,47 @@ const ProjectDetail: React.FC = () => {
     const navigate = useNavigate();
     const containerRef = useRef<HTMLDivElement>(null);
     const heroVideoRef = useRef<HTMLVideoElement>(null);
+    const heroRevealVideoRef = useRef<HTMLVideoElement>(null);
 
     const project = projects.find(p => p.id === id);
+
+    const [heroRevealPhase, setHeroRevealPhase] = useState<'image' | 'video'>('image');
+
+    useEffect(() => {
+        setHeroRevealPhase('image');
+    }, [project?.id]);
+
+    useEffect(() => {
+        if (!project?.heroRevealVideo) return;
+        const delay = project.heroRevealDelayMs ?? 3000;
+        const t = window.setTimeout(() => setHeroRevealPhase('video'), delay);
+        return () => window.clearTimeout(t);
+    }, [project?.heroRevealVideo, project?.heroRevealDelayMs, project?.id]);
+
+    useEffect(() => {
+        if (heroRevealPhase !== 'video') return;
+        const el = heroRevealVideoRef.current;
+        if (!el) return;
+        void el.play().catch(() => {});
+    }, [heroRevealPhase]);
 
     const toggleHeroVideo = () => {
         const el = heroVideoRef.current;
         if (!el) return;
         if (el.paused) void el.play();
         else el.pause();
+    };
+
+    const toggleHeroRevealVideo = () => {
+        const el = heroRevealVideoRef.current;
+        if (!el) return;
+        if (el.paused) void el.play();
+        else el.pause();
+    };
+
+    const revertHeroRevealToImage = () => {
+        heroRevealVideoRef.current?.pause();
+        setHeroRevealPhase('image');
     };
 
     useLayoutEffect(() => {
@@ -124,7 +157,44 @@ const ProjectDetail: React.FC = () => {
                     </div>
                     <div className="col-span-12 md:col-span-8 content-block">
                         <div className="relative aspect-[16/9] bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                            {project.heroVideo ? (
+                            {project.heroRevealVideo ? (
+                                <>
+                                    {heroRevealPhase === 'image' ? (
+                                        <img
+                                            src={project.image}
+                                            alt="Project Preview"
+                                            className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                                        />
+                                    ) : (
+                                        <>
+                                            <video
+                                                ref={heroRevealVideoRef}
+                                                className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                                                autoPlay
+                                                muted
+                                                loop
+                                                playsInline
+                                                preload="auto"
+                                                onClick={toggleHeroRevealVideo}
+                                                aria-label="Winning clip. Click to pause or play."
+                                            >
+                                                <source src={project.heroRevealVideo} type="video/quicktime" />
+                                                <source src={project.heroRevealVideo} type="video/mp4" />
+                                            </video>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    revertHeroRevealToImage();
+                                                }}
+                                                className="absolute bottom-3 right-3 z-10 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest bg-black/70 text-white dark:bg-white/90 dark:text-black backdrop-blur-sm border border-white/20 dark:border-black/10 hover:opacity-90 transition-opacity"
+                                            >
+                                                Back to cover
+                                            </button>
+                                        </>
+                                    )}
+                                </>
+                            ) : project.heroVideo ? (
                                 <video
                                     ref={heroVideoRef}
                                     className="absolute inset-0 w-full h-full object-cover cursor-pointer"

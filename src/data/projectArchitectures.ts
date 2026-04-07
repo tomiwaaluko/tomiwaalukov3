@@ -552,6 +552,107 @@ export const projectArchitectures: Record<string, ProjectArchitecture> = {
     B-->>U: Popup reads list copy all`,
     },
 
+    'agent-a-thon-nsbe-2026': {
+        hld: `flowchart TB
+    U[Convention attendee]
+    A[Copilot Studio Agent]
+    CR[Career readiness pillar]
+    EM[Event management pillar]
+
+    U -->|Greeting hi hello whats up| A
+    A --> CR
+    A --> EM
+
+    CR --> ATS[ATS resume review]
+    CR --> CC[Career competency quiz]
+    CR --> CN[Company navigator open roles]
+
+    CC --> TR1[Software engineering track]
+    CC --> TR2[DevOps track]
+    CC --> TR3[Cyber security track]
+
+    EM --> CE[Current events today]
+    EM --> SCH[Create schedule free text]
+
+    CE --> NSBE[NSBE website plus convention app]
+    SCH --> OL[Outlook email]
+    CC --> GEN[Generative AI recommendations]
+    CN --> GEN`,
+
+        lld: `flowchart TB
+    subgraph ENTRY["Entry and routing"]
+        KW[Keyword greetings]
+        M[Offer career or events]
+    end
+    subgraph CAREER["Career readiness"]
+        ATS2[ATS resume review]
+        BEH[Behavioral screen internship readiness]
+        QZ[7 to 10 yes no per track]
+        NAV[Company navigator GenAI roles]
+        TRN[Pick Software engineering DevOps or Cyber]
+    end
+    subgraph SCORE["Competency outcome"]
+        CALC[Score tier 70 plus vs 50 to 69 vs under 50]
+        REC[GenAI YouTube and resources for No answers]
+    end
+    subgraph EVENTS["Event management"]
+        TD[Current events today]
+        TX[Free text schedule]
+        OM[Outlook email]
+    end
+
+    KW --> M
+    M --> ATS2
+    M --> BEH
+    M --> NAV
+    BEH --> QZ
+    QZ --> TRN
+    TRN --> CALC
+    CALC --> REC
+    M --> TD
+    M --> TX
+    TX --> OM
+    TD --> NSBE2[NSBE site plus convention app]
+    NAV --> GEN2[Generative AI]`,
+
+        dataFlow: `sequenceDiagram
+    participant U as User
+    participant A as Copilot Studio
+    participant G as Generative AI
+    participant O as Outlook
+    participant E as NSBE web and app
+
+    U->>A: Keyword hi hello whats up
+    A-->>U: Career readiness or Event management
+
+    alt Career competency path
+        U->>A: Pick competency then e.g. Software engineering
+        A-->>U: Behavioral check internship readiness
+        loop Seven to ten questions
+            A-->>U: Yes or no e.g. DSA React basics
+            U->>A: Answer
+        end
+        A->>A: Score 70 plus good 50 to 69 polish under 50 basics
+        A->>G: Tier plus missed topics
+        G-->>U: YouTube links and study resources
+    else ATS resume review
+        U->>A: Request resume help
+        A-->>U: ATS oriented feedback flow
+    else Company navigator
+        U->>A: Target role query
+        A->>G: Generative search open positions
+        G-->>U: Companies and roles
+    else Current events
+        U->>A: Todays sessions
+        A->>E: Pull agenda same day
+        E-->>U: Event list
+    else Create schedule
+        U->>A: Free text what to attend
+        A->>O: Send via Outlook connector
+        O-->>U: Email in inbox
+    end`,
+    },
+
     'tomiwa-eportfolio': {
         hld: `flowchart TB
     NX["Next.js 15 SPA sections"]

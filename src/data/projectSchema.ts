@@ -17,6 +17,12 @@ export interface Project {
     image: string;
     /** When set, project detail hero shows this MP4 instead of `image` (list views still use `image`). */
     heroVideo?: string;
+    /**
+     * Brief hero: show `image` first, then swap to this video after `heroRevealDelayMs` (default 3000).
+     * Video stays muted; user can revert to the still via the on-page control. Ignores `heroVideo` when set.
+     */
+    heroRevealVideo?: string;
+    heroRevealDelayMs?: number;
     /** Engineering index thumbnail: muted MP4 that plays while the row is hovered (`image` used as poster). */
     listHoverVideo?: string;
     github: string;

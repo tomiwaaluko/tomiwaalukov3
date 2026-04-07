@@ -30,6 +30,8 @@ export const projects: Project[] = [
         year: '2026',
         status: 'Award',
         image: '/project-images/agent-a-thon-nsbe-2026/1774425810727.jpg',
+        heroRevealVideo: '/project-images/agent-a-thon-nsbe-2026/winningvideo.mov',
+        heroRevealDelayMs: 6000,
         github: GITHUB,
         primaryCta: {
             label: 'View LinkedIn Post',
@@ -55,6 +57,7 @@ export const projects: Project[] = [
         ],
         size: 'small',
         color: 'from-blue-500/20 to-violet-500/20',
+        architecture: arch['agent-a-thon-nsbe-2026'],
     },
     {
         id: 'frontend-testing',
