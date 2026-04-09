@@ -70,8 +70,7 @@ const Projects: React.FC = () => {
       <section className="relative z-10 pt-32 pb-20 px-6 md:px-12 max-w-[1800px] mx-auto">
         <div className="border-b border-black dark:border-white pb-6 mb-12">
           <h1 className="text-[14vw] leading-[0.8] font-bold tracking-tighter uppercase mix-blend-difference text-black dark:text-white">
-            <span className="hero-word block">Engineer</span>
-            <span className="hero-word block pl-[10vw]">ing_</span>
+            <span className="hero-word block">Projects_</span>
           </h1>
         </div>
 

@@ -61,7 +61,7 @@ const Navigation: React.FC = () => {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Engineering', path: '/projects' },
+    { name: 'Projects', path: '/projects' },
     // { name: 'GuestBook', path: '/guestbook' },
   ];
 
