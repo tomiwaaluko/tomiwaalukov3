@@ -19,10 +19,20 @@ const ProjectDetail: React.FC = () => {
     const project = projects.find(p => p.id === id);
 
     const [heroRevealPhase, setHeroRevealPhase] = useState<'image' | 'video'>('image');
+    const [heroGalleryIndex, setHeroGalleryIndex] = useState(0);
 
     useEffect(() => {
         setHeroRevealPhase('image');
+        setHeroGalleryIndex(0);
     }, [project?.id]);
+
+    useEffect(() => {
+        if (!project?.heroGallery || project.heroGallery.length <= 1) return;
+        const t = window.setInterval(() => {
+            setHeroGalleryIndex((i) => (i + 1) % project.heroGallery!.length);
+        }, 3000);
+        return () => window.clearInterval(t);
+    }, [project?.heroGallery, project?.id]);
 
     useEffect(() => {
         if (!project?.heroRevealVideo) return;
@@ -157,13 +167,36 @@ const ProjectDetail: React.FC = () => {
                     </div>
                     <div className="col-span-12 md:col-span-8 content-block">
                         <div className="relative aspect-[16/9] bg-gray-200 dark:bg-gray-800 overflow-hidden">
-                            {project.heroRevealVideo ? (
+                            {project.heroGallery && project.heroGallery.length > 0 ? (
+                                <>
+                                    <img
+                                        src={project.heroGallery[heroGalleryIndex]}
+                                        alt="Project Preview"
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                        style={{ objectPosition: project.imageObjectPosition ?? 'center' }}
+                                    />
+                                    {project.heroGallery.length > 1 && (
+                                        <div className="absolute inset-x-0 bottom-3 flex justify-center gap-2 z-10">
+                                            {project.heroGallery.map((_, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    type="button"
+                                                    onClick={() => setHeroGalleryIndex(idx)}
+                                                    className={`w-2 h-2 rounded-full border border-white/40 dark:border-black/40 transition-colors duration-200 ${idx === heroGalleryIndex ? 'bg-white dark:bg-black' : 'bg-transparent'}`}
+                                                    aria-label={`Show slide ${idx + 1}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+                                </>
+                            ) : project.heroRevealVideo ? (
                                 <>
                                     {heroRevealPhase === 'image' ? (
                                         <img
                                             src={project.image}
                                             alt="Project Preview"
                                             className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                                            style={{ objectPosition: project.imageObjectPosition ?? 'center' }}
                                         />
                                     ) : (
                                         <>
@@ -210,7 +243,12 @@ const ProjectDetail: React.FC = () => {
                                     <source src={project.heroVideo} type="video/mp4" />
                                 </video>
                             ) : (
-                                <img src={project.image} alt="Project Preview" className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                                <img
+                                    src={project.image}
+                                    alt="Project Preview"
+                                    className="absolute inset-0 w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                                    style={{ objectPosition: project.imageObjectPosition ?? 'center' }}
+                                />
                             )}
                         </div>
                     </div>

@@ -15,6 +15,10 @@ export interface Project {
     year: string;
     status: string;
     image: string;
+    /** Optional object-position used where the image is rendered with object-cover (e.g. 'top', 'center 20%'). */
+    imageObjectPosition?: string;
+    /** Optional gallery used for a hero image carousel on the detail page. */
+    heroGallery?: string[];
     /** When set, project detail hero shows this MP4 instead of `image` (list views still use `image`). */
     heroVideo?: string;
     /**

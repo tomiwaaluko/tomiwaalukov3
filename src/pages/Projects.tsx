@@ -146,7 +146,12 @@ const Projects: React.FC = () => {
                       <source src={project.listHoverVideo} type="video/mp4" />
                     </video>
                   ) : (
-                    <img src={project.image} alt={project.title} className="w-full h-full object-cover" />
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                      style={{ objectPosition: project.imageObjectPosition ?? 'center' }}
+                    />
                   )}
                 </div>
                 <div className="min-w-0">
