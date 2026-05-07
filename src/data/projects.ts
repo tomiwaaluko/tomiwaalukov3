@@ -19,6 +19,95 @@ const IMG = {
  */
 export const projects: Project[] = [
     {
+        id: 'standin',
+        title: 'StandIn',
+        category: 'AI / Hackathon',
+        description:
+            'LA Hacks 2026: Fetch.ai agent network sends an AI to stand in for meetings—Slack/Jira/calendar stubs, contradiction detection, RAG history, Evidence Passports.',
+        longDescription:
+            'StandIn replaces “another status meeting” with a coordinated uAgent mesh on Agentverse: an Orchestrator classifies intents (status, conflicts, actions, history, briefings), routes to a four-phase Status agent (gather, synthesise, contradict, passports), a Perform Action agent with human approval gates, Historical RAG over MongoDB Atlas Vector Search plus BM25 and Gemini tiers, and a Watchdog agent for proactive snapshots. ASI:One is the chat front door; Gemini 2.5 Flash plus text-embedding-004; ElevenLabs for executive voice briefs. Seeded NovaLoop demo data and stubbed integrations with clear Evidence Passport provenance.',
+        tech: [
+            'Python',
+            'Fetch.ai uAgents',
+            'Agentverse',
+            'Gemini',
+            'MongoDB',
+            'LangGraph',
+            'ElevenLabs',
+        ],
+        year: '2026',
+        status: 'Hackathon',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['Evidence Passports', 'Five-intent orchestration', 'Three-tier RAG'],
+        challenges: [
+            {
+                title: 'Trust without hallucination',
+                description:
+                    'Stakeholders need to know whether a claim is grounded, contradicted, or low confidence.',
+                solution:
+                    'Mandatory Evidence Passport stamping on outputs, rule-first contradiction detection, and structured escalation flags before any outbound action.',
+            },
+            {
+                title: 'Multi-agent coherence',
+                description:
+                    'Five agents plus watchdog must agree on schemas and Mongo writes without collisions.',
+                solution:
+                    'Shared message models in uAgents, collection-level ownership for live writes (brief_history vs pending_approvals), and seeded stable Agentverse identities for reproducible demos.',
+            },
+        ],
+        size: 'large',
+        color: 'from-violet-500/20 to-amber-500/20',
+        architecture: arch.standin,
+    },
+    {
+        id: 'rom-com',
+        title: 'ROM-COM (KineticLab)',
+        category: 'HealthTech / ML',
+        description:
+            'Clinical stroke-rehab companion: MediaPipe gestures, FMA-UE scoring, LiveAvatar coach under 2s, and Photon iMessage daily check-ins.',
+        longDescription:
+            'KineticLab ROM-COM pairs a React + Three.js rehab UI with FastAPI WebSockets and a dual AI backend: HeyGen LiveAvatar + LiveKit for real-time voice coaching with Gemini clinical guardrails, and Photon Spectrum plus APScheduler for supportive daily iMessages (read-only Mongo for that track). MediaPipe landmarks feed a sklearn gesture classifier and FMA-UE subscale proxy across five exercises; Arduino bridge optional. Docker Compose wires Vite frontend and uvicorn backend; mock avatar and Photon flags for demos.',
+        tech: [
+            'React',
+            'TypeScript',
+            'Vite',
+            'Tailwind',
+            'Three.js',
+            'FastAPI',
+            'MediaPipe',
+            'LiveKit',
+            'MongoDB',
+            'Gemini',
+        ],
+        year: '2026',
+        status: 'Development',
+        image: IMG.x,
+        github: GITHUB,
+        live: null,
+        impact: ['Dual-track AI rehab', 'FMA-UE exercise loop', '<2s avatar path'],
+        challenges: [
+            {
+                title: 'Latency vs. clinical guardrails',
+                description:
+                    'Track A must answer in under two seconds while every LLM turn carries verbatim safety prompts.',
+                solution:
+                    'Streaming ASR and TTS, cached audio cues where possible, and a fixed guardrails block in prompts with mock fallback when APIs are unavailable.',
+            },
+            {
+                title: 'Tone across channels',
+                description:
+                    'Photon reminders must motivate without guilt; UI must avoid FDA-ish claims.',
+                solution:
+                    'Separate copy and system rules per channel, framing scores as research-grade proxies only and keeping Track B Mongo usage read-only.',
+            },
+        ],
+        size: 'large',
+        color: 'from-rose-500/20 to-teal-500/20',
+        architecture: arch['rom-com'],
+    },
+    {
         id: 'agent-a-thon-nsbe-2026',
         title: 'Microsoft Agent-a-thon',
         category: 'AI / Event',

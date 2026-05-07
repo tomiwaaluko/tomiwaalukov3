@@ -727,4 +727,102 @@ export const projectArchitectures: Record<string, ProjectArchitecture> = {
     P->>P: Mermaid render tabs
     P-->>U: Blueprint view`,
     },
+
+    'rom-com': {
+        hld: `flowchart TB
+    FE["React 19 Vite Three R3F Tailwind"]
+    BE["FastAPI WebSocket HTTP"]
+    A["Track A HeyGen LiveAvatar LiveKit Gemini ElevenLabs ASR"]
+    B["Track B Photon iMessage APScheduler daily"]
+    MP["MediaPipe sklearn FMA UE scoring Arduino bridge"]
+    DB[("MongoDB Atlas sessions ROM")]
+
+    FE -->|"ws gesture events"| BE
+    FE -->|"LiveKit room"| A
+    BE --> A
+    BE --> B
+    BE --> MP
+    BE --> DB
+    MP -->|"POST internal gesture"| BE`,
+
+        lld: `flowchart LR
+    subgraph FastAPI
+        WS["ConnectionManager WS v1"]
+        AV["avatar start stop LiveKit tokens"]
+        PH["photon inbound webhook"]
+        SE["session latest complete Mongo"]
+    end
+    subgraph Pipeline
+        TR["mediapipe_tracker"]
+        FX["feature_extractor"]
+        GC["gesture_classifier pkl"]
+        FS["fma_scoring"]
+    end
+    WS --> TR
+    TR --> FX --> GC --> FS
+    FS --> WS`,
+
+        dataFlow: `sequenceDiagram
+    participant P as Patient UI
+    participant W as WebSocket
+    participant B as FastAPI
+    participant M as MediaPipe pipeline
+    participant L as LiveAvatar LiveKit
+
+    P->>W: exercise_start calibration
+    W->>B: typed messages
+    B->>M: landmarks classify
+    M-->>B: gesture rom_update fma_score
+    B-->>W: broadcast
+    W-->>P: dashboard charts 3D
+    P->>B: POST avatar start
+    B-->>P: livekit_url token
+    P->>L: join video track coach under 2s path`,
+    },
+
+    standin: {
+        hld: `flowchart TB
+    U["User ASI One"]
+    ORC["Orchestrator uAgent 8000 Gemini intent"]
+    ST["Status 8007 gather synthesise contradict passports"]
+    PA["Perform Action 8008 approvals audit"]
+    HA["Historical 8009 RAG vector BM25 Gemini"]
+    WD["Watchdog 8010 poll draft_slack snapshots"]
+    DB[("MongoDB standin corpus briefs approvals")]
+
+    U --> ORC
+    ORC --> ST
+    ORC --> PA
+    ORC --> HA
+    WD --> ST
+    WD --> PA
+    ST --> DB
+    PA --> DB
+    HA --> DB`,
+
+        lld: `flowchart LR
+    ORC2["orchestrator agent.py"]
+    ST2["status_agent gather synthesise passports"]
+    PA2["perform_action approvals"]
+    HA2["historical_agent RAG tiers"]
+    ORC2 --> ST2
+    ORC2 --> PA2
+    ORC2 --> HA2`,
+
+        dataFlow: `sequenceDiagram
+    participant U as User
+    participant O as Orchestrator
+    participant S as Status Agent
+    participant G as Gemini
+    participant DB as MongoDB
+
+    U->>O: Natural language intent
+    O->>G: Classify intent_type teams topic
+    G-->>O: Route to specialist
+    O->>S: FullBriefRequest
+    S->>S: Gather synthesise Contradict
+    S->>S: Evidence Passport per claim
+    S->>DB: brief_history write
+    S-->>U: Passport backed summary`,
+    },
 };
