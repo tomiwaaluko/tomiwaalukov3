@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiArrowUpRight } from 'react-icons/fi';
 import ScrollRevealText from './ScrollRevealText';
+import ConstantScrambleText from './ConstantScrambleText';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -13,17 +14,72 @@ type Milestone = {
     tags: string[];
     /** When true, only the substring before the first " · " is styled with accent (company name). */
     redCompany?: boolean;
+    /** When true, company segment shows continuous scramble (viewport-only); never reveals the real name on screen. */
+    scrambleCompany?: boolean;
+    /** Exact substring of `description` to replace with scramble (must match once). */
+    descriptionScramblePhrase?: string;
 };
 
-function MilestoneTitle({ title, redCompany }: { title: string; redCompany?: boolean }) {
+function MilestoneTitle({
+    title,
+    redCompany,
+    scrambleCompany,
+}: {
+    title: string;
+    redCompany?: boolean;
+    scrambleCompany?: boolean;
+}) {
     if (!redCompany) return <>{title}</>;
     const sep = ' · ';
     const i = title.indexOf(sep);
     if (i === -1) return <>{title}</>;
+    const company = title.slice(0, i);
+    const suffix = `${sep}${title.slice(i + sep.length)}`;
+
+    if (scrambleCompany) {
+        return (
+            <>
+                <span className="timeline-title inline">
+                    <ConstantScrambleText
+                        mask={company}
+                        className="text-cream-600"
+                        ariaLabel="Employer name withheld"
+                    />
+                </span>
+                <span className="text-black dark:text-white">{suffix}</span>
+            </>
+        );
+    }
+
     return (
         <>
-            <span className="text-cream-600">{title.slice(0, i)}</span>
-            <span className="text-inherit">{sep}{title.slice(i + sep.length)}</span>
+            <span className="text-cream-600">{company}</span>
+            <span className="text-inherit">{suffix}</span>
+        </>
+    );
+}
+
+function MilestoneDescription({
+    description,
+    scramblePhrase,
+}: {
+    description: string;
+    scramblePhrase?: string;
+}) {
+    if (!scramblePhrase) return <>{description}</>;
+    const idx = description.indexOf(scramblePhrase);
+    if (idx === -1) return <>{description}</>;
+    const before = description.slice(0, idx);
+    const after = description.slice(idx + scramblePhrase.length);
+    return (
+        <>
+            {before}
+            <ConstantScrambleText
+                mask={scramblePhrase}
+                ariaLabel="Employer details withheld"
+                className="inline"
+            />
+            {after}
         </>
     );
 }
@@ -33,6 +89,9 @@ const milestones: Milestone[] = [
         year: '2026',
         title: 'Bank of New York · Software Engineering Intern (Incoming)',
         redCompany: true,
+        scrambleCompany: true,
+        descriptionScramblePhrase:
+            'a global financial technology and investment services company.',
         description:
             'Summer 2026. Selected for a competitive Software Engineering internship at a global financial technology and investment services company.',
         tags: ['Software Engineering', 'FinTech', 'Internship'],
@@ -253,8 +312,20 @@ const Timeline: React.FC = () => {
                             {/* Content Column */}
                             <div className="flex-grow w-full z-10 relative">
                                 <div className="flex items-center justify-between w-full">
-                                    <h3 className="timeline-title text-xl md:text-4xl font-bold uppercase tracking-tight leading-[0.9] md:leading-tight transition-all duration-300 origin-left mb-2 md:mb-0">
-                                        <MilestoneTitle title={item.title} redCompany={item.redCompany} />
+                                    <h3
+                                        className={`${
+                                            item.scrambleCompany ? '' : 'timeline-title '
+                                        }text-xl md:text-4xl font-bold uppercase tracking-tight leading-[0.9] md:leading-tight transition-all duration-300 origin-left mb-2 md:mb-0 ${
+                                            item.scrambleCompany
+                                                ? 'flex flex-wrap items-baseline gap-x-1.5'
+                                                : ''
+                                        }`}
+                                    >
+                                        <MilestoneTitle
+                                            title={item.title}
+                                            redCompany={item.redCompany}
+                                            scrambleCompany={item.scrambleCompany}
+                                        />
                                     </h3>
                                     <FiArrowUpRight className="timeline-arrow w-5 h-5 shrink-0 transition-transform duration-300 opacity-30" />
                                 </div>
@@ -263,12 +334,26 @@ const Timeline: React.FC = () => {
                                 <div className="timeline-content h-0 overflow-hidden opacity-0 will-change-[height,opacity]">
                                     <div className="pt-2 md:pt-6 max-w-2xl">
                                         <p className="font-sans text-sm md:text-lg opacity-100 leading-relaxed mb-4 font-light">
-                                            {item.description}
+                                            <MilestoneDescription
+                                                description={item.description}
+                                                scramblePhrase={item.descriptionScramblePhrase}
+                                            />
                                         </p>
                                         <div className="flex flex-wrap gap-2 pb-2">
                                             {item.tags.map(t => (
-                                                <span key={t} className="text-[10px] md:text-xs font-mono uppercase tracking-wider border border-black/20 dark:border-white/20 px-2 py-0.5 md:px-3 md:py-1 rounded-full opacity-60">
-                                                    {t}
+                                                <span
+                                                    key={t}
+                                                    className="text-[10px] md:text-xs font-mono uppercase tracking-wider border border-black/20 dark:border-white/20 px-2 py-0.5 md:px-3 md:py-1 rounded-full opacity-60"
+                                                >
+                                                    {item.scrambleCompany && t === 'FinTech' ? (
+                                                        <ConstantScrambleText
+                                                            mask={t}
+                                                            ariaLabel="Category withheld"
+                                                            className="inline"
+                                                        />
+                                                    ) : (
+                                                        t
+                                                    )}
                                                 </span>
                                             ))}
                                         </div>

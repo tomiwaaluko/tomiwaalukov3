@@ -27,19 +27,54 @@ interface MusicProviderProps {
   children: React.ReactNode;
 }
 
+/** Tracks in `public/music/` — new files can be appended here. */
+const MUSIC_TRACKS = [
+  '/music/background-music.mp3',
+  '/music/If-I-Am-With-You.mp3',
+] as const;
+
+function shuffleInPlace<T>(items: T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = a[i];
+    a[i] = a[j]!;
+    a[j] = t!;
+  }
+  return a;
+}
+
 export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.7); // Default volume at 30%
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playlistRef = useRef<string[]>([]);
+  const trackIndexRef = useRef(0);
 
-  // Effect to initialize the audio element
-  // Effect to initialize the audio element
   useEffect(() => {
-    // Create the audio object and store it in the ref
-    const audio = new Audio('/music/background-music.mp3');
-    audio.loop = true;
+    playlistRef.current = shuffleInPlace([...MUSIC_TRACKS]);
+    trackIndexRef.current = 0;
+
+    const audio = new Audio(playlistRef.current[0]);
+    audio.loop = false;
     audioRef.current = audio;
+
+    const advanceTrack = () => {
+      const list = playlistRef.current;
+      if (list.length === 0) return;
+      trackIndexRef.current = (trackIndexRef.current + 1) % list.length;
+      audio.src = list[trackIndexRef.current]!;
+      const p = audio.play();
+      if (p !== undefined) {
+        p.catch(() => setIsPlaying(false));
+      }
+    };
+
+    const onEnded = () => {
+      advanceTrack();
+    };
+    audio.addEventListener('ended', onEnded);
 
     const playAudio = () => {
       if (!audioRef.current) return;
@@ -49,15 +84,11 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       if (playPromise !== undefined) {
         playPromise.then(() => {
           setIsPlaying(true);
-          console.log('Music started playing');
-          // Remove listeners if they were added
           document.removeEventListener('click', handleInteraction);
           document.removeEventListener('keydown', handleInteraction);
           document.removeEventListener('scroll', handleInteraction);
-        }).catch(error => {
-          console.warn('Autoplay prevented by browser:', error);
+        }).catch(() => {
           setIsPlaying(false);
-          // Listeners are already added below if this fails
         });
       }
     };
@@ -66,23 +97,22 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       playAudio();
     };
 
-    // Attempt to play immediately
     playAudio();
 
-    // Add global listeners for first interaction to trigger music
     document.addEventListener('click', handleInteraction, { once: true });
     document.addEventListener('keydown', handleInteraction, { once: true });
     document.addEventListener('scroll', handleInteraction, { once: true });
 
-    // Cleanup function to run when the component unmounts
     return () => {
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('keydown', handleInteraction);
       document.removeEventListener('scroll', handleInteraction);
+      audio.removeEventListener('ended', onEnded);
       audio.pause();
       audioRef.current = null;
+      playlistRef.current = [];
     };
-  }, []); // Empty dependency array ensures this runs only once
+  }, []);
 
   // Effect to control the audio element's volume based on state
   useEffect(() => {
@@ -98,14 +128,11 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
-      console.log('Music paused');
     } else {
       audioRef.current.play().then(() => {
         setIsPlaying(true);
-        console.log('Music started playing');
-      }).catch(error => {
-        console.error('Audio play failed:', error);
-        setIsPlaying(false); // Ensure state is correct if play fails
+      }).catch(() => {
+        setIsPlaying(false);
       });
     }
   }, [isPlaying]);
@@ -113,8 +140,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   // Function to toggle mute/unmute
   const toggleMute = useCallback(() => {
     setIsMuted(prevMuted => !prevMuted);
-    console.log(isMuted ? 'Music unmuted' : 'Music muted');
-  }, [isMuted]);
+  }, []);
 
   // Function to set a new volume
   const handleSetVolume = useCallback((newVolume: number) => {
