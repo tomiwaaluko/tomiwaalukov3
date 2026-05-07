@@ -246,6 +246,7 @@ export const projects: Project[] = [
         color: 'from-amber-500/20 to-orange-500/20',
         architecture: arch['nsbe-app'],
     },
+    /* TenderPilot — commented out from engineering index
     {
         id: 'tenderpilot',
         title: 'TenderPilot',
@@ -276,6 +277,7 @@ export const projects: Project[] = [
         color: 'from-zinc-500/20 to-emerald-500/20',
         architecture: arch.tenderpilot,
     },
+    */
     {
         id: 'ucf-alphas-website',
         title: 'UCF Alphas Website',
@@ -308,6 +310,7 @@ export const projects: Project[] = [
         color: 'from-yellow-500/20 to-amber-500/20',
         architecture: arch['ucf-alphas-website'],
     },
+    /* Stacks — commented out from engineering index
     {
         id: 'stacks',
         title: 'Stacks (Wealthly)',
@@ -338,18 +341,20 @@ export const projects: Project[] = [
         color: 'from-emerald-500/20 to-lime-500/20',
         architecture: arch.stacks,
     },
+    */
     {
         id: 'digiconvo',
         title: 'DigiConvo',
         category: 'AI / EdTech',
-        description: 'Practice hard conversations with AI personas, emotion panel, voice I/O.',
+        description:
+            'AI-powered conversation coach for practicing difficult conversations through realistic role-play and real-time feedback.',
         longDescription:
-            'KnightHacks build: T3 Stack, Zustand client state, tRPC to Gemini for persona replies and live tone analysis, Web Speech STT/TTS, optional Prisma persistence.',
+            'DigiConvo is an AI conversation coach for practicing difficult personal and professional talks through realistic role-play. It provides real-time emotion analysis, personalized feedback, and alternative responses so users can build stronger communication, empathy, and confidence in a judgment-free environment.',
         tech: ['Next.js', 'tRPC', 'Gemini', 'Zustand', 'Framer Motion', 'Prisma'],
         year: '2025',
         status: 'Hackathon',
-        image: IMG.b,
-        github: GITHUB,
+        image: '/project-images/digiconvo/thumbnail.jpg',
+        github: 'https://github.com/tomiwaaluko/digiconvo',
         live: null,
         impact: ['Scenario library', 'Emotion timeline', 'Markdown replies'],
         challenges: [
@@ -399,6 +404,7 @@ export const projects: Project[] = [
         color: 'from-blue-500/20 to-violet-500/20',
         architecture: arch['apply-sense'],
     },
+    /* AirFryHub — commented out from engineering index
     {
         id: 'airfryhub',
         title: 'AirFryHub',
@@ -429,6 +435,7 @@ export const projects: Project[] = [
         color: 'from-orange-500/20 to-rose-500/20',
         architecture: arch.airfryhub,
     },
+    */
     {
         id: 'tomiwa-eportfolio',
         title: 'Tomiwa ePortfolio',
@@ -439,7 +446,9 @@ export const projects: Project[] = [
         tech: ['Next.js', 'Tailwind', 'Framer Motion', 'Resend', 'Vercel Analytics'],
         year: '2025',
         status: 'Live',
-        image: IMG.e,
+        image: '/project-images/tomiwaportfolio/thumbnail.png',
+        heroVideo: '/project-images/tomiwaportfolio/video.mp4',
+        listHoverVideo: '/project-images/tomiwaportfolio/video.mp4',
         github: 'https://github.com/tomiwaaluko/TomiwaPortfolio',
         live: 'https://tomiwaaluko.com',
         impact: ['Serverless mail', 'Motion polish', 'Analytics'],
