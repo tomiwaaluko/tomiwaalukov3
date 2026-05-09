@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useMotionTemplate, useScroll, useTransform } from "framer-motion";
+import HeroMetaScramble from "./HeroMetaScramble";
 
 // ─── Replace these with your actual image imports or URLs ───────────────────
 const PHOTO_1 = "/Hero-2.png"; // smiling, arms open
 const PHOTO_2 = "/Hero-1.png"; // standing with bag
 // ────────────────────────────────────────────────────────────────────────────
 
-export default function Hero() {
+type HeroProps = {
+  /** True once the intro loader has finished and main content is shown (see App.tsx). */
+  startAnimation?: boolean;
+};
+
+export default function Hero({ startAnimation = false }: HeroProps) {
   const [isQuoteHovered, setIsQuoteHovered] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
 
@@ -520,16 +526,7 @@ export default function Hero() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ ...transitionSettings, delay: 0.8 }}
         >
-          <p>
-            SOFTWARE ENGINEER<br />
-            NSBE | APA | COLORSTACK<br />
-            UNIV. OF CENTRAL FLORIDA
-          </p>
-          <p className="meta-gap">
-            BASED IN<br />
-            ORLANDO, FLORIDA<br />
-            MIAMI, FLORIDA
-          </p>
+          <HeroMetaScramble contentReady={startAnimation} startDelayMs={850} betweenLinesMs={140} />
         </motion.div>
 
         <motion.div
