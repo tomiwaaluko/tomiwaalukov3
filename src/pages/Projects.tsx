@@ -130,20 +130,28 @@ const Projects: React.FC = () => {
 
               {/* Main Content (Image + Title) */}
               <div className="col-span-12 md:col-span-5 py-6 md:py-8 px-4 flex items-center gap-6 relative z-10">
-                <div className="w-16 h-16 md:w-24 md:h-16 bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
+                <div className="relative w-16 h-16 md:w-24 md:h-16 bg-gray-200 dark:bg-gray-800 overflow-hidden shrink-0 grayscale group-hover:grayscale-0 transition-all duration-500">
                   {project.listHoverVideo ? (
-                    <video
-                      data-list-hover
-                      className="w-full h-full object-cover pointer-events-none"
-                      muted
-                      playsInline
-                      loop
-                      preload="metadata"
-                      poster={project.image}
-                      aria-hidden
-                    >
-                      <source src={project.listHoverVideo} type="video/mp4" />
-                    </video>
+                    <>
+                      <img
+                        src={project.image}
+                        alt={project.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ objectPosition: project.imageObjectPosition ?? 'center' }}
+                      />
+                      <video
+                        data-list-hover
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        muted
+                        playsInline
+                        loop
+                        preload="metadata"
+                        poster={project.image}
+                        aria-hidden
+                      >
+                        <source src={project.listHoverVideo} type="video/mp4" />
+                      </video>
+                    </>
                   ) : (
                     <img
                       src={project.image}

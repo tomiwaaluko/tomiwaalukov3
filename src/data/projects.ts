@@ -37,7 +37,9 @@ export const projects: Project[] = [
         ],
         year: '2026',
         status: 'Hackathon',
-        image: IMG.x,
+        image: '/project-images/standin/thumbnail.jpg',
+        heroVideo: '/project-images/standin/standinvideo.mp4',
+        listHoverVideo: '/project-images/standin/standinvideo.mp4',
         github: GITHUB,
         live: null,
         impact: ['Evidence Passports', 'Five-intent orchestration', 'Three-tier RAG'],
@@ -159,7 +161,7 @@ export const projects: Project[] = [
         tech: ['Next.js', 'React', 'Gemini', 'Tailwind', 'Cloud Run'],
         year: '2026',
         status: 'Experiment',
-        image: IMG.a,
+        image: '/project-images/skygo/thumbnail.png',
         heroVideo: '/project-images/skygo/skygo.mp4',
         listHoverVideo: '/project-images/skygo/skygo-front.mp4',
         github: 'https://github.com/tomiwaaluko/frontendtesting',
@@ -531,7 +533,7 @@ export const projects: Project[] = [
         category: 'Portfolio',
         description: 'Next.js single-page portfolio: Framer Motion, Resend contact, Vercel.',
         longDescription:
-            'Next.js 15 App Router personal site with typed hero, achievements, projects grid, and api/send using Resend — distinct from this Vite portfolio v3.',
+            'We all start somewhere, and this was mine. Next.js 15 App Router personal site with typed hero, achievements, projects grid, and api/send using Resend',
         tech: ['Next.js', 'Tailwind', 'Framer Motion', 'Resend', 'Vercel Analytics'],
         year: '2025',
         status: 'Live',
@@ -539,7 +541,7 @@ export const projects: Project[] = [
         heroVideo: '/project-images/tomiwaportfolio/video.mp4',
         listHoverVideo: '/project-images/tomiwaportfolio/video.mp4',
         github: 'https://github.com/tomiwaaluko/TomiwaPortfolio',
-        live: 'https://tomiwaaluko.com',
+        live: 'https://tomiwa-portfolio-theta.vercel.app/',
         impact: ['Serverless mail', 'Motion polish', 'Analytics'],
         challenges: [
             {
