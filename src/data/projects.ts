@@ -65,12 +65,12 @@ export const projects: Project[] = [
     },
     {
         id: 'rom-com',
-        title: 'ROM-COM (KineticLab)',
+        title: 'ROM-COM',
         category: 'HealthTech / ML',
         description:
             'Clinical stroke-rehab companion: MediaPipe gestures, FMA-UE scoring, LiveAvatar coach under 2s, and Photon iMessage daily check-ins.',
         longDescription:
-            'KineticLab ROM-COM pairs a React + Three.js rehab UI with FastAPI WebSockets and a dual AI backend: HeyGen LiveAvatar + LiveKit for real-time voice coaching with Gemini clinical guardrails, and Photon Spectrum plus APScheduler for supportive daily iMessages (read-only Mongo for that track). MediaPipe landmarks feed a sklearn gesture classifier and FMA-UE subscale proxy across five exercises; Arduino bridge optional. Docker Compose wires Vite frontend and uvicorn backend; mock avatar and Photon flags for demos.',
+            'Clinical stroke-rehab companion: MediaPipe gestures, FMA-UE scoring, LiveAvatar coach under 2s, and Photon iMessage daily check-ins.',
         tech: [
             'React',
             'TypeScript',
@@ -85,8 +85,10 @@ export const projects: Project[] = [
         ],
         year: '2026',
         status: 'Development',
-        image: IMG.x,
-        github: GITHUB,
+        image: '/project-images/romcom/thumbnail.png',
+        heroVideo: '/project-images/romcom/romcomvideo.mp4',
+        listHoverVideo: '/project-images/romcom/romcomvideo.mp4',
+        github: 'https://github.com/tomiwaaluko/ROM-com',
         live: null,
         impact: ['Dual-track AI rehab', 'FMA-UE exercise loop', '<2s avatar path'],
         challenges: [
