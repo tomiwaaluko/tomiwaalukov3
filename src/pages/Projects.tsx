@@ -16,6 +16,8 @@ const HIGHLIGHT_PROJECT_IDS = new Set([
   'chalk',
   'civic-lens',
   'nsbe-app',
+  'rom-com',
+  'standin',
   'ucf-alphas-website',
 ]);
 
