@@ -223,7 +223,7 @@ const Timeline: React.FC = () => {
                         opacity: 0.75,
                         x: 10,
                         scale: 1.05,
-                        originLeft: 0,
+                        transformOrigin: 'left center',
                         duration: 0.3
                     });
                 }
@@ -255,6 +255,7 @@ const Timeline: React.FC = () => {
                         opacity: 0.8,
                         x: 0,
                         scale: 1,
+                        transformOrigin: 'left center',
                         duration: 0.3
                     });
                 }

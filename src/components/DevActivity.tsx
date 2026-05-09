@@ -70,6 +70,9 @@ const DevActivity: React.FC = () => {
   const [languagePercentages, setLanguagePercentages] = useState<LanguageStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  /** Local API (commit-stats / profile-views) unreachable or errored — show graceful placeholders */
+  const [commitStatsUnavailable, setCommitStatsUnavailable] = useState(false);
+  const [profileViewsUnavailable, setProfileViewsUnavailable] = useState(false);
 
 
   // --- Animation Setup ---
@@ -115,6 +118,9 @@ const DevActivity: React.FC = () => {
   useEffect(() => {
     const fetchGitHubData = async () => {
       try {
+        setCommitStatsUnavailable(false);
+        setProfileViewsUnavailable(false);
+
         const username = 'tomiwaaluko';
         const token = import.meta.env.VITE_GITHUB_TOKEN;
 
@@ -131,6 +137,7 @@ const DevActivity: React.FC = () => {
         // --- Fetch External "Most Commit Language" SVG to get accurate Commit Stats ---
         // We parse the SVG directly because GitHub API doesn't provide commit counts per language efficiently.
         let parsedLanguageStats: LanguageStat[] = [];
+        let commitStatsBackendOk = false;
         try {
           // Add timestamp to prevent caching
           // Clean API URL logic (duplicated for safety/clarity inside this block)
@@ -256,11 +263,13 @@ const DevActivity: React.FC = () => {
             }));
           }
 
+          commitStatsBackendOk = true;
         } catch (err) {
-          console.error("Failed to fetch SVG stats:", err);
-          // Fallback to existing logic if SVG fails?
-          // For now, let's stick with empty or partial.
+          console.warn("Commit stats unavailable (local API):", err);
+          commitStatsBackendOk = false;
+          // Fallback to repo-based language breakdown below when parsedLanguageStats stays empty.
         }
+        setCommitStatsUnavailable(!commitStatsBackendOk);
 
         // --- Calculate Stats (Stars/Forks/Contribs) --- 
         // We still need this for the other cards
@@ -348,7 +357,7 @@ const DevActivity: React.FC = () => {
         }
 
         // Fetch Profile Views from Backend (Proxy)
-        // Fetch Profile Views from Backend (Proxy)
+        let profileViewsBackendOk = false;
         try {
           // Use our backend proxy which handles CORS and text parsing
           // In PROD: Use relative '/api' so Vercel rewrites handle it (defined in vercel.json)
@@ -368,17 +377,20 @@ const DevActivity: React.FC = () => {
 
           const viewsRes = await fetch(fetchUrl);
 
-          if (viewsRes.ok) {
-            const viewsData = await viewsRes.json();
-            if (typeof viewsData.views === 'number') {
-              profileViews = viewsData.views;
-            }
-          } else {
-            console.error(`Profile Views fetch failed: ${viewsRes.status} ${viewsRes.statusText}`);
+          if (!viewsRes.ok) {
+            throw new Error(`Profile Views fetch failed: ${viewsRes.status} ${viewsRes.statusText}`);
+          }
+
+          const viewsData = await viewsRes.json();
+          if (typeof viewsData.views === 'number') {
+            profileViews = viewsData.views;
+            profileViewsBackendOk = true;
           }
         } catch (e) {
-          console.warn("Profile Views fetch failed", e);
+          console.warn("Profile views unavailable (local API):", e);
+          profileViewsBackendOk = false;
         }
+        setProfileViewsUnavailable(!profileViewsBackendOk);
 
         // If external API failed, use recent events * multiplier or just show recent
         if (totalContributions === 0) totalContributions = (userData.public_repos * 5); // Fallback estimate
@@ -503,7 +515,18 @@ const DevActivity: React.FC = () => {
             <MetricCard
               icon={<FiEye />}
               title="Profile Views"
-              value={data.stats.profileViews}
+              value={
+                profileViewsUnavailable ? (
+                  <span className="inline-flex flex-col items-start gap-1">
+                    <span className="text-3xl md:text-4xl font-normal text-zinc-400 dark:text-zinc-500 tabular-nums">—</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                      Stats unavailable
+                    </span>
+                  </span>
+                ) : (
+                  data.stats.profileViews
+                )
+              }
               description="Total views on your GitHub profile."
             />
           </div>
@@ -548,6 +571,12 @@ const DevActivity: React.FC = () => {
               <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tight">Top language</h3>
               <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Usage%</span>
             </div>
+
+            {commitStatsUnavailable && (
+              <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 dark:text-zinc-500 mb-6">
+                Commit-language stats unavailable — showing estimates from public repos.
+              </p>
+            )}
 
             <div className="space-y-6">
               {languagePercentages.map(({ lang, percentage }) => (

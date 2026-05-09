@@ -86,7 +86,7 @@ function App() {
   return (
     <ThemeProvider>
       <MusicProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <TransitionProvider>
             <div className="relative bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen overflow-x-hidden">
               <AnimatePresence mode="wait">

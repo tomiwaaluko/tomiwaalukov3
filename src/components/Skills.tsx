@@ -13,6 +13,8 @@ const Skills: React.FC = () => {
   const barRefs = useRef<(HTMLDivElement | null)[]>([]);
   const logoCarouselRef = useRef<HTMLDivElement>(null);
   const logoCarouselRef2 = useRef<HTMLDivElement>(null);
+  const tickerTween1Ref = useRef<gsap.core.Tween | null>(null);
+  const tickerTween2Ref = useRef<gsap.core.Tween | null>(null);
 
   const skillCategories = [
     {
@@ -75,22 +77,22 @@ const Skills: React.FC = () => {
   ];
 
   const logos = [
-    { name: 'Python', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg' },
-    { name: 'Java', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg' },
-    { name: 'TypeScript', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg' },
-    { name: 'JavaScript', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg' },
-    { name: 'React', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg' },
-    { name: 'Next.js', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg' },
-    { name: 'Node.js', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg' },
-    { name: 'NestJS', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nestjs/nestjs-plain.svg' },
-    { name: 'Tailwind', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg' },
-    { name: 'FastAPI', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/fastapi/fastapi-original.svg' },
-    { name: 'Docker', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg' },
-    { name: 'PostgreSQL', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg' },
-    { name: 'MySQL', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg' },
-    { name: 'Redis', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg' },
-    { name: 'Git', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg' },
-    { name: 'Prisma', src: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/prisma/prisma-original.svg' },
+    { name: 'Python', src: '/devicon/icons/python/python-original.svg' },
+    { name: 'Java', src: '/devicon/icons/java/java-original.svg' },
+    { name: 'TypeScript', src: '/devicon/icons/typescript/typescript-original.svg' },
+    { name: 'JavaScript', src: '/devicon/icons/javascript/javascript-original.svg' },
+    { name: 'React', src: '/devicon/icons/react/react-original.svg' },
+    { name: 'Next.js', src: '/devicon/icons/nextjs/nextjs-original.svg' },
+    { name: 'Node.js', src: '/devicon/icons/nodejs/nodejs-original.svg' },
+    { name: 'NestJS', src: '/devicon/icons/nestjs/nestjs-original.svg' },
+    { name: 'Tailwind', src: '/devicon/icons/tailwindcss/tailwindcss-original.svg' },
+    { name: 'FastAPI', src: '/devicon/icons/fastapi/fastapi-original.svg' },
+    { name: 'Docker', src: '/devicon/icons/docker/docker-original.svg' },
+    { name: 'PostgreSQL', src: '/devicon/icons/postgresql/postgresql-original.svg' },
+    { name: 'MySQL', src: '/devicon/icons/mysql/mysql-original.svg' },
+    { name: 'Redis', src: '/devicon/icons/redis/redis-original.svg' },
+    { name: 'Git', src: '/devicon/icons/git/git-original.svg' },
+    { name: 'Prisma', src: '/devicon/icons/prisma/prisma-original.svg' },
   ];
 
   const logos2 = [...logos].reverse();
@@ -143,7 +145,7 @@ const Skills: React.FC = () => {
       // 4. Kinetic Ticker Animation
       // Use function to handle dynamic width calculation
       const animateTicker = (ref: React.RefObject<HTMLDivElement>, reverse: boolean = false) => {
-        if (!ref.current) return;
+        if (!ref.current) return undefined;
         const el = ref.current;
         // Clone children to ensure seamless loop if not already enough
         // (Assuming we rendered 2 sets in JSX, but GSAP needs to know total scrolling width)
@@ -151,7 +153,7 @@ const Skills: React.FC = () => {
 
         gsap.set(el, { x: reverse ? -totalWidth : 0 }); // Start position
 
-        gsap.to(el, {
+        return gsap.to(el, {
           x: reverse ? 0 : -totalWidth,
           duration: 80, // Slower for smoother infinite loop effect
           ease: "none",
@@ -167,8 +169,8 @@ const Skills: React.FC = () => {
         });
       };
 
-      animateTicker(logoCarouselRef, false);
-      animateTicker(logoCarouselRef2, true);
+      tickerTween1Ref.current = animateTicker(logoCarouselRef, false) ?? null;
+      tickerTween2Ref.current = animateTicker(logoCarouselRef2, true) ?? null;
 
       // Scroll Velocity Skew Effect
       ScrollTrigger.create({
@@ -282,10 +284,18 @@ const Skills: React.FC = () => {
         <div
           className="mt-24 pt-4 pb-12 overflow-hidden relative cursor-crosshair"
           onMouseEnter={() => {
-            gsap.to([logoCarouselRef.current, logoCarouselRef2.current], { timeScale: 0, duration: 0.5, overwrite: true });
+            const tw1 = tickerTween1Ref.current;
+            const tw2 = tickerTween2Ref.current;
+            if (tw1 && tw2) {
+              gsap.to([tw1, tw2], { timeScale: 0, duration: 0.5, overwrite: true });
+            }
           }}
           onMouseLeave={() => {
-            gsap.to([logoCarouselRef.current, logoCarouselRef2.current], { timeScale: 1, duration: 0.5, overwrite: true });
+            const tw1 = tickerTween1Ref.current;
+            const tw2 = tickerTween2Ref.current;
+            if (tw1 && tw2) {
+              gsap.to([tw1, tw2], { timeScale: 1, duration: 0.5, overwrite: true });
+            }
           }}
         >
           {/* Gradient Masks */}
