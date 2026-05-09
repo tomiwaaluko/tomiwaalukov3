@@ -6,7 +6,7 @@ import type { Project } from '../data/projects';
 import { projects as allProjects } from '../data/projects';
 
 /** Home featured block: fixed order (not first rows of engineering index). */
-const FEATURED_IDS = ['civic-lens', 'chalk', 'nsbe-app'] as const;
+const FEATURED_IDS = ['standin', 'chalk', 'civic-lens'] as const;
 
 const featured: Project[] = FEATURED_IDS.map((id) => {
   const p = allProjects.find((x) => x.id === id);
@@ -16,9 +16,9 @@ const featured: Project[] = FEATURED_IDS.map((id) => {
 
 /** Hero typography (multiline) + index labels; titles are display names, years from project data */
 const featuredDisplay = [
-  { title: 'CIVIC\nLENS', dateLine: `01 / ${featured[0].year}` },
+  { title: 'STANDIN', dateLine: `01 / ${featured[0].year}` },
   { title: 'CHALK', dateLine: `02 / ${featured[1].year}` },
-  { title: 'NSBE\nApp', dateLine: `03 / ${featured[2].year}` },
+  { title: 'CIVIC\nLENS', dateLine: `03 / ${featured[2].year}` },
 ] as const;
 
 const Projects: React.FC = () => {

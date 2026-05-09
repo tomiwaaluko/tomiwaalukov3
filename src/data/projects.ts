@@ -21,7 +21,7 @@ export const projects: Project[] = [
     {
         id: 'standin',
         title: 'StandIn',
-        category: 'AI / Hackathon',
+        category: 'Agentic AI Orchestration & RAG',
         description:
             'LA Hacks 2026: Fetch.ai agent network sends an AI to stand in for meetings—Slack/Jira/calendar stubs, contradiction detection, RAG history, Evidence Passports.',
         longDescription:
