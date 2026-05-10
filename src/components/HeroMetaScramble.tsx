@@ -198,16 +198,16 @@ export default function HeroMetaScramble({
           user-select: none;
         }
       `}</style>
-      <p>
+      <div role="group" aria-label="Hero meta lines">
         {renderLine(0)}
         {renderLine(1)}
         {renderLine(2)}
-      </p>
-      <p className="meta-gap">
+      </div>
+      <div className="meta-gap" role="group" aria-label="Location">
         {renderLine(3)}
         {renderLine(4)}
         {renderLine(5)}
-      </p>
+      </div>
     </div>
   );
 }

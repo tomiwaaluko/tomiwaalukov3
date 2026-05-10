@@ -90,7 +90,6 @@ const DevActivity: React.FC = () => {
 
   // --- Animation Setup ---
   useEffect(() => {
-    console.log("Animation useEffect running");
     if (!loading && data) {
       const ctx = gsap.context(() => {
         if (titleRef.current) {
@@ -159,8 +158,6 @@ const DevActivity: React.FC = () => {
           const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
           const cleanApiUrl = apiUrl.endsWith('/api') ? apiUrl.slice(0, -4) : apiUrl;
           const fetchUrl = `${cleanApiUrl}/api/commit-stats`;
-
-          console.log("Fetching Commit Stats from:", fetchUrl);
 
           const svgRes = await fetch(fetchUrl);
           if (!svgRes.ok) throw new Error(`Commit stats fetch failed: ${svgRes.status}`);
@@ -385,8 +382,6 @@ const DevActivity: React.FC = () => {
           // Local: http://localhost:5000/api/profile-views
           // Prod (via Vercel): /api/profile-views -> Render API host from vercel.json rewrites
           const fetchUrl = `${cleanApiUrl}/api/profile-views`;
-
-          console.log("Fetching Profile Views from:", fetchUrl);
 
           const viewsRes = await fetch(fetchUrl);
 
