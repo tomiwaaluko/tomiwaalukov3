@@ -35,10 +35,26 @@ const CustomCursor: React.FC = () => {
 
     if (!cursor || !follower) return;
 
-    // The rest of your animation logic goes here.
+    // Keep centering in GSAP so x/y tweens do not clobber translate(-50%,-50%) (jagged scale).
+    gsap.set([cursor, follower], {
+      xPercent: -50,
+      yPercent: -50,
+      transformOrigin: '50% 50%',
+    });
+
     const moveCursor = (e: MouseEvent) => {
-      gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
-      gsap.to(follower, { x: e.clientX, y: e.clientY, duration: 0.3 });
+      gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.06,
+        overwrite: 'auto',
+      });
+      gsap.to(follower, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.18,
+        overwrite: 'auto',
+      });
     };
 
     const handleMouseEnter = (e: Event) => {
@@ -84,8 +100,8 @@ const CustomCursor: React.FC = () => {
       el.addEventListener('mouseleave', handleTextLeave);
     });
 
-    // Cleanup function to remove listeners
     return () => {
+      gsap.killTweensOf([cursor, follower]);
       document.removeEventListener('mousemove', moveCursor);
       interactiveElements.forEach((el) => {
         el.removeEventListener('mouseenter', handleMouseEnter);
@@ -110,13 +126,11 @@ const CustomCursor: React.FC = () => {
     <>
       <div
         ref={cursorRef}
-        className="fixed top-0 left-0 w-2 h-2 bg-gray-700 dark:bg-gray-100 rounded-full pointer-events-none z-[9999] mix-blend-difference"
-        style={{ transform: 'translate(-50%, -50%)' }}
+        className="pointer-events-none fixed left-0 top-0 z-[9999] h-2 w-2 rounded-full bg-gray-700 mix-blend-difference dark:bg-gray-100"
       />
       <div
         ref={followerRef}
-        className="fixed top-0 left-0 w-8 h-8 border border-gray-700 dark:border-gray-100 rounded-full pointer-events-none z-[9998] mix-blend-difference"
-        style={{ transform: 'translate(-50%, -50%)' }}
+        className="pointer-events-none fixed left-0 top-0 z-[9998] h-8 w-8 rounded-full border border-gray-700 mix-blend-difference dark:border-gray-100"
       />
     </>
   );

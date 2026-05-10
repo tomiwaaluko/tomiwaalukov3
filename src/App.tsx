@@ -18,6 +18,8 @@ import ThemeProvider from './context/ThemeContext';
 import { MusicProvider } from './context/MusicContext';
 import { TransitionProvider } from './context/TransitionContext';
 import Transition from './components/Transition';
+import ScrollToTop from './components/ScrollToTop';
+import { registerLenis, scrollPageTop } from './utils/scrollPageTop';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,41 +27,34 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
 
-  // Force scroll to top on mount and disable browser scroll restoration
+  // Disable browser scroll restoration (bfcache / history) so refresh and navigations start at top
   useEffect(() => {
-    // Disable browser's native scroll restoration
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
-
-    // Force scroll to top immediately
-    window.scrollTo(0, 0);
+    scrollPageTop();
   }, []);
 
 
 
-  // This effect sets up the Lenis smooth scroll library
+  // Lenis smooth scroll — driven only by gsap.ticker (syncs with ScrollTrigger; avoids double raf())
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 0.85,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
-      wheelMultiplier: 1,
+      wheelMultiplier: 1.15,
       touchMultiplier: 2,
     });
 
-    function raf(time) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
-
-    requestAnimationFrame(raf);
+    registerLenis(lenis);
+    scrollPageTop();
 
     lenis.on('scroll', ScrollTrigger.update);
 
-    const tickerCallback = (time) => {
+    const tickerCallback = (time: number) => {
       lenis.raf(time * 1000);
     };
 
@@ -67,8 +62,9 @@ function App() {
     gsap.ticker.lagSmoothing(0);
 
     return () => {
-      lenis.destroy();
       gsap.ticker.remove(tickerCallback);
+      registerLenis(null);
+      lenis.destroy();
     };
   }, []);
 
@@ -87,6 +83,7 @@ function App() {
     <ThemeProvider>
       <MusicProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ScrollToTop />
           <TransitionProvider>
             <div className="relative bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen overflow-x-hidden">
               <AnimatePresence mode="wait">

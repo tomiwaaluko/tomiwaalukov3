@@ -1,6 +1,7 @@
 // src/context/TransitionContext.jsx
 import React, { createContext, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { scrollPageTop } from '../utils/scrollPageTop';
 
 const TransitionContext = createContext();
 
@@ -13,6 +14,9 @@ export const TransitionProvider = ({ children }) => {
       timeline.play(0); // Play the timeline from the beginning
       setTimeout(() => {
         navigate(path);
+        requestAnimationFrame(() => {
+          scrollPageTop();
+        });
       }, 1000); // Duration must be long enough for the IN-animation
     }
   };
