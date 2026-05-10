@@ -78,9 +78,15 @@ const initialForm: FormData = {
   additionalNotes: '',
 };
 
+const STORAGE_KEY = 'clientRequestForm';
+
 const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState<FormData>(initialForm);
+  const [step, setStep] = useState<number>(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').step || 1; } catch { return 1; }
+  });
+  const [form, setForm] = useState<FormData>(() => {
+    try { return { ...initialForm, ...(JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').form || {}) }; } catch { return initialForm; }
+  });
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -110,6 +116,10 @@ const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
     }, sectionRef);
     return () => ctx.revert();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ step, form }));
+  }, [step, form]);
 
   const animateStep = (direction: 'left' | 'right') => {
     const el = stepRef.current;
@@ -163,6 +173,7 @@ const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
         setSubmitError(msg);
         return;
       }
+      localStorage.removeItem(STORAGE_KEY);
       setSubmitted(true);
     } catch {
       setSubmitError('Network error. Please try again.');

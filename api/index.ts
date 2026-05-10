@@ -143,6 +143,181 @@ function contactNotificationHtml(params: {
 </html>`;
 }
 
+/**
+ * Service request notification HTML — same design system as contactNotificationHtml.
+ * Sections mirror the 7-step ClientRequestForm wizard.
+ */
+function serviceRequestHtml(fields: {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  website?: string;
+  projectType?: string;
+  mainGoal?: string;
+  targetAudience?: string;
+  domainName?: string;
+  pagesNeeded?: string[];
+  features?: string[];
+  cmsNeeded?: string;
+  mobileFriendly?: string;
+  colorPreferences?: string;
+  designStyle?: string;
+  websitesYouLike?: string;
+  hasLogo?: string;
+  brandFonts?: string;
+  contentProvider?: string;
+  imageProvider?: string;
+  existingContent?: string;
+  budget?: string;
+  launchDate?: string;
+  maintenance?: string;
+  additionalNotes?: string;
+}): string {
+  const e = escapeHtml;
+  const cream = '#C49A3C';
+  const creamSoft = '#D4B896';
+  const black = '#000000';
+  const surface = '#050505';
+  const hairline = '#262626';
+  const sectionBg = '#0a0a0a';
+  const labelGray = '#737373';
+  const bodyGray = '#a3a3a3';
+  const textMain = '#fafafa';
+  const sans = "'Segoe UI',Roboto,'Helvetica Neue',Helvetica,Arial,sans-serif";
+
+  const field = (label: string, value?: string | string[]) => {
+    if (!value || (Array.isArray(value) && value.length === 0)) return '';
+    const display = Array.isArray(value) ? value.join(', ') : value;
+    return `
+      <tr>
+        <td style="padding:0 0 16px 0;">
+          <p style="margin:0 0 4px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">${label}</p>
+          <p style="margin:0;font-family:${sans};font-size:14px;line-height:1.5;color:${textMain};">${e(display)}</p>
+        </td>
+      </tr>`;
+  };
+
+  const section = (title: string, rows: string) => {
+    if (!rows.trim()) return '';
+    return `
+      <tr>
+        <td style="padding:0 28px 4px 28px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="padding:16px 0 12px 0;border-top:1px solid ${hairline};">
+                <p style="margin:0;font-family:${sans};font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:${cream};">${title}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 0 8px 0;background-color:${sectionBg};border-radius:2px;padding:14px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  ${rows}
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`;
+  };
+
+  const contactRows = [
+    field('Name', fields.name),
+    field('Email', fields.email),
+    field('Phone', fields.phone),
+    field('Company', fields.company),
+    field('Existing Website', fields.website),
+  ].join('');
+
+  const projectRows = [
+    field('Website Type', fields.projectType),
+    field('Main Goal', fields.mainGoal),
+    field('Target Audience', fields.targetAudience),
+    field('Domain Name', fields.domainName),
+  ].join('');
+
+  const scopeRows = [
+    field('Pages Needed', fields.pagesNeeded),
+    field('Features', fields.features),
+    field('CMS Needed', fields.cmsNeeded),
+    field('Mobile-Friendly', fields.mobileFriendly),
+  ].join('');
+
+  const designRows = [
+    field('Color Preferences', fields.colorPreferences),
+    field('Design Style', fields.designStyle),
+    field('Reference Websites', fields.websitesYouLike),
+    field('Has Logo', fields.hasLogo),
+    field('Brand Fonts', fields.brandFonts),
+  ].join('');
+
+  const contentRows = [
+    field('Content Provider', fields.contentProvider),
+    field('Image Provider', fields.imageProvider),
+    field('Existing Content', fields.existingContent),
+  ].join('');
+
+  const timelineRows = [
+    field('Budget Range', fields.budget),
+    field('Launch Date', fields.launchDate),
+    field('Ongoing Maintenance', fields.maintenance),
+  ].join('');
+
+  const notesRows = field('Additional Notes', fields.additionalNotes);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Service Request</title>
+</head>
+<body style="margin:0;padding:0;background-color:${black};">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:${black};padding:40px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background-color:${surface};border:1px solid ${hairline};border-radius:2px;">
+        <tr>
+          <td style="height:2px;background-color:${cream};line-height:2px;font-size:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:28px 28px 20px 28px;">
+            <p style="margin:0 0 10px;font-family:${sans};font-size:11px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;color:${cream};">
+              Services · New Request
+            </p>
+            <p style="margin:0 0 8px;font-family:${sans};font-size:24px;font-weight:600;letter-spacing:-0.03em;line-height:1.15;color:${textMain};">
+              ${e(fields.name)} wants to build something.
+            </p>
+            <p style="margin:0;font-family:${sans};font-size:14px;line-height:1.55;color:${bodyGray};">
+              A new project request came through your services page. All details are below.
+            </p>
+          </td>
+        </tr>
+        ${section('01 · Contact', contactRows)}
+        ${section('02 · Project Overview', projectRows)}
+        ${section('03 · Scope', scopeRows)}
+        ${section('04 · Design', designRows)}
+        ${section('05 · Content', contentRows)}
+        ${section('06 · Timeline &amp; Budget', timelineRows)}
+        ${section('07 · Notes', notesRows)}
+        <tr>
+          <td style="padding:20px 28px 26px 28px;border-top:1px solid ${hairline};">
+            <p style="margin:0;font-family:${sans};font-size:11px;line-height:1.55;color:${labelGray};letter-spacing:0.02em;">
+              <span style="color:${bodyGray};">Reply to </span><a href="mailto:${encodeURIComponent(fields.email)}" style="color:${creamSoft};text-decoration:none;border-bottom:1px solid rgba(212,184,150,0.4);">${e(fields.email)}</a><span style="color:${bodyGray};"> to respond directly.</span>
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:20px 0 0;font-family:${sans};font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#525252;text-align:center;">
+        Automated notification · tomiwaaluko.com
+      </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -350,11 +525,23 @@ app.post('/api/collaborate',
         ? `New Service Request from ${name}`
         : 'New Collaboration Request';
 
+      const html = source === 'services' ? serviceRequestHtml({
+        name, email, phone, company, website,
+        projectType, mainGoal, targetAudience, domainName,
+        pagesNeeded: Array.isArray(pagesNeeded) ? pagesNeeded : (pagesNeeded ? [pagesNeeded] : undefined),
+        features: Array.isArray(features) ? features : (features ? [features] : undefined),
+        cmsNeeded, mobileFriendly, colorPreferences, designStyle, websitesYouLike,
+        hasLogo, brandFonts, contentProvider, imageProvider, existingContent,
+        budget, launchDate, maintenance, additionalNotes,
+      }) : undefined;
+
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_TO || process.env.EMAIL_USER,
+        replyTo: email,
         subject,
         text: `You have received a new ${source === 'services' ? 'service' : 'collaboration'} request:\n\n${lines.join('\n')}`,
+        ...(html ? { html } : {}),
       };
       await transporter.sendMail(mailOptions);
       res.status(201).json({ success: true, message: 'Collaboration request submitted!' });
