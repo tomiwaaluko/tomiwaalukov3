@@ -5,8 +5,143 @@ import dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import type { Request, Response } from 'express';
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 dotenv.config();
+
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+/** Escape user-controlled strings for HTML email bodies */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Contact notification HTML — aligned with site theme (black / cream-400 / white borders)
+ * and design-taste constraints: single accent, no emoji, neutral sophistication.
+ */
+function contactNotificationHtml(params: {
+  name: string;
+  email: string;
+  subjectLine: string;
+  message: string;
+}): string {
+  const nameSafe = escapeHtml(params.name);
+  const emailDisplay = escapeHtml(params.email);
+  const subjectLine = escapeHtml(params.subjectLine);
+  const messageSafe = escapeHtml(params.message);
+  const mailtoHref = `mailto:${encodeURIComponent(params.email)}`;
+  // Tailwind theme: cream-400 #D4B896, black surfaces, border-white/10 ~ #262626
+  const cream = '#D4B896';
+  const creamSoft = '#E3D4C0';
+  const black = '#000000';
+  const surface = '#050505';
+  const hairline = '#262626';
+  const labelGray = '#737373';
+  const bodyGray = '#a3a3a3';
+  const textMain = '#fafafa';
+  const sans =
+    "'Segoe UI',Roboto,'Helvetica Neue',Helvetica,Arial,sans-serif";
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<title>Portfolio contact</title>
+</head>
+<body style="margin:0;padding:0;background-color:${black};">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:${black};padding:40px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background-color:${surface};border:1px solid ${hairline};border-radius:2px;">
+        <tr>
+          <td style="height:1px;background-color:${cream};line-height:1px;font-size:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:28px 28px 8px 28px;">
+            <p style="margin:0 0 12px;font-family:${sans};font-size:11px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;color:${cream};">
+              Portfolio · Contact
+            </p>
+            <p style="margin:0 0 10px;font-family:${sans};font-size:24px;font-weight:600;letter-spacing:-0.03em;line-height:1.15;color:${textMain};">
+              Inbound message
+            </p>
+            <p style="margin:0;font-family:${sans};font-size:14px;line-height:1.55;color:${bodyGray};max-width:42em;">
+              Someone used the contact form on your site. Reply to this email to respond directly.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 28px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="height:1px;background-color:${hairline};line-height:1px;font-size:0;">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px 18px 28px;">
+            <p style="margin:0 0 6px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">
+              Name
+            </p>
+            <p style="margin:0 0 18px;font-family:${sans};font-size:17px;font-weight:500;line-height:1.4;color:${textMain};">
+              ${nameSafe}
+            </p>
+            <p style="margin:0 0 6px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">
+              Email
+            </p>
+            <p style="margin:0 0 18px;font-family:${sans};font-size:15px;line-height:1.4;">
+              <a href="${mailtoHref}" style="color:${cream};text-decoration:none;border-bottom:1px solid rgba(212,184,150,0.45);">${emailDisplay}</a>
+            </p>
+            <p style="margin:0 0 6px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">
+              Subject
+            </p>
+            <p style="margin:0;font-family:${sans};font-size:15px;line-height:1.5;color:${textMain};">
+              ${subjectLine}
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 28px 28px 28px;">
+            <p style="margin:0 0 10px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">
+              Message
+            </p>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+              <tr>
+                <td style="padding:20px 18px;background-color:${black};border:1px solid ${hairline};border-radius:2px;">
+                  <div style="margin:0;font-family:${sans};font-size:15px;line-height:1.65;color:${creamSoft};white-space:pre-wrap;word-break:break-word;">
+                    ${messageSafe}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 28px 26px 28px;text-align:center;border-top:1px solid ${hairline};">
+            <p style="margin:18px 0 0;font-family:${sans};font-size:11px;line-height:1.55;color:${labelGray};letter-spacing:0.02em;">
+              <span style="color:${bodyGray};">Sent from your portfolio contact form. Use </span><strong style="color:${textMain};font-weight:600;">Reply</strong><span style="color:${bodyGray};"> to reach the sender.</span>
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:20px 0 0;font-family:${sans};font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#525252;text-align:center;">
+        Automated notification
+      </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -80,6 +215,82 @@ app.get('/api/hello', (req: Request, res: Response) => {
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
+
+// Contact form → Resend (portfolio site)
+app.post('/api/contact',
+  [
+    body('name').trim().notEmpty().withMessage('Name is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('message').trim().notEmpty().withMessage('Message is required'),
+    body('subject').optional().trim(),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+    if (!resend) {
+      res.status(503).json({ success: false, error: 'Email service is not configured.' });
+      return;
+    }
+    const to = process.env.EMAIL_TO || process.env.RESEND_TO;
+    if (!to) {
+      res.status(503).json({ success: false, error: 'Recipient address not configured.' });
+      return;
+    }
+    const { name, email, subject, message } = req.body as {
+      name: string;
+      email: string;
+      subject?: string;
+      message: string;
+    };
+    const from =
+      process.env.RESEND_FROM?.trim() || 'Portfolio <onboarding@resend.dev>';
+    const subjectLabel = subject?.length ? subject : '(No subject)';
+    const html = contactNotificationHtml({
+      name,
+      email,
+      subjectLine: subjectLabel,
+      message,
+    });
+    const textBody = [
+      'PORTFOLIO · CONTACT',
+      'Inbound message',
+      '',
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `Subject: ${subjectLabel}`,
+      '',
+      'Message:',
+      message,
+      '',
+      '—',
+      'Sent from your portfolio contact form. Reply to respond.',
+    ].join('\n');
+    try {
+      const result = await resend.emails.send({
+        from,
+        to: [to],
+        replyTo: email,
+        subject: subject?.length
+          ? `Portfolio · ${subject}`
+          : 'Portfolio · New contact',
+        text: textBody,
+        html,
+      });
+      if (result.error) {
+        console.error('Resend error:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to send message.' });
+        return;
+      }
+      res.status(201).json({ success: true, message: 'Message sent.' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, error: 'Failed to send message.' });
+    }
+  }
+);
 
 // Collaboration endpoint (Email only for now, DB optional or future)
 app.post('/api/collaborate',

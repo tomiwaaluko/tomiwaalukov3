@@ -22,6 +22,37 @@ paths:
                   status:
                     type: string
                     example: ok
+  /contact:
+    post:
+      summary: Send contact message
+      description: Sends email via Resend (portfolio contact form).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - message
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                subject:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '201':
+          description: Message sent
+        '400':
+          description: Validation error
+        '503':
+          description: Email not configured
   /guestbook:
     get:
       summary: Get Guestbook Entries

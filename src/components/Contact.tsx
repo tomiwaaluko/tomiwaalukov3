@@ -3,10 +3,15 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiArrowUpRight, FiArrowRight, FiCheck } from 'react-icons/fi';
 import ScrollRevealText from './ScrollRevealText'; // Import the new component
-import { CONTACT_EMAIL } from '../constants/contact';
-
 const Contact: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const rawApiUrl =
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+  const API_URL = rawApiUrl.endsWith('/api')
+    ? rawApiUrl.slice(0, -4) + '/api'
+    : rawApiUrl;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,6 +19,8 @@ const Contact: React.FC = () => {
     message: ''
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -60,13 +67,37 @@ const Contact: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const subject = encodeURIComponent(`Inquiry: ${formData.subject}`);
-    const body = encodeURIComponent(`Hi Tomiwa,\n\nMy name is ${formData.name}.\n\n${formData.message}\n\nBest,\n${formData.name} (${formData.email})`);
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        errors?: { msg?: string }[];
+      };
+      if (!res.ok) {
+        const msg =
+          data.errors?.map((x) => x.msg).filter(Boolean).join(' ') ||
+          data.error ||
+          'Something went wrong. Try again.';
+        setSubmitError(msg);
+        return;
+      }
+      setSubmitted(true);
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setTimeout(() => setSubmitted(false), 4000);
+    } catch {
+      setSubmitError('Network error. Is the API running?');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -163,13 +194,18 @@ const Contact: React.FC = () => {
               ></textarea>
             </div>
 
-            <div className="pt-4 flex justify-end contact-form-item">
+            <div className="pt-4 flex flex-col items-end gap-3 contact-form-item">
+              {submitError && (
+                <p className="text-sm text-red-400 max-w-md text-right" role="alert">
+                  {submitError}
+                </p>
+              )}
               <button
                 type="submit"
-                disabled={submitted}
+                disabled={submitted || isSubmitting}
                 className="group flex items-center gap-4 px-8 py-4 bg-white text-black text-sm font-bold tracking-widest uppercase hover:bg-cream-500 hover:text-black transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {submitted ? 'Message Sent' : 'Send Message'}
+                {submitted ? 'Message Sent' : isSubmitting ? 'Sending…' : 'Send Message'}
                 {submitted ? <FiCheck size={18} /> : <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
               </button>
             </div>
