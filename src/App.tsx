@@ -10,6 +10,7 @@ import Navigation from './components/Navigation';
 import Home from './pages/Home';
 import Projects from './pages/Projects';
 import ProjectDetail from './pages/ProjectDetail';
+import Services from './pages/Services';
 // import GuestBook from './pages/GuestBook';
 import Loader from './components/Loader';
 
@@ -103,6 +104,7 @@ function App() {
                   <Route path="/" element={<Home startAnimation={showContent} />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />
+                  <Route path="/services" element={<Services />} />
                   {/* <Route path="/guestbook" element={<GuestBook />} /> */}
                 </Routes>
               </div>

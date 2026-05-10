@@ -59,6 +59,7 @@ const Footer: React.FC = () => {
     { name: "HOME", action: () => scrollToTop() },
     { name: "ABOUT", action: () => scrollToSection('about') },
     { name: "WORK", action: () => scrollToDigitalEvolution() },
+    { name: "SERVICES", action: () => navigate('/services') },
     { name: "CONTACT", action: () => scrollToSection('contact') }, // Assuming contact section exists or just footer
   ];
 

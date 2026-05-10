@@ -304,15 +304,57 @@ app.post('/api/collaborate',
       res.status(400).json({ success: false, errors: errors.array() });
       return;
     }
-    const { name, email, company, phone, projectType, budget, timeline, description, requirements } = req.body;
+    const {
+      name, email, company, phone, projectType, budget, timeline, description, requirements,
+      // New service request fields (all optional)
+      website, mainGoal, targetAudience, domainName, pagesNeeded, features,
+      cmsNeeded, mobileFriendly, colorPreferences, designStyle, websitesYouLike,
+      hasLogo, brandFonts, contentProvider, imageProvider, existingContent,
+      launchDate, maintenance, additionalNotes, source,
+    } = req.body;
 
     try {
-      // Send email notification
+      // Build email body — include new fields when present
+      const lines = [
+        `Name: ${name}`,
+        `Email: ${email}`,
+      ];
+      if (company) lines.push(`Company: ${company}`);
+      if (phone) lines.push(`Phone: ${phone}`);
+      if (website) lines.push(`Existing Website: ${website}`);
+      if (projectType) lines.push(`Project Type: ${projectType}`);
+      if (mainGoal) lines.push(`Main Goal: ${mainGoal}`);
+      if (targetAudience) lines.push(`Target Audience: ${targetAudience}`);
+      if (domainName) lines.push(`Domain Name: ${domainName}`);
+      if (pagesNeeded?.length) lines.push(`Pages Needed: ${Array.isArray(pagesNeeded) ? pagesNeeded.join(', ') : pagesNeeded}`);
+      if (features?.length) lines.push(`Features: ${Array.isArray(features) ? features.join(', ') : features}`);
+      if (cmsNeeded) lines.push(`CMS Needed: ${cmsNeeded}`);
+      if (mobileFriendly) lines.push(`Mobile-Friendly: ${mobileFriendly}`);
+      if (colorPreferences) lines.push(`Color Preferences: ${colorPreferences}`);
+      if (designStyle) lines.push(`Design Style: ${designStyle}`);
+      if (websitesYouLike) lines.push(`Reference Websites: ${websitesYouLike}`);
+      if (hasLogo) lines.push(`Has Logo: ${hasLogo}`);
+      if (brandFonts) lines.push(`Brand Fonts: ${brandFonts}`);
+      if (contentProvider) lines.push(`Content Provider: ${contentProvider}`);
+      if (imageProvider) lines.push(`Image Provider: ${imageProvider}`);
+      if (existingContent) lines.push(`Existing Content: ${existingContent}`);
+      if (budget) lines.push(`Budget: ${budget}`);
+      if (timeline) lines.push(`Timeline: ${timeline}`);
+      if (launchDate) lines.push(`Launch Date: ${launchDate}`);
+      if (maintenance) lines.push(`Maintenance: ${maintenance}`);
+      if (description) lines.push(`Description: ${description}`);
+      if (requirements) lines.push(`Requirements: ${requirements}`);
+      if (additionalNotes) lines.push(`Additional Notes: ${additionalNotes}`);
+
+      const subject = source === 'services'
+        ? `New Service Request from ${name}`
+        : 'New Collaboration Request';
+
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_TO || process.env.EMAIL_USER,
-        subject: 'New Collaboration Request',
-        text: `You have received a new collaboration request:\n\nName: ${name}\nEmail: ${email}\nCompany: ${company}\nPhone: ${phone}\nProject Type: ${projectType}\nBudget: ${budget}\nTimeline: ${timeline}\nDescription: ${description}\nRequirements: ${requirements}`,
+        subject,
+        text: `You have received a new ${source === 'services' ? 'service' : 'collaboration'} request:\n\n${lines.join('\n')}`,
       };
       await transporter.sendMail(mailOptions);
       res.status(201).json({ success: true, message: 'Collaboration request submitted!' });
