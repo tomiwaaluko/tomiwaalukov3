@@ -318,6 +318,181 @@ function serviceRequestHtml(fields: {
 </html>`;
 }
 
+/** Client confirmation email — sent to the person who submitted the service request */
+function clientConfirmationHtml(fields: {
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  website?: string;
+  projectType?: string;
+  mainGoal?: string;
+  targetAudience?: string;
+  domainName?: string;
+  pagesNeeded?: string[];
+  features?: string[];
+  cmsNeeded?: string;
+  mobileFriendly?: string;
+  colorPreferences?: string;
+  designStyle?: string;
+  websitesYouLike?: string;
+  hasLogo?: string;
+  brandFonts?: string;
+  contentProvider?: string;
+  imageProvider?: string;
+  existingContent?: string;
+  budget?: string;
+  launchDate?: string;
+  maintenance?: string;
+  additionalNotes?: string;
+}): string {
+  const e = escapeHtml;
+  const cream = '#C49A3C';
+  const creamSoft = '#D4B896';
+  const black = '#000000';
+  const surface = '#050505';
+  const hairline = '#262626';
+  const sectionBg = '#0a0a0a';
+  const labelGray = '#737373';
+  const bodyGray = '#a3a3a3';
+  const textMain = '#fafafa';
+  const sans = "'Segoe UI',Roboto,'Helvetica Neue',Helvetica,Arial,sans-serif";
+
+  const field = (label: string, value?: string | string[]) => {
+    if (!value || (Array.isArray(value) && value.length === 0)) return '';
+    const display = Array.isArray(value) ? value.join(', ') : value;
+    return `
+      <tr>
+        <td style="padding:0 0 16px 0;">
+          <p style="margin:0 0 4px;font-family:${sans};font-size:10px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:${labelGray};">${label}</p>
+          <p style="margin:0;font-family:${sans};font-size:14px;line-height:1.5;color:${textMain};">${e(display)}</p>
+        </td>
+      </tr>`;
+  };
+
+  const section = (title: string, rows: string) => {
+    if (!rows.trim()) return '';
+    return `
+      <tr>
+        <td style="padding:0 28px 4px 28px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <td style="padding:16px 0 12px 0;border-top:1px solid ${hairline};">
+                <p style="margin:0;font-family:${sans};font-size:10px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:${cream};">${title}</p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 0 8px 0;background-color:${sectionBg};border-radius:2px;padding:14px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  ${rows}
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>`;
+  };
+
+  const contactRows = [
+    field('Name', fields.name),
+    field('Email', fields.email),
+    field('Phone', fields.phone),
+    field('Company', fields.company),
+    field('Existing Website', fields.website),
+  ].join('');
+
+  const projectRows = [
+    field('Website Type', fields.projectType),
+    field('Main Goal', fields.mainGoal),
+    field('Target Audience', fields.targetAudience),
+    field('Domain Name', fields.domainName),
+  ].join('');
+
+  const scopeRows = [
+    field('Pages Needed', fields.pagesNeeded),
+    field('Features', fields.features),
+    field('CMS Needed', fields.cmsNeeded),
+    field('Mobile-Friendly', fields.mobileFriendly),
+  ].join('');
+
+  const designRows = [
+    field('Color Preferences', fields.colorPreferences),
+    field('Design Style', fields.designStyle),
+    field('Reference Websites', fields.websitesYouLike),
+    field('Has Logo', fields.hasLogo),
+    field('Brand Fonts', fields.brandFonts),
+  ].join('');
+
+  const contentRows = [
+    field('Content Provider', fields.contentProvider),
+    field('Image Provider', fields.imageProvider),
+    field('Existing Content', fields.existingContent),
+  ].join('');
+
+  const timelineRows = [
+    field('Budget Range', fields.budget),
+    field('Launch Date', fields.launchDate),
+    field('Ongoing Maintenance', fields.maintenance),
+  ].join('');
+
+  const notesRows = field('Additional Notes', fields.additionalNotes);
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Request Confirmed</title>
+</head>
+<body style="margin:0;padding:0;background-color:${black};">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:${black};padding:40px 16px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background-color:${surface};border:1px solid ${hairline};border-radius:2px;">
+        <tr>
+          <td style="height:2px;background-color:${cream};line-height:2px;font-size:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:28px 28px 20px 28px;">
+            <p style="margin:0 0 10px;font-family:${sans};font-size:11px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;color:${cream};">
+              Request Confirmed
+            </p>
+            <p style="margin:0 0 8px;font-family:${sans};font-size:24px;font-weight:600;letter-spacing:-0.03em;line-height:1.15;color:${textMain};">
+              Thanks, ${e(fields.name)}.
+            </p>
+            <p style="margin:0;font-family:${sans};font-size:14px;line-height:1.55;color:${bodyGray};">
+              I've received your project request and will review it shortly. Expect a response within 24 &ndash; 48 hours. Below is a copy of what you submitted for your records.
+            </p>
+          </td>
+        </tr>
+        ${section('01 · Contact', contactRows)}
+        ${section('02 · Project Overview', projectRows)}
+        ${section('03 · Scope', scopeRows)}
+        ${section('04 · Design', designRows)}
+        ${section('05 · Content', contentRows)}
+        ${section('06 · Timeline &amp; Budget', timelineRows)}
+        ${section('07 · Notes', notesRows)}
+        <tr>
+          <td style="padding:20px 28px 26px 28px;border-top:1px solid ${hairline};">
+            <p style="margin:0;font-family:${sans};font-size:11px;line-height:1.55;color:${labelGray};letter-spacing:0.02em;">
+              <span style="color:${bodyGray};">If you have any questions in the meantime, reply directly to this email.</span>
+            </p>
+            <p style="margin:12px 0 0;font-family:${sans};font-size:13px;line-height:1.55;color:${textMain};">
+              &mdash; Tomiwa Aluko
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:20px 0 0;font-family:${sans};font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#525252;text-align:center;">
+        Automated confirmation · tomiwaaluko.com
+      </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -544,6 +719,31 @@ app.post('/api/collaborate',
         ...(html ? { html } : {}),
       };
       await transporter.sendMail(mailOptions);
+
+      // Send confirmation email to the client
+      if (source === 'services') {
+        const confirmationFields = {
+          name, email, phone, company, website,
+          projectType, mainGoal, targetAudience, domainName,
+          pagesNeeded: Array.isArray(pagesNeeded) ? pagesNeeded : (pagesNeeded ? [pagesNeeded] : undefined),
+          features: Array.isArray(features) ? features : (features ? [features] : undefined),
+          cmsNeeded, mobileFriendly, colorPreferences, designStyle, websitesYouLike,
+          hasLogo, brandFonts, contentProvider, imageProvider, existingContent,
+          budget, launchDate, maintenance, additionalNotes,
+        };
+        const confirmationMail = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Your project request has been received — Tomiwa Aluko',
+          text: `Hi ${name},\n\nThanks for submitting your project request! I've received your details and will get back to you within 24-48 hours.\n\nHere's a summary of what you submitted:\n\n${lines.join('\n')}\n\nIf you have any questions, just reply to this email.\n\n— Tomiwa Aluko`,
+          html: clientConfirmationHtml(confirmationFields),
+        };
+        // Fire-and-forget so client confirmation doesn't block the response
+        transporter.sendMail(confirmationMail).catch((err: unknown) => {
+          console.error('Failed to send client confirmation email:', err);
+        });
+      }
+
       res.status(201).json({ success: true, message: 'Collaboration request submitted!' });
     } catch (err) {
       console.error(err);

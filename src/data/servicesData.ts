@@ -181,7 +181,6 @@ export const designStyles = [
 ];
 
 export const budgetRanges = [
-  'Under $500',
   '$500 – $1,200',
   '$1,500 – $3,500',
   '$3,000 – $6,000',
