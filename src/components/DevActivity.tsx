@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiStar, FiCode, FiGitPullRequest, FiAlertCircle, FiArrowUpRight, FiEye, FiCornerDownRight } from 'react-icons/fi';
@@ -59,6 +59,8 @@ const LANGUAGE_COLORS: Record<string, string> = {
 
 const getColor = (lang: string) => LANGUAGE_COLORS[lang] || "#888888";
 
+/** Recent Projects list only includes repos with `updated_at` within this window */
+const RECENT_PROJECT_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 const DevActivity: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -74,6 +76,17 @@ const DevActivity: React.FC = () => {
   const [commitStatsUnavailable, setCommitStatsUnavailable] = useState(false);
   const [profileViewsUnavailable, setProfileViewsUnavailable] = useState(false);
 
+  const recentRepos = useMemo(() => {
+    if (!data?.repos?.length) return [];
+    const cutoff = Date.now() - RECENT_PROJECT_MAX_AGE_MS;
+    return [...data.repos]
+      .filter((repo) => new Date(repo.updated_at).getTime() >= cutoff)
+      .sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+      )
+      .slice(0, 2);
+  }, [data]);
 
   // --- Animation Setup ---
   useEffect(() => {
@@ -539,20 +552,26 @@ const DevActivity: React.FC = () => {
           <div className="lg:col-span-8 order-2 lg:order-1">
             <div className="flex items-baseline justify-between mb-8 border-b-2 border-black dark:border-white pb-2">
               <h3 className="text-2xl md:text-3xl font-bold uppercase tracking-tight">Recent Projects</h3>
-              <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Latest_Push</span>
+              <span className="font-mono text-xs uppercase tracking-widest text-cream-600">Last_30_Days</span>
             </div>
             <div className="flex flex-col">
-              {data.repos.slice(0, 2).map((repo) => (
-                <RepoCard
-                  key={repo.name}
-                  name={repo.name}
-                  stars={repo.stargazers_count}
-                  forks={repo.forks_count}
-                  language={repo.language}
-                  url={repo.html_url}
-                  updated={repo.updated_at}
-                />
-              ))}
+              {recentRepos.length === 0 ? (
+                <p className="py-6 text-sm font-mono uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
+                  No public repository activity in the last 30 days.
+                </p>
+              ) : (
+                recentRepos.map((repo) => (
+                  <RepoCard
+                    key={repo.name}
+                    name={repo.name}
+                    stars={repo.stargazers_count}
+                    forks={repo.forks_count}
+                    language={repo.language}
+                    url={repo.html_url}
+                    updated={repo.updated_at}
+                  />
+                ))
+              )}
             </div>
 
             <a
