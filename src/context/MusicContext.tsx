@@ -64,26 +64,61 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const lastUiTickRef = useRef(0);
   /** Browser autoplay policy: we may start muted until the first user gesture. */
   const policyMutedUntilGestureRef = useRef(false);
+  /** Invalidates in-flight play retries when the user skips again before the new file is ready. */
+  const playbackGenerationRef = useRef(0);
+  const cancelPendingPlayRetryRef = useRef<(() => void) | null>(null);
 
   const isTronPlaylist = isTronTheme;
 
-  const goToIndex = useCallback((index: number, autoplay: boolean) => {
-    const audio = audioRef.current;
-    const list = playlistRef.current;
-    if (!audio || list.length === 0) return;
-    const i = ((index % list.length) + list.length) % list.length;
-    trackIndexRef.current = i;
-    const track = list[i]!;
-    audio.src = track.src;
-    setCurrentTrack(track);
-    setCurrentTime(0);
-    if (autoplay) {
-      const p = audio.play();
-      if (p !== undefined) {
-        p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-      }
-    }
+  const playAfterSourceChange = useCallback((audio: HTMLAudioElement, generation: number) => {
+    cancelPendingPlayRetryRef.current?.();
+    cancelPendingPlayRetryRef.current = null;
+
+    void audio.play().then(() => {
+      if (playbackGenerationRef.current !== generation) return;
+      setIsPlaying(true);
+    }).catch(() => {
+      const onCanPlay = () => {
+        audio.removeEventListener('canplay', onCanPlay);
+        cancelPendingPlayRetryRef.current = null;
+        if (playbackGenerationRef.current !== generation) return;
+        void audio.play().then(() => {
+          if (playbackGenerationRef.current !== generation) return;
+          setIsPlaying(true);
+        }).catch(() => {
+          if (playbackGenerationRef.current !== generation) return;
+          setIsPlaying(false);
+        });
+      };
+      cancelPendingPlayRetryRef.current = () => {
+        audio.removeEventListener('canplay', onCanPlay);
+      };
+      audio.addEventListener('canplay', onCanPlay);
+    });
   }, []);
+
+  const goToIndex = useCallback(
+    (index: number, autoplay: boolean) => {
+      const audio = audioRef.current;
+      const list = playlistRef.current;
+      if (!audio || list.length === 0) return;
+      const i = ((index % list.length) + list.length) % list.length;
+      trackIndexRef.current = i;
+      const track = list[i]!;
+      cancelPendingPlayRetryRef.current?.();
+      cancelPendingPlayRetryRef.current = null;
+      audio.pause();
+      audio.src = track.src;
+      audio.load();
+      setCurrentTrack(track);
+      setCurrentTime(0);
+      if (autoplay) {
+        playbackGenerationRef.current += 1;
+        playAfterSourceChange(audio, playbackGenerationRef.current);
+      }
+    },
+    [playAfterSourceChange],
+  );
 
   const advanceTrack = useCallback(() => {
     const list = playlistRef.current;
@@ -124,13 +159,15 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       const next = (trackIndexRef.current + 1) % list.length;
       trackIndexRef.current = next;
       const t = list[next]!;
+      cancelPendingPlayRetryRef.current?.();
+      cancelPendingPlayRetryRef.current = null;
+      audio.pause();
       audio.src = t.src;
+      audio.load();
       setCurrentTrack(t);
       setCurrentTime(0);
-      const p = audio.play();
-      if (p !== undefined) {
-        p.catch(() => setIsPlaying(false));
-      }
+      playbackGenerationRef.current += 1;
+      playAfterSourceChange(audio, playbackGenerationRef.current);
     };
 
     const onLoadedMetadata = () => {
@@ -214,6 +251,8 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     void startPlayback();
 
     return () => {
+      cancelPendingPlayRetryRef.current?.();
+      cancelPendingPlayRetryRef.current = null;
       detachGestureListeners();
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
@@ -222,7 +261,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       audioRef.current = null;
       playlistRef.current = [];
     };
-  }, [isTronTheme]);
+  }, [isTronTheme, playAfterSourceChange]);
 
   useEffect(() => {
     if (audioRef.current) {

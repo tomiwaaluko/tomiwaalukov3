@@ -22,7 +22,7 @@ const MusicPlayer: React.FC = () => {
     isTronPlaylist,
   } = useMusic();
 
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(true);
 
   const spring = { type: 'spring' as const, stiffness: 420, damping: 32, mass: 0.85 };
 
