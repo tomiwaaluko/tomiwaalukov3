@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -118,6 +119,7 @@ function App() {
           </Router>
         </MusicProvider>
       </TronThemeProvider>
+      <Analytics />
     </ThemeProvider>
   );
 }
