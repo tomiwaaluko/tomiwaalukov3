@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
 
 /** Probability (0–1) that a full page load uses TRON accent + Tron Legacy playlist only. */
-export const TRON_THEME_ROLL_CHANCE = 0.22;
+export const TRON_THEME_ROLL_CHANCE = 0.40;
 
 interface TronThemeContextValue {
   isTronTheme: boolean;

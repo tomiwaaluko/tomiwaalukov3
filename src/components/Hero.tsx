@@ -564,7 +564,7 @@ export default function Hero({ startAnimation = false }: HeroProps) {
                 zIndex: 100,
               }}
             >
-              In a world where deadlines are tomorrow and bugs are ‘minor’, engineering is damage control.
+              If you're reading this, it isn't too late. You aren't cooked. Start now.
             </motion.div>
           </div>
         </motion.div>

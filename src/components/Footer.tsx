@@ -158,6 +158,9 @@ const Footer: React.FC = () => {
         <div>
           &copy; {new Date().getFullYear()} Tomiwa Aluko. All Rights Reserved.
         </div>
+        <div>
+          refresh for a new experience and easter eggs! 
+        </div>
         <div className="flex gap-6">
           {/* <span>Designed & Built by Me</span> */}
           <span>System Status: Operational</span>
