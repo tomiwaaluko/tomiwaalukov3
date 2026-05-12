@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default portfolio accent (warm cream). `tron-theme` swaps to TRON cyan for 400–700. */
+:root {
+  --cream-400-rgb: 212 184 150;
+  --cream-500-rgb: 196 165 114;
+  --cream-600-rgb: 166 139 91;
+  --cream-700-rgb: 139 115 85;
+}
+
+html.tron-theme {
+  --cream-400-rgb: 65 243 241;
+  --cream-500-rgb: 55 220 218;
+  --cream-600-rgb: 45 190 188;
+  --cream-700-rgb: 35 160 158;
+}
+
 * {
   box-sizing: border-box;
 }

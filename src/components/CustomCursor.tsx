@@ -1,33 +1,49 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { useTronTheme } from '../context/TronThemeContext';
+
+type HitMode = 'default' | 'interactive-link' | 'interactive-button' | 'heading';
+
+function classifyHit(el: Element | null): HitMode {
+  if (!el || !(el instanceof Element)) return 'default';
+  // Featured project titles: same cursor treatment as nav tabs (large ring), not the giant heading mode.
+  if (el.closest('[data-cursor="featured"]')) return 'interactive-link';
+  const inHeading = el.closest('h1, h2, h3');
+  if (inHeading && !inHeading.closest('[data-cursor="featured"]')) return 'heading';
+  if (el.closest('a')) return 'interactive-link';
+  if (el.closest('button, [data-cursor="pointer"]')) return 'interactive-button';
+  return 'default';
+}
+
+const ACCENT = {
+  creamDot: '#C4A572',
+  creamRing: '#8B7355',
+  creamLinkText: '#A68B5B',
+  tronDot: '#41f3f1',
+  tronRing: '#41f3f1',
+  tronLinkText: '#41f3f1',
+} as const;
 
 const CustomCursor: React.FC = () => {
+  const { isTronTheme } = useTronTheme();
   const cursorRef = useRef<HTMLDivElement>(null);
   const followerRef = useRef<HTMLDivElement>(null);
+  const lastPointerKeyRef = useRef('');
+  const lastTintedLinkRef = useRef<HTMLAnchorElement | null>(null);
 
-  // --- Touch Device Detection ---
-  // We'll use state to track if the device is touch-capable.
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
-    // This effect checks for a touch-first device using a media query.
-    // It runs only once when the component mounts.
     const mediaQuery = window.matchMedia('(pointer: coarse)');
-
     const determineTouchDevice = () => {
       if (mediaQuery.matches) {
         setIsTouchDevice(true);
       }
     };
-
     determineTouchDevice();
   }, []);
-  // -----------------------------
 
-
-  // --- Cursor Animation Logic ---
   useEffect(() => {
-    // If it's a touch device, we stop here and do nothing.
     if (isTouchDevice) return;
 
     const cursor = cursorRef.current;
@@ -35,12 +51,62 @@ const CustomCursor: React.FC = () => {
 
     if (!cursor || !follower) return;
 
-    // Keep centering in GSAP so x/y tweens do not clobber translate(-50%,-50%) (jagged scale).
     gsap.set([cursor, follower], {
       xPercent: -50,
       yPercent: -50,
       transformOrigin: '50% 50%',
     });
+
+    const clearLinkTint = () => {
+      if (lastTintedLinkRef.current) {
+        lastTintedLinkRef.current.style.color = '';
+        lastTintedLinkRef.current = null;
+      }
+    };
+
+    const applyHitMode = (mode: HitMode, anchorForTint: HTMLAnchorElement | null) => {
+      const tron = isTronTheme;
+
+      if (mode === 'default') {
+        clearLinkTint();
+        gsap.to(cursor, { backgroundColor: '', scale: 1, duration: 0.2 });
+        gsap.to(follower, { borderColor: '', scale: 1, duration: 0.2 });
+        return;
+      }
+
+      if (mode === 'heading') {
+        clearLinkTint();
+        gsap.to(cursor, { backgroundColor: '', scale: 19.5, duration: 0.3 });
+        gsap.to(follower, { borderColor: '', scale: 5, duration: 0.3 });
+        return;
+      }
+
+      if (mode === 'interactive-link') {
+        gsap.to(cursor, {
+          backgroundColor: tron ? ACCENT.tronDot : ACCENT.creamDot,
+          scale: 5.8,
+          duration: 0.2,
+        });
+        gsap.to(follower, {
+          borderColor: tron ? ACCENT.tronRing : ACCENT.creamRing,
+          scale: 1.5,
+          duration: 0.2,
+        });
+        if (anchorForTint) {
+          if (lastTintedLinkRef.current && lastTintedLinkRef.current !== anchorForTint) {
+            lastTintedLinkRef.current.style.color = '';
+          }
+          lastTintedLinkRef.current = anchorForTint;
+          anchorForTint.style.color = tron ? ACCENT.tronLinkText : ACCENT.creamLinkText;
+        }
+        return;
+      }
+
+      // interactive-button
+      clearLinkTint();
+      gsap.to(cursor, { backgroundColor: '', scale: 5.8, duration: 0.3 });
+      gsap.to(follower, { borderColor: '', scale: 1.5, duration: 0.3 });
+    };
 
     const moveCursor = (e: MouseEvent) => {
       gsap.to(cursor, {
@@ -55,73 +121,31 @@ const CustomCursor: React.FC = () => {
         duration: 0.18,
         overwrite: 'auto',
       });
+
+      const el = document.elementFromPoint(e.clientX, e.clientY);
+      const mode = classifyHit(el);
+      const anchorForTint =
+        mode === 'interactive-link' && el ? el.closest('a') : null;
+      const key = `${mode}:${anchorForTint?.href ?? ''}`;
+      if (key === lastPointerKeyRef.current) return;
+      lastPointerKeyRef.current = key;
+      applyHitMode(mode, anchorForTint);
     };
 
-    const handleMouseEnter = (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName.toLowerCase() === 'a') {
-        gsap.to(cursor, { backgroundColor: '#C4A572', scale: 5.8, duration: 0.2 });
-        gsap.to(follower, { borderColor: '#8B7355', scale: 1.5, duration: 0.2 });
-        target.style.color = '#A68B5B';
-      } else {
-        gsap.to(cursor, { scale: 5.8, duration: 0.3 });
-        gsap.to(follower, { scale: 1.5, duration: 0.3 });
-      }
-    };
-
-    const handleMouseLeave = (e: Event) => {
-      const target = e.target as HTMLElement;
-      gsap.to(cursor, { backgroundColor: '', scale: 1, duration: 0.2 });
-      gsap.to(follower, { borderColor: '', scale: 1, duration: 0.2 });
-      if (target.tagName.toLowerCase() === 'a') {
-        target.style.color = '';
-      }
-    };
-
-    const handleTextEnter = () => {
-      gsap.to(cursor, { scale: 19.5, duration: 0.3 });
-      gsap.to(follower, { scale: 5, duration: 0.3 });
-    };
-
-    const handleTextLeave = () => {
-      gsap.to([cursor, follower], { scale: 1, duration: 0.3 });
-    };
-
-    // Add all event listeners
     document.addEventListener('mousemove', moveCursor);
-    const interactiveElements = document.querySelectorAll('a, button, [data-cursor="pointer"]');
-    interactiveElements.forEach((el) => {
-      el.addEventListener('mouseenter', handleMouseEnter);
-      el.addEventListener('mouseleave', handleMouseLeave);
-    });
-    const textElements = document.querySelectorAll('h1, h2, h3');
-    textElements.forEach((el) => {
-      el.addEventListener('mouseenter', handleTextEnter);
-      el.addEventListener('mouseleave', handleTextLeave);
-    });
 
     return () => {
       gsap.killTweensOf([cursor, follower]);
       document.removeEventListener('mousemove', moveCursor);
-      interactiveElements.forEach((el) => {
-        el.removeEventListener('mouseenter', handleMouseEnter);
-        el.removeEventListener('mouseleave', handleMouseLeave);
-      });
-      textElements.forEach((el) => {
-        el.removeEventListener('mouseenter', handleTextEnter);
-        el.removeEventListener('mouseleave', handleTextLeave);
-      });
+      clearLinkTint();
+      lastPointerKeyRef.current = '';
     };
-  }, [isTouchDevice]); // This effect depends on the device type.
+  }, [isTouchDevice, isTronTheme]);
 
-
-  // --- Component Render ---
-  // This is the key: if it's a touch device, we render nothing.
   if (isTouchDevice) {
     return null;
   }
 
-  // Otherwise, we render the cursor elements for desktop.
   return (
     <>
       <div

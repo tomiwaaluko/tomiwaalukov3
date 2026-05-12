@@ -87,7 +87,7 @@ const Projects: React.FC = () => {
 
           {/* Title (Massive, Spanning) */}
           <div className="col-span-12 md:col-span-10 md:col-start-3 relative z-20">
-            <Link to={`/projects/${featured[0].id}`} className="block">
+            <Link to={`/projects/${featured[0].id}`} data-cursor="featured" className="block">
               <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
                 {featuredDisplay[0].title}
               </h3>
@@ -106,7 +106,7 @@ const Projects: React.FC = () => {
         <div className="group relative mb-24 md:mb-8 grid grid-cols-1 md:grid-cols-12 gap-x-8 items-start">
           {/* Title (Massive, Right Aligned) */}
           <div className="col-span-12 md:col-span-10 md:col-start-1 order-2 md:order-2 text-right relative z-20">
-            <Link to={`/projects/${featured[1].id}`} className="block">
+            <Link to={`/projects/${featured[1].id}`} data-cursor="featured" className="block">
               <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-right text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
                 {featuredDisplay[1].title}
               </h3>
@@ -145,7 +145,7 @@ const Projects: React.FC = () => {
 
           {/* Title (Massive, Spanning) */}
           <div className="col-span-12 md:col-span-10 md:col-start-3 relative z-20">
-            <Link to={`/projects/${featured[2].id}`} className="block">
+            <Link to={`/projects/${featured[2].id}`} data-cursor="featured" className="block">
               <h3 className="text-[18vw] md:text-[14vw] font-black uppercase tracking-tighter leading-[0.8] transition-all duration-300 text-black dark:text-white hover:italic hover:text-transparent hover:[-webkit-text-stroke:1px_black] dark:hover:[-webkit-text-stroke:1px_white] whitespace-pre-line">
                 {featuredDisplay[2].title}
               </h3>

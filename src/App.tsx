@@ -16,7 +16,9 @@ import Loader from './components/Loader';
 
 import CustomCursor from './components/CustomCursor';
 import ThemeProvider from './context/ThemeContext';
+import { TronThemeProvider } from './context/TronThemeContext';
 import { MusicProvider } from './context/MusicContext';
+import MusicPlayer from './components/MusicPlayer';
 import { TransitionProvider } from './context/TransitionContext';
 import Transition from './components/Transition';
 import ScrollToTop from './components/ScrollToTop';
@@ -82,36 +84,40 @@ function App() {
   // Once loading is false, render the main application
   return (
     <ThemeProvider>
-      <MusicProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <ScrollToTop />
-          <TransitionProvider>
-            <div className="relative bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen overflow-x-hidden">
-              <AnimatePresence mode="wait">
-                {loading && <Loader key="loader" onComplete={handleLoaderComplete} />}
-              </AnimatePresence>
+      <TronThemeProvider>
+        <MusicProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ScrollToTop />
+            <TransitionProvider>
+              <div className="relative bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen overflow-x-hidden">
+                <AnimatePresence mode="wait">
+                  {loading && <Loader key="loader" onComplete={handleLoaderComplete} />}
+                </AnimatePresence>
 
-              {/* Main content - starts fading in when showContent is true */}
-              <div
-                className={`transition-opacity duration-700 ${showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-                style={{ visibility: showContent ? 'visible' : 'hidden' }}
-              >
-                <CustomCursor />
-                <Navigation />
-                <Transition />
+                <MusicPlayer />
 
-                <Routes>
-                  <Route path="/" element={<Home startAnimation={showContent} />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/projects/:id" element={<ProjectDetail />} />
-                  <Route path="/services" element={<Services />} />
-                  {/* <Route path="/guestbook" element={<GuestBook />} /> */}
-                </Routes>
+                {/* Main content - starts fading in when showContent is true */}
+                <div
+                  className={`transition-opacity duration-700 ${showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                  style={{ visibility: showContent ? 'visible' : 'hidden' }}
+                >
+                  <CustomCursor />
+                  <Navigation />
+                  <Transition />
+
+                  <Routes>
+                    <Route path="/" element={<Home startAnimation={showContent} />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/projects/:id" element={<ProjectDetail />} />
+                    <Route path="/services" element={<Services />} />
+                    {/* <Route path="/guestbook" element={<GuestBook />} /> */}
+                  </Routes>
+                </div>
               </div>
-            </div>
-          </TransitionProvider>
-        </Router>
-      </MusicProvider>
+            </TransitionProvider>
+          </Router>
+        </MusicProvider>
+      </TronThemeProvider>
     </ThemeProvider>
   );
 }

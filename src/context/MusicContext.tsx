@@ -1,6 +1,14 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+import { useTronTheme } from './TronThemeContext';
+import { DEFAULT_MUSIC_TRACKS, TRON_LEGACY_TRACKS, type MusicTrack } from '../data/musicTracks';
 
-// Define the shape of the context data
 interface MusicContextType {
   isPlaying: boolean;
   isMuted: boolean;
@@ -8,12 +16,16 @@ interface MusicContextType {
   toggleMute: () => void;
   volume: number;
   setVolume: (volume: number) => void;
+  currentTrack: MusicTrack | null;
+  currentTime: number;
+  duration: number;
+  skipNext: () => void;
+  skipPrevious: () => void;
+  isTronPlaylist: boolean;
 }
 
-// Create the context
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
-// Custom hook for easy access to the context
 export const useMusic = () => {
   const context = useContext(MusicContext);
   if (!context) {
@@ -22,16 +34,9 @@ export const useMusic = () => {
   return context;
 };
 
-// Define the props for the provider component
 interface MusicProviderProps {
   children: React.ReactNode;
 }
-
-/** Tracks in `public/music/` — new files can be appended here. */
-const MUSIC_TRACKS = [
-  '/music/background-music.mp3',
-  '/music/If-I-Am-With-You.mp3',
-] as const;
 
 function shuffleInPlace<T>(items: T[]): T[] {
   const a = [...items];
@@ -45,110 +50,207 @@ function shuffleInPlace<T>(items: T[]): T[] {
 }
 
 export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
+  const { isTronTheme } = useTronTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.7); // Default volume at 30%
+  const [volume, setVolume] = useState(0.7);
+  const [currentTrack, setCurrentTrack] = useState<MusicTrack | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const playlistRef = useRef<string[]>([]);
+  const playlistRef = useRef<MusicTrack[]>([]);
   const trackIndexRef = useRef(0);
+  const lastUiTickRef = useRef(0);
+  /** Browser autoplay policy: we may start muted until the first user gesture. */
+  const policyMutedUntilGestureRef = useRef(false);
+
+  const isTronPlaylist = isTronTheme;
+
+  const goToIndex = useCallback((index: number, autoplay: boolean) => {
+    const audio = audioRef.current;
+    const list = playlistRef.current;
+    if (!audio || list.length === 0) return;
+    const i = ((index % list.length) + list.length) % list.length;
+    trackIndexRef.current = i;
+    const track = list[i]!;
+    audio.src = track.src;
+    setCurrentTrack(track);
+    setCurrentTime(0);
+    if (autoplay) {
+      const p = audio.play();
+      if (p !== undefined) {
+        p.then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      }
+    }
+  }, []);
+
+  const advanceTrack = useCallback(() => {
+    const list = playlistRef.current;
+    if (list.length === 0) return;
+    const next = (trackIndexRef.current + 1) % list.length;
+    goToIndex(next, true);
+  }, [goToIndex]);
+
+  const skipNext = useCallback(() => {
+    advanceTrack();
+  }, [advanceTrack]);
+
+  const skipPrevious = useCallback(() => {
+    const list = playlistRef.current;
+    if (list.length === 0) return;
+    const prev = (trackIndexRef.current - 1 + list.length) % list.length;
+    goToIndex(prev, true);
+  }, [goToIndex]);
 
   useEffect(() => {
-    playlistRef.current = shuffleInPlace([...MUSIC_TRACKS]);
+    const sourceTracks = isTronTheme ? [...TRON_LEGACY_TRACKS] : [...DEFAULT_MUSIC_TRACKS];
+    playlistRef.current = shuffleInPlace(sourceTracks);
     trackIndexRef.current = 0;
 
-    const audio = new Audio(playlistRef.current[0]);
+    const first = playlistRef.current[0]!;
+    const audio = new Audio(first.src);
     audio.loop = false;
+    audio.preload = 'auto';
+    audio.setAttribute('playsinline', '');
     audioRef.current = audio;
+    setCurrentTrack(first);
+    setCurrentTime(0);
+    setDuration(0);
 
-    const advanceTrack = () => {
+    const onEnded = () => {
       const list = playlistRef.current;
       if (list.length === 0) return;
-      trackIndexRef.current = (trackIndexRef.current + 1) % list.length;
-      audio.src = list[trackIndexRef.current]!;
+      const next = (trackIndexRef.current + 1) % list.length;
+      trackIndexRef.current = next;
+      const t = list[next]!;
+      audio.src = t.src;
+      setCurrentTrack(t);
+      setCurrentTime(0);
       const p = audio.play();
       if (p !== undefined) {
         p.catch(() => setIsPlaying(false));
       }
     };
 
-    const onEnded = () => {
-      advanceTrack();
+    const onLoadedMetadata = () => {
+      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
     };
+
+    const onTimeUpdate = () => {
+      const now = performance.now();
+      if (now - lastUiTickRef.current < 220) return;
+      lastUiTickRef.current = now;
+      setCurrentTime(audio.currentTime);
+    };
+
     audio.addEventListener('ended', onEnded);
+    audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    audio.addEventListener('timeupdate', onTimeUpdate);
 
-    const playAudio = () => {
-      if (!audioRef.current) return;
+    const gestureOpts = { capture: true } as const;
 
-      const playPromise = audio.play();
-
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          setIsPlaying(true);
-          document.removeEventListener('click', handleInteraction);
-          document.removeEventListener('keydown', handleInteraction);
-          document.removeEventListener('scroll', handleInteraction);
-        }).catch(() => {
-          setIsPlaying(false);
-        });
+    const onUserGesture = () => {
+      const el = audioRef.current;
+      if (!el) return;
+      if (policyMutedUntilGestureRef.current) {
+        el.muted = false;
+        policyMutedUntilGestureRef.current = false;
       }
+      if (el.paused) {
+        void el.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      }
+      document.removeEventListener('pointerdown', onUserGesture, gestureOpts);
+      document.removeEventListener('keydown', onUserGesture, gestureOpts);
+      document.removeEventListener('touchstart', onUserGesture, gestureOpts);
+      document.removeEventListener('scroll', onUserGesture, gestureOpts);
+      document.removeEventListener('click', onUserGesture, gestureOpts);
     };
 
-    const handleInteraction = () => {
-      playAudio();
+    const attachGestureListeners = () => {
+      document.addEventListener('pointerdown', onUserGesture, gestureOpts);
+      document.addEventListener('keydown', onUserGesture, gestureOpts);
+      document.addEventListener('touchstart', onUserGesture, gestureOpts);
+      document.addEventListener('scroll', onUserGesture, gestureOpts);
+      document.addEventListener('click', onUserGesture, gestureOpts);
     };
 
-    playAudio();
+    const detachGestureListeners = () => {
+      document.removeEventListener('pointerdown', onUserGesture, gestureOpts);
+      document.removeEventListener('keydown', onUserGesture, gestureOpts);
+      document.removeEventListener('touchstart', onUserGesture, gestureOpts);
+      document.removeEventListener('scroll', onUserGesture, gestureOpts);
+      document.removeEventListener('click', onUserGesture, gestureOpts);
+    };
 
-    document.addEventListener('click', handleInteraction, { once: true });
-    document.addEventListener('keydown', handleInteraction, { once: true });
-    document.addEventListener('scroll', handleInteraction, { once: true });
+    const startPlayback = async () => {
+      const el = audioRef.current;
+      if (!el) return;
+
+      try {
+        await el.play();
+        setIsPlaying(true);
+        policyMutedUntilGestureRef.current = false;
+        return;
+      } catch {
+        /* autoplay with sound blocked */
+      }
+
+      try {
+        el.muted = true;
+        policyMutedUntilGestureRef.current = true;
+        await el.play();
+        setIsPlaying(true);
+        attachGestureListeners();
+        return;
+      } catch {
+        policyMutedUntilGestureRef.current = false;
+        setIsPlaying(false);
+      }
+
+      attachGestureListeners();
+    };
+
+    void startPlayback();
 
     return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('keydown', handleInteraction);
-      document.removeEventListener('scroll', handleInteraction);
+      detachGestureListeners();
       audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.pause();
       audioRef.current = null;
       playlistRef.current = [];
     };
-  }, []);
+  }, [isTronTheme]);
 
-  // Effect to control the audio element's volume based on state
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
     }
   }, [isMuted, volume]);
 
-  // Function to toggle play/pause
   const togglePlay = useCallback(() => {
     if (!audioRef.current) return;
-
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(() => {
-        setIsPlaying(false);
-      });
+      audioRef.current
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false));
     }
   }, [isPlaying]);
 
-  // Function to toggle mute/unmute
   const toggleMute = useCallback(() => {
-    setIsMuted(prevMuted => !prevMuted);
+    setIsMuted((m) => !m);
   }, []);
 
-  // Function to set a new volume
   const handleSetVolume = useCallback((newVolume: number) => {
-    const clampedVolume = Math.max(0, Math.min(1, newVolume)); // Ensure volume is between 0 and 1
-    setVolume(clampedVolume);
+    setVolume(Math.max(0, Math.min(1, newVolume)));
   }, []);
 
-  // The value object provided to consuming components
   const value: MusicContextType = {
     isPlaying,
     isMuted,
@@ -156,11 +258,13 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     toggleMute,
     volume,
     setVolume: handleSetVolume,
+    currentTrack,
+    currentTime,
+    duration,
+    skipNext,
+    skipPrevious,
+    isTronPlaylist,
   };
 
-  return (
-    <MusicContext.Provider value={value}>
-      {children}
-    </MusicContext.Provider>
-  );
+  return <MusicContext.Provider value={value}>{children}</MusicContext.Provider>;
 };
