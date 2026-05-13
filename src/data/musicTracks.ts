@@ -22,12 +22,13 @@ export const DEFAULT_MUSIC_TRACKS: MusicTrack[] = [
   { src: '/music/Interstellar.mp3', title: 'Interstellar', artist: 'Hans Zimmer' },
   { src: '/music/If-I-Am-With-You.mp3', title: 'If I Am With You', artist: 'Soundtrack' },
   {
-    src: `/music/${encodeURIComponent('A Huge Tree in the Tsukamori Forest.mp3')}`,
+    /** encodeURI keeps `/`; browsers and static hosts resolve this reliably */
+    src: encodeURI('/music/A Huge Tree in the Tsukamori Forest.mp3'),
     title: 'A Huge Tree in the Tsukamori Forest',
     artist: 'Joe Hisaishi',
   },
   {
-    src: `/music/${encodeURIComponent('Dearly Beloved - KINGDOM HEARTS II Version-.mp3')}`,
+    src: encodeURI('/music/Dearly Beloved - KINGDOM HEARTS II Version-.mp3'),
     title: 'Dearly Beloved',
     artist: 'Yoko Shimomura',
   },

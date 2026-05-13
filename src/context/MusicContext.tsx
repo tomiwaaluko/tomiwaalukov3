@@ -74,6 +74,16 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     cancelPendingPlayRetryRef.current?.();
     cancelPendingPlayRetryRef.current = null;
 
+    const tryPlay = () => {
+      void audio.play().then(() => {
+        if (playbackGenerationRef.current !== generation) return;
+        setIsPlaying(true);
+      }).catch(() => {
+        if (playbackGenerationRef.current !== generation) return;
+        setIsPlaying(false);
+      });
+    };
+
     void audio.play().then(() => {
       if (playbackGenerationRef.current !== generation) return;
       setIsPlaying(true);
@@ -82,18 +92,19 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
         audio.removeEventListener('canplay', onCanPlay);
         cancelPendingPlayRetryRef.current = null;
         if (playbackGenerationRef.current !== generation) return;
-        void audio.play().then(() => {
-          if (playbackGenerationRef.current !== generation) return;
-          setIsPlaying(true);
-        }).catch(() => {
-          if (playbackGenerationRef.current !== generation) return;
-          setIsPlaying(false);
-        });
+        tryPlay();
       };
       cancelPendingPlayRetryRef.current = () => {
         audio.removeEventListener('canplay', onCanPlay);
       };
       audio.addEventListener('canplay', onCanPlay);
+      // canplay may have fired before this listener was added (cached / fast load)
+      if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        queueMicrotask(() => {
+          if (playbackGenerationRef.current !== generation) return;
+          onCanPlay();
+        });
+      }
     });
   }, []);
 
