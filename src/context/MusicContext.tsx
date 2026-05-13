@@ -283,6 +283,28 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     }
   }, [isMuted, volume]);
 
+  // Pause when the tab loses focus, resume when it regains focus
+  useEffect(() => {
+    const wasPlayingRef = { current: false };
+
+    const onVisibilityChange = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      if (document.hidden) {
+        wasPlayingRef.current = !audio.paused;
+        if (!audio.paused) {
+          audio.pause();
+          setIsPlaying(false);
+        }
+      } else if (wasPlayingRef.current) {
+        void audio.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
   const togglePlay = useCallback(() => {
     if (!audioRef.current) return;
     if (isPlaying) {
