@@ -201,10 +201,10 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     const onUserGesture = () => {
       const el = audioRef.current;
       if (!el) return;
-      if (policyMutedUntilGestureRef.current) {
-        el.muted = false;
-        policyMutedUntilGestureRef.current = false;
-      }
+      // Always unmute on first user gesture — covers both the policy-muted path
+      // and the edge case where el.muted was left true after both autoplay attempts failed.
+      el.muted = false;
+      policyMutedUntilGestureRef.current = false;
       if (el.paused) {
         void el.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
       }
@@ -252,6 +252,9 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
         attachGestureListeners();
         return;
       } catch {
+        // Both unmuted and muted autoplay failed — reset muted so audio
+        // isn't silently stuck on mute when the gesture handler fires.
+        el.muted = false;
         policyMutedUntilGestureRef.current = false;
         setIsPlaying(false);
       }
@@ -286,12 +289,14 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
+      // Ensure audio isn't stuck muted from a failed autoplay attempt
+      audioRef.current.muted = isMuted;
       audioRef.current
         .play()
         .then(() => setIsPlaying(true))
         .catch(() => setIsPlaying(false));
     }
-  }, [isPlaying]);
+  }, [isPlaying, isMuted]);
 
   const toggleMute = useCallback(() => {
     setIsMuted((m) => !m);

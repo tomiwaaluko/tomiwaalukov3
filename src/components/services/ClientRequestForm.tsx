@@ -164,19 +164,30 @@ const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...form, source: 'services' }),
       });
-      const data = (await res.json()) as { success?: boolean; error?: string; errors?: { msg?: string }[] };
+
+      // Read as text first — the proxy may return HTML on failure
+      const text = await res.text();
+      let data: { success?: boolean; error?: string; errors?: { msg?: string }[] } | null = null;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // Response wasn't JSON (e.g. Vercel proxy error page)
+      }
+
       if (!res.ok) {
         const msg =
-          data.errors?.map((x) => x.msg).filter(Boolean).join(' ') ||
-          data.error ||
-          'Something went wrong. Try again.';
+          data?.errors?.map((x) => x.msg).filter(Boolean).join(' ') ||
+          data?.error ||
+          (res.status >= 500
+            ? 'Server error — please try again later or email directly.'
+            : 'Something went wrong. Try again.');
         setSubmitError(msg);
         return;
       }
       localStorage.removeItem(STORAGE_KEY);
       setSubmitted(true);
     } catch {
-      setSubmitError('Network error. Please try again.');
+      setSubmitError('Network error. Please check your connection and try again.');
     } finally {
       setIsSubmitting(false);
     }
