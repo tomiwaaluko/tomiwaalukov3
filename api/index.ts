@@ -547,13 +547,29 @@ console.log('Swagger Document Loaded:', swaggerDocument ? 'Yes' : 'No');
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 console.log('Swagger Route Registered at /api/docs');
 
-// Setup Nodemailer transporter
+// Setup Nodemailer transporter.
+// Timeouts are explicit because nodemailer defaults to "wait forever". On
+// Render's free tier, Gmail SMTP sometimes hangs on connect (cloud IP
+// throttling), and a hung request becomes a 502 at the Vercel->Render proxy
+// boundary after ~30s instead of a clean 5xx with a real error. Capping each
+// phase means we fail fast and the catch block in /api/collaborate runs with
+// a usable error to log.
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
+});
+
+// Surface the real reason Gmail SMTP is unreachable at boot, so the cause
+// shows up in Render logs without a user having to trigger a request.
+transporter.verify((err) => {
+  if (err) console.error('Nodemailer (Gmail SMTP) verify failed:', err);
+  else console.log('Nodemailer (Gmail SMTP) verified OK');
 });
 
 // Test endpoint
