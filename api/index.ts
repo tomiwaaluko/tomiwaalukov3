@@ -474,7 +474,7 @@ function clientConfirmationHtml(fields: {
         <tr>
           <td style="padding:20px 28px 26px 28px;border-top:1px solid ${hairline};">
             <p style="margin:0;font-family:${sans};font-size:11px;line-height:1.55;color:${labelGray};letter-spacing:0.02em;">
-              <span style="color:${bodyGray};">If you have any questions in the meantime, reply directly to this email.</span>
+              <span style="color:${bodyGray};">If you have any questions in the meantime, email tomiwaaluko02@gmail.com with this form attached.</span>
             </p>
             <p style="margin:12px 0 0;font-family:${sans};font-size:13px;line-height:1.55;color:${textMain};">
               &mdash; Tomiwa Aluko
