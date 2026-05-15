@@ -117,6 +117,22 @@ const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
     return () => ctx.revert();
   }, []);
 
+  // Warm up the Render free-tier backend as soon as the form mounts.
+  // The dyno can take 30–60s to wake from sleep; firing this now means
+  // it's usually hot by the time the user reaches the submit step.
+  useEffect(() => {
+    const controller = new AbortController();
+    // keepalive lets the request finish even if the user navigates away
+    fetch(`${API_URL}/health`, {
+      method: 'GET',
+      signal: controller.signal,
+      keepalive: true,
+    }).catch(() => {
+      // Swallow — this is best-effort warmup, not user-facing
+    });
+    return () => controller.abort();
+  }, [API_URL]);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ step, form }));
   }, [step, form]);
@@ -178,7 +194,9 @@ const ClientRequestForm = React.forwardRef<HTMLDivElement>((_props, ref) => {
         const msg =
           data?.errors?.map((x) => x.msg).filter(Boolean).join(' ') ||
           data?.error ||
-          (res.status >= 500
+          (res.status === 502 || res.status === 503
+            ? 'The server is starting up after inactivity. Please wait 30 seconds and try again.'
+            : res.status >= 500
             ? 'Server error — please try again later or email directly.'
             : 'Something went wrong. Try again.');
         setSubmitError(msg);

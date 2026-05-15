@@ -1,0 +1,37 @@
+name: Keep Render API awake
+
+# Render's free tier spins services down after ~15 minutes of inactivity.
+# A cold start takes 30–60s and surfaces to users as a 502 Bad Gateway.
+# This workflow pings /api/health every 10 minutes so the dyno stays warm.
+#
+# To stop the pings (e.g. if you upgrade to a paid plan), either delete this
+# file, set the schedule to a far-future date, or comment out the cron line.
+
+on:
+  schedule:
+    # Every 10 minutes. Note: GitHub may delay scheduled runs by a few minutes
+    # under load, which is fine — Render's idle timeout is ~15 min.
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # allows manual runs from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Ping /api/health
+        run: |
+          # --max-time 90 covers a full cold start.
+          # --retry 2 with a backoff handles transient 502s mid-wake.
+          # We always exit 0 so a missed ping never marks the workflow failed
+          # (Render sleeping is the *normal* state; one missed ping is fine).
+          response=$(curl -s -o /tmp/body -w "%{http_code}" \
+            --max-time 90 \
+            --retry 2 \
+            --retry-delay 15 \
+            --retry-all-errors \
+            https://tomiwaalukoportfolio.onrender.com/api/health || echo "000")
+          echo "HTTP status: $response"
+          echo "Body:"
+          cat /tmp/body || true
+          echo
