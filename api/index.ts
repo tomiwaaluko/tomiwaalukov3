@@ -4,7 +4,6 @@ import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import type { Request, Response } from 'express';
-import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
 dotenv.config();
@@ -547,30 +546,10 @@ console.log('Swagger Document Loaded:', swaggerDocument ? 'Yes' : 'No');
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 console.log('Swagger Route Registered at /api/docs');
 
-// Setup Nodemailer transporter.
-// Timeouts are explicit because nodemailer defaults to "wait forever". On
-// Render's free tier, Gmail SMTP sometimes hangs on connect (cloud IP
-// throttling), and a hung request becomes a 502 at the Vercel->Render proxy
-// boundary after ~30s instead of a clean 5xx with a real error. Capping each
-// phase means we fail fast and the catch block in /api/collaborate runs with
-// a usable error to log.
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
-
-// Surface the real reason Gmail SMTP is unreachable at boot, so the cause
-// shows up in Render logs without a user having to trigger a request.
-transporter.verify((err) => {
-  if (err) console.error('Nodemailer (Gmail SMTP) verify failed:', err);
-  else console.log('Nodemailer (Gmail SMTP) verified OK');
-});
+// Nodemailer / Gmail SMTP was removed: Render's free tier blocks outbound
+// SMTP (ETIMEDOUT on CONN), so /api/collaborate now sends through Resend's
+// HTTPS API, same as /api/contact. The `resend` client is initialized near
+// the top of this file from RESEND_API_KEY.
 
 // Test endpoint
 app.get('/api/hello', (req: Request, res: Response) => {
@@ -726,17 +705,38 @@ app.post('/api/collaborate',
         budget, launchDate, maintenance, additionalNotes,
       }) : undefined;
 
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_TO || process.env.EMAIL_USER,
+      // Send via Resend (HTTPS API) instead of Nodemailer/Gmail SMTP.
+      // Render's free tier blocks outbound SMTP (ETIMEDOUT on CONN), so the
+      // old Gmail/Nodemailer path could never succeed in production. Resend
+      // uses an HTTPS request and works fine from Render free.
+      if (!resend) {
+        res.status(503).json({ success: false, error: 'Email service is not configured.' });
+        return;
+      }
+      const adminTo = process.env.EMAIL_TO || process.env.RESEND_TO;
+      if (!adminTo) {
+        res.status(503).json({ success: false, error: 'Recipient address not configured.' });
+        return;
+      }
+      const fromAddress =
+        process.env.RESEND_FROM?.trim() || 'Portfolio <onboarding@resend.dev>';
+      const adminText = `You have received a new ${source === 'services' ? 'service' : 'collaboration'} request:\n\n${lines.join('\n')}`;
+
+      const adminResult = await resend.emails.send({
+        from: fromAddress,
+        to: [adminTo],
         replyTo: email,
         subject,
-        text: `You have received a new ${source === 'services' ? 'service' : 'collaboration'} request:\n\n${lines.join('\n')}`,
+        text: adminText,
         ...(html ? { html } : {}),
-      };
-      await transporter.sendMail(mailOptions);
+      });
+      if (adminResult.error) {
+        console.error('Resend admin notification error:', adminResult.error);
+        res.status(500).json({ success: false, error: 'Failed to submit collaboration request.' });
+        return;
+      }
 
-      // Send confirmation email to the client
+      // Send confirmation email to the client (services flow only)
       if (source === 'services') {
         const confirmationFields = {
           name, email, phone, company, website,
@@ -747,15 +747,21 @@ app.post('/api/collaborate',
           hasLogo, brandFonts, contentProvider, imageProvider, existingContent,
           budget, launchDate, maintenance, additionalNotes,
         };
-        const confirmationMail = {
-          from: process.env.EMAIL_USER,
-          to: email,
+        const confirmationText = `Hi ${name},\n\nThanks for submitting your project request! I've received your details and will get back to you within 24-48 hours.\n\nHere's a summary of what you submitted:\n\n${lines.join('\n')}\n\nIf you have any questions, just reply to this email.\n\n— Tomiwa Aluko`;
+
+        // Fire-and-forget so the client confirmation doesn't block our 201.
+        // If the confirmation fails we still consider the submission a success
+        // because the admin notification already landed.
+        resend.emails.send({
+          from: fromAddress,
+          to: [email],
+          replyTo: adminTo,
           subject: 'Your project request has been received — Tomiwa Aluko',
-          text: `Hi ${name},\n\nThanks for submitting your project request! I've received your details and will get back to you within 24-48 hours.\n\nHere's a summary of what you submitted:\n\n${lines.join('\n')}\n\nIf you have any questions, just reply to this email.\n\n— Tomiwa Aluko`,
+          text: confirmationText,
           html: clientConfirmationHtml(confirmationFields),
-        };
-        // Fire-and-forget so client confirmation doesn't block the response
-        transporter.sendMail(confirmationMail).catch((err: unknown) => {
+        }).then((r) => {
+          if (r.error) console.error('Resend client confirmation error:', r.error);
+        }).catch((err: unknown) => {
           console.error('Failed to send client confirmation email:', err);
         });
       }
@@ -839,18 +845,6 @@ app.get('/api/profile-views', async (req: Request, res: Response) => {
     // Regex strategy:
     const matches = svgText.match(/>\s*([\d,]+)\s*<\/text>/g);
     let views = 0;
-    if (matches && matches.length > 0) {
-      // Get the last match
-      const lastMatch = matches[matches.length - 1];
-      // Extract number string
-      const numberStr = lastMatch.replace(/<\/?text>|>|\s|,/g, '');
-      const parsed = parseInt(numberStr, 10);
-      if (!isNaN(parsed)) {
-        views = parsed;
-      }
-    }
-
-    res.json({ views });
 
   } catch (error) {
     console.error('Error fetching profile views:', error);
