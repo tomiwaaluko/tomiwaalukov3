@@ -87,11 +87,11 @@ function MilestoneDescription({
 const milestones: Milestone[] = [
     {
         year: '2026',
-        title: 'Bank of New York · Software Engineering Intern (Incoming)',
+        title: 'Bank of New York · Software Engineering Intern',
         redCompany: true,
-        scrambleCompany: true,
-        descriptionScramblePhrase:
-            'a global financial technology and investment services company.',
+        // scrambleCompany: true,
+        // descriptionScramblePhrase:
+        //     'a global financial technology and investment services company.',
         description:
             'Summer 2026. Selected for a competitive Software Engineering internship at a global financial technology and investment services company.',
         tags: ['Software Engineering', 'FinTech', 'Internship'],
