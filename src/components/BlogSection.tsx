@@ -30,6 +30,11 @@ const BlogSection: React.FC = () => {
   useEffect(() => {
     const fetchMedium = async () => {
       try {
+        // NOTE: this host is NOT in the Content-Security-Policy connect-src in
+        // vercel.json. This component is currently unused (both its import and
+        // its usage are commented out in Home.tsx), so the omission is
+        // deliberate - add https://api.rss2json.com to connect-src before
+        // re-enabling the section, or the fetch will be blocked.
         const res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@tomiwaaluko');
         const data = await res.json();
         if (data.status === 'ok') {

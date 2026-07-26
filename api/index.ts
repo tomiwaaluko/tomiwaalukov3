@@ -498,13 +498,9 @@ function clientConfirmationHtml(fields: {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Render terminates TLS at its edge and forwards with X-Forwarded-For. Setting
-// the hop count (rather than `true`) makes req.ip the address that proxy
-// observed. With `true`, Express would trust the leftmost XFF entry - which the
-// caller supplies - and every rate limit below could be bypassed by rotating
-// the header. With it unset, every request looks like it came from the proxy
-// and all callers share one bucket.
-app.set('trust proxy', 1);
+// Deliberately NOT using `app.set('trust proxy', n)` - see rateLimitKey below
+// for why a hop count cannot be chosen correctly for this deployment.
+
 
 // PostgreSQL Connection
 const pool = new Pool({
@@ -590,38 +586,108 @@ app.use(
   }),
 );
 
-// Explicit body size limit rather than relying on the default.
-app.use(express.json({ limit: '64kb' }));
+/**
+ * Rate-limit key.
+ *
+ * Getting this wrong is worse than having no limiter, so it is worth spelling
+ * out. In production the browser calls the RELATIVE path `/api/...`, which
+ * `vercel.json` rewrites server-side to the Render host. The real chain is:
+ *
+ *     browser -> Vercel edge -> Render LB -> this process
+ *
+ * Render never talks to the visitor. So `req.ip` - with any `trust proxy` hop
+ * count - resolves to Vercel's egress address, identical for every visitor on
+ * earth. Every caller would share one bucket, and five requests would 429 the
+ * contact and services forms for everyone, permanently, for free.
+ *
+ * The visitor's own address is the LEFTMOST X-Forwarded-For entry, appended by
+ * Vercel's edge. That is what we key on.
+ *
+ * The trade-off, stated plainly: a caller who reaches the Render host directly
+ * can set that header themselves and get a fresh bucket per request. That is
+ * acceptable here because these limits are abuse heuristics, not an
+ * authorization boundary - nothing behind them is protected by the limit alone
+ * (the destructive route has its own token, and the mail routes send only fixed
+ * templates). Sharing one global bucket, by contrast, is a guaranteed outage
+ * triggered by any single actor. Given a choice between "bypassable by a
+ * determined attacker" and "trivially DoS-able by anyone", take the former.
+ *
+ * If the API is ever served from its own origin rather than through the Vercel
+ * rewrite, revisit this - `req.ip` with a correct hop count becomes right again.
+ */
+function rateLimitKey(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  if (typeof raw === 'string' && raw.length > 0) {
+    return raw.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress ?? 'unknown';
+}
+
+const limiterDefaults = {
+  standardHeaders: 'draft-7' as const,
+  legacyHeaders: false,
+  keyGenerator: rateLimitKey,
+  // We supply our own key, so the library's trust-proxy heuristics do not apply.
+  validate: { trustProxy: false, xForwardedForHeader: false },
+  message: { success: false, error: 'Too many requests. Please try again later.' },
+};
 
 /**
- * Rate limiters.
+ * None of these endpoints had any throttle. Two send real email and one writes
+ * to the database, all without authentication.
  *
- * None of these endpoints had any throttle. Two of them send real email and
- * one writes to the database, all without authentication.
+ * Limits are per visitor and sized so a human filling in a form never sees a
+ * 429 even after several corrections, while bulk submission is bounded.
  */
 const emailLimiter = rateLimit({
+  ...limiterDefaults,
   windowMs: 15 * 60 * 1000,
-  limit: 5,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: { success: false, error: 'Too many requests. Please try again later.' },
+  limit: 10,
 });
 
 const writeLimiter = rateLimit({
+  ...limiterDefaults,
   windowMs: 15 * 60 * 1000,
   limit: 20,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: { success: false, error: 'Too many requests. Please try again later.' },
 });
 
 const readLimiter = rateLimit({
+  ...limiterDefaults,
   windowMs: 60 * 1000,
   limit: 120,
-  standardHeaders: 'draft-7',
-  legacyHeaders: false,
-  message: { success: false, error: 'Too many requests. Please try again later.' },
 });
+
+/**
+ * Backstop for the cheap always-on routes. Generous: /api/health is polled by
+ * the client as a cold-start warm-up, and by the keep-alive workflow.
+ */
+const healthLimiter = rateLimit({
+  ...limiterDefaults,
+  windowMs: 60 * 1000,
+  limit: 240,
+});
+
+// Throttle the body-carrying routes BEFORE the JSON parser runs.
+//
+// app-level middleware runs in registration order, so mounting the parser
+// first would mean every request - including ones about to be 429'd - costs a
+// full socket read and a JSON.parse. Cheap for the caller, not for a free-tier
+// dyno.
+//
+// Scoped with app.post rather than app.use so guestbook READS are not caught by
+// the write limiter. These are the only places these three limiters are
+// applied: running the same limiter instance twice in one request would count
+// the request twice and silently halve the limit.
+app.post('/api/contact', emailLimiter);
+app.post('/api/collaborate', emailLimiter);
+app.post('/api/guestbook', writeLimiter);
+
+// Explicit body size limit rather than relying on the default.
+// 128kb comfortably exceeds the sum of the per-field validation caps below, so
+// a payload can never be rejected by the parser when the validators would have
+// accepted it (which would surface as a confusing 413).
+app.use(express.json({ limit: '128kb' }));
 
 /**
  * Kill switch for the client confirmation email.
@@ -633,6 +699,34 @@ const readLimiter = rateLimit({
  */
 const CONFIRMATION_EMAILS_ENABLED =
   process.env.DISABLE_CONFIRMATION_EMAILS !== 'true';
+
+/**
+ * Reduce a submitted name to something safe to place in an email addressed to
+ * a third party.
+ *
+ * Length-capping `name` was not enough. It is the ONLY caller-supplied value
+ * that still reaches the confirmation recipient, and `.trim()` strips only
+ * leading and trailing whitespace - internal newlines survive, and the
+ * text/plain part is not HTML-escaped. So ~100 characters of attacker-authored
+ * text, complete with line breaks and a URL that every mail client
+ * auto-linkifies, could be delivered to any address from a domain with aligned
+ * SPF/DKIM/DMARC:
+ *
+ *     name = "there,\n\nYour invoice is overdue. Pay: https://x.example/p\n\nBilling"
+ *     -> "Hi there,\n\nYour invoice is overdue. Pay: https://x.example/p\n\nBilling,"
+ *
+ * Restricting to letters, marks, spaces, apostrophes, hyphens and periods
+ * removes the newlines, the colon, and the slashes a URL needs. Anything that
+ * does not look like a name falls back to a neutral greeting rather than being
+ * partially rendered.
+ */
+function safeGreetingName(value: unknown): string {
+  const raw = String(value ?? '').replace(/\s+/g, ' ').trim();
+  if (!raw || raw.length > 60) {
+    return 'there';
+  }
+  return /^[\p{L}\p{M}'\-. ]+$/u.test(raw) ? raw : 'there';
+}
 
 /**
  * Admin gate for destructive routes.
@@ -667,13 +761,25 @@ function requireAdminToken(req: Request, res: Response, next: NextFunction) {
 // Swagger Documentation
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-// Swagger is served only outside production, or when explicitly enabled.
-// Publishing the full API surface to anonymous callers hands an attacker a map
-// of every endpoint and its expected payloads.
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'true') {
+// Swagger is opt-in via ENABLE_API_DOCS, NOT gated on NODE_ENV.
+//
+// Deliberate: a deployment that forgets to set NODE_ENV=production would, under
+// a `NODE_ENV !== 'production'` check, silently publish the full API surface -
+// every endpoint and its expected payload - to anonymous callers. Failing
+// closed on a missing variable is the safer default.
+if (process.env.ENABLE_API_DOCS === 'true') {
   try {
     const swaggerDocument = YAML.load('./swagger.yaml');
-    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    app.use(
+      '/api/docs',
+      // helmet's default CSP is script-src 'self', which blocks the inline
+      // bootstrap script Swagger UI ships with, leaving a blank page. Relax it
+      // for this route only.
+      helmet({ contentSecurityPolicy: false }),
+      readLimiter,
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerDocument),
+    );
     console.log('Swagger UI registered at /api/docs');
   } catch (err) {
     console.error('Failed to load swagger.yaml; /api/docs not registered:', err);
@@ -686,19 +792,19 @@ if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'tr
 // the top of this file from RESEND_API_KEY.
 
 // Test endpoint
-app.get('/api/hello', (req: Request, res: Response) => {
+app.get('/api/hello', healthLimiter, (req: Request, res: Response) => {
   res.json({ message: 'Hello from Express + TypeScript backend (Neon DB)!' });
 });
 
 // Health check endpoint
-app.get('/api/health', (req: Request, res: Response) => {
+app.get('/api/health', healthLimiter, (req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
 
 // Contact form → Resend (portfolio site)
 app.post('/api/contact',
-  emailLimiter,
   [
+
     body('name').trim().notEmpty().isLength({ max: 100 })
       .withMessage('Name is required (max 100 characters)'),
     body('email').trim().isEmail().isLength({ max: 254 })
@@ -794,9 +900,14 @@ const COLLABORATE_TEXT_FIELDS = [
 ] as const;
 
 app.post('/api/collaborate',
-  emailLimiter,
   [
-    body('name').trim().notEmpty().isLength({ max: 100 }).withMessage('Name is required (max 100 characters)'),
+
+    // CRLF stripped for the same reason /api/contact strips it from its
+    // subject: `name` is interpolated into the admin notification's Subject
+    // header below, and an embedded newline is the header-injection primitive.
+    body('name').trim().notEmpty().isLength({ max: 100 })
+      .customSanitizer((value: string) => String(value).replace(/[\r\n]+/g, ' '))
+      .withMessage('Name is required (max 100 characters)'),
     body('email').trim().isEmail().isLength({ max: 254 }).withMessage('Valid email is required'),
     body('source').optional().isIn(['services', 'collaborate']).withMessage('Invalid source'),
     ...COLLABORATE_TEXT_FIELDS.map((field) =>
@@ -917,8 +1028,11 @@ app.post('/api/collaborate',
       // use it to deliver chosen content. The name is included because it is
       // length-capped and escaped, and a confirmation without it reads oddly.
       if (source === 'services' && CONFIRMATION_EMAILS_ENABLED) {
+        // The only caller-supplied value in this email, and it goes to an
+        // address the caller chose. See safeGreetingName.
+        const greeting = safeGreetingName(name);
         const confirmationText = [
-          `Hi ${name},`,
+          `Hi ${greeting},`,
           '',
           "Thanks for submitting your project request. I've received your details",
           'and will get back to you within 24-48 hours.',
@@ -939,7 +1053,7 @@ app.post('/api/collaborate',
           replyTo: adminTo,
           subject: 'Your project request has been received — Tomiwa Aluko',
           text: confirmationText,
-          html: clientConfirmationHtml({ name, email }),
+          html: clientConfirmationHtml({ name: greeting, email }),
         }).then((r) => {
           if (r.error) console.error('Resend client confirmation error:', r.error);
         }).catch((err: unknown) => {
@@ -959,8 +1073,8 @@ app.post('/api/collaborate',
 // every field is length-capped - previously both were unbounded, so a script
 // could fill the table with arbitrarily large rows.
 app.post('/api/guestbook',
-  writeLimiter,
   [
+
     body('name').trim().notEmpty().isLength({ max: 80 })
       .withMessage('Name is required (max 80 characters)'),
     body('message').trim().notEmpty().isLength({ max: 1000 })
@@ -1002,8 +1116,12 @@ app.get('/api/guestbook',
       // Explicit columns and a bounded page. `SELECT *` with no limit returned
       // the entire table on every call, which grows without bound and would
       // expose any column added to this table later.
-      const limit = (req.query.limit as unknown as number) ?? 50;
-      const offset = (req.query.offset as unknown as number) ?? 0;
+      // Coerce explicitly. In Express 5 `req.query` is a recomputed getter, so
+      // express-validator's .toInt() writes into a throwaway object and the
+      // values arrive here as strings - the validators still run correctly on
+      // the read, but the conversion is lost. Range is already enforced above.
+      const limit = Number(req.query.limit) || 50;
+      const offset = Number(req.query.offset) || 0;
       const result = await pool.query(
         'SELECT id, name, message, created_at FROM guestbook ORDER BY created_at DESC LIMIT $1 OFFSET $2',
         [limit, offset]
@@ -1130,10 +1248,30 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   if (res.headersSent) {
     return;
   }
+
   if (err.message === 'Not allowed by CORS') {
     res.status(403).json({ success: false, error: 'Origin not allowed.' });
     return;
   }
+
+  // Honour the error's own status for client errors. body-parser raises a 400
+  // for malformed JSON and a 413 for an oversized body; reporting those as 500
+  // blames the server for the caller's mistake, and the frontend branches on
+  // `status >= 500` to decide whether to say "server error, try later".
+  const status = (err as { status?: number; statusCode?: number }).status
+    ?? (err as { statusCode?: number }).statusCode;
+
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    res.status(status).json({
+      success: false,
+      error:
+        status === 413
+          ? 'Request body too large.'
+          : 'Malformed request.',
+    });
+    return;
+  }
+
   res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
