@@ -1,10 +1,13 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import { body, validationResult } from 'express-validator';
-import type { Request, Response } from 'express';
+import { body, param, query, validationResult } from 'express-validator';
+import type { Request, Response, NextFunction } from 'express';
 import { Resend } from 'resend';
+import { timingSafeEqual } from 'crypto';
 
 dotenv.config();
 
@@ -495,12 +498,23 @@ function clientConfirmationHtml(fields: {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Render terminates TLS at its edge and forwards with X-Forwarded-For. Setting
+// the hop count (rather than `true`) makes req.ip the address that proxy
+// observed. With `true`, Express would trust the leftmost XFF entry - which the
+// caller supplies - and every rate limit below could be bypassed by rotating
+// the header. With it unset, every request looks like it came from the proxy
+// and all callers share one bucket.
+app.set('trust proxy', 1);
+
 // PostgreSQL Connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false, // Required for Neon
-  },
+  // SECURITY: this was `rejectUnauthorized: false`, which disables certificate
+  // verification entirely - the client would accept any certificate, so anyone
+  // able to intercept the connection could read and modify traffic to the
+  // database. Neon presents a certificate signed by a public CA, so normal
+  // verification works; the flag was never actually required.
+  ssl: { rejectUnauthorized: true },
 });
 
 pool.connect()
@@ -534,17 +548,137 @@ const initDB = async () => {
 };
 initDB();
 
-app.use(cors());
-app.use(express.json());
+// Baseline security headers. The API served none.
+app.use(helmet());
+
+/**
+ * CORS allowlist.
+ *
+ * SECURITY: this was a bare `cors()`, which reflects `Access-Control-Allow-Origin: *`
+ * and lets any site on the internet call these endpoints from a visitor's
+ * browser. Origins come from ALLOWED_ORIGINS (comma-separated).
+ */
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const DEFAULT_ORIGINS = [
+  'https://tomiwaaluko.com',
+  'https://www.tomiwaaluko.com',
+];
+
+const allowedOrigins =
+  ALLOWED_ORIGINS.length > 0
+    ? ALLOWED_ORIGINS
+    : process.env.NODE_ENV === 'production'
+      ? DEFAULT_ORIGINS
+      : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Requests with no Origin (curl, server-to-server, same-origin
+      // navigations) are allowed through; the rate limits below are what
+      // constrain non-browser callers.
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    },
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  }),
+);
+
+// Explicit body size limit rather than relying on the default.
+app.use(express.json({ limit: '64kb' }));
+
+/**
+ * Rate limiters.
+ *
+ * None of these endpoints had any throttle. Two of them send real email and
+ * one writes to the database, all without authentication.
+ */
+const emailLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests. Please try again later.' },
+});
+
+const writeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests. Please try again later.' },
+});
+
+const readLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 120,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { success: false, error: 'Too many requests. Please try again later.' },
+});
+
+/**
+ * Kill switch for the client confirmation email.
+ *
+ * That email is the only one this API sends to a caller-supplied address, so
+ * it is the only outbound path that can be aimed at a third party. Defaults on,
+ * but can be turned off from the environment without a deploy if it is ever
+ * abused.
+ */
+const CONFIRMATION_EMAILS_ENABLED =
+  process.env.DISABLE_CONFIRMATION_EMAILS !== 'true';
+
+/**
+ * Admin gate for destructive routes.
+ *
+ * Compared in constant time: `===` short-circuits on the first differing byte,
+ * so response timing would leak how much of the token an attacker has guessed.
+ */
+function requireAdminToken(req: Request, res: Response, next: NextFunction) {
+  const expected = process.env.ADMIN_TOKEN;
+  if (!expected) {
+    console.error('ADMIN_TOKEN is not configured; refusing admin request.');
+    res.status(503).json({ success: false, error: 'Not available.' });
+    return;
+  }
+
+  const header = req.headers['authorization'];
+  const provided =
+    typeof header === 'string' && header.toLowerCase().startsWith('bearer ')
+      ? header.slice(7).trim()
+      : '';
+
+  const a = Buffer.from(provided, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    res.status(401).json({ success: false, error: 'Unauthorized' });
+    return;
+  }
+
+  next();
+}
 
 // Swagger Documentation
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
-console.log('Loading Swagger YAML...');
-const swaggerDocument = YAML.load('./swagger.yaml');
-console.log('Swagger Document Loaded:', swaggerDocument ? 'Yes' : 'No');
-app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-console.log('Swagger Route Registered at /api/docs');
+// Swagger is served only outside production, or when explicitly enabled.
+// Publishing the full API surface to anonymous callers hands an attacker a map
+// of every endpoint and its expected payloads.
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_API_DOCS === 'true') {
+  try {
+    const swaggerDocument = YAML.load('./swagger.yaml');
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    console.log('Swagger UI registered at /api/docs');
+  } catch (err) {
+    console.error('Failed to load swagger.yaml; /api/docs not registered:', err);
+  }
+}
 
 // Nodemailer / Gmail SMTP was removed: Render's free tier blocks outbound
 // SMTP (ETIMEDOUT on CONN), so /api/collaborate now sends through Resend's
@@ -563,11 +697,18 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 // Contact form → Resend (portfolio site)
 app.post('/api/contact',
+  emailLimiter,
   [
-    body('name').trim().notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Valid email is required'),
-    body('message').trim().notEmpty().withMessage('Message is required'),
-    body('subject').optional().trim(),
+    body('name').trim().notEmpty().isLength({ max: 100 })
+      .withMessage('Name is required (max 100 characters)'),
+    body('email').trim().isEmail().isLength({ max: 254 })
+      .withMessage('Valid email is required'),
+    body('message').trim().notEmpty().isLength({ max: 5000 })
+      .withMessage('Message is required (max 5000 characters)'),
+    // Capped and CRLF-stripped: this value goes into a mail Subject header,
+    // where an embedded newline would let a submitter append their own headers.
+    body('subject').optional().trim().isLength({ max: 200 })
+      .customSanitizer((value: string) => String(value).replace(/[\r\n]+/g, ' ')),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -638,10 +779,34 @@ app.post('/api/contact',
 );
 
 // Collaboration endpoint (Email only for now, DB optional or future)
+/**
+ * Free-text fields on the service-request form. Every one of these is
+ * interpolated into an outbound email, so each needs a length cap - previously
+ * only `name` and `email` were validated at all and the rest were unbounded.
+ */
+const COLLABORATE_TEXT_FIELDS = [
+  'company', 'phone', 'projectType', 'budget', 'timeline', 'description',
+  'requirements', 'website', 'mainGoal', 'targetAudience', 'domainName',
+  'cmsNeeded', 'mobileFriendly', 'colorPreferences', 'designStyle',
+  'websitesYouLike', 'hasLogo', 'brandFonts', 'contentProvider',
+  'imageProvider', 'existingContent', 'launchDate', 'maintenance',
+  'additionalNotes',
+] as const;
+
 app.post('/api/collaborate',
+  emailLimiter,
   [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Valid email is required'),
+    body('name').trim().notEmpty().isLength({ max: 100 }).withMessage('Name is required (max 100 characters)'),
+    body('email').trim().isEmail().isLength({ max: 254 }).withMessage('Valid email is required'),
+    body('source').optional().isIn(['services', 'collaborate']).withMessage('Invalid source'),
+    ...COLLABORATE_TEXT_FIELDS.map((field) =>
+      body(field).optional().isString().trim().isLength({ max: 2000 })
+        .withMessage(`${field} must be 2000 characters or fewer`),
+    ),
+    body('pagesNeeded').optional().isArray({ max: 50 }),
+    body('pagesNeeded.*').isString().trim().isLength({ max: 200 }),
+    body('features').optional().isArray({ max: 50 }),
+    body('features.*').isString().trim().isLength({ max: 200 }),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -736,18 +901,34 @@ app.post('/api/collaborate',
         return;
       }
 
-      // Send confirmation email to the client (services flow only)
-      if (source === 'services') {
-        const confirmationFields = {
-          name, email, phone, company, website,
-          projectType, mainGoal, targetAudience, domainName,
-          pagesNeeded: Array.isArray(pagesNeeded) ? pagesNeeded : (pagesNeeded ? [pagesNeeded] : undefined),
-          features: Array.isArray(features) ? features : (features ? [features] : undefined),
-          cmsNeeded, mobileFriendly, colorPreferences, designStyle, websitesYouLike,
-          hasLogo, brandFonts, contentProvider, imageProvider, existingContent,
-          budget, launchDate, maintenance, additionalNotes,
-        };
-        const confirmationText = `Hi ${name},\n\nThanks for submitting your project request! I've received your details and will get back to you within 24-48 hours.\n\nHere's a summary of what you submitted:\n\n${lines.join('\n')}\n\nIf you have any questions, just reply to this email.\n\n— Tomiwa Aluko`;
+      // Send confirmation email to the client (services flow only).
+      //
+      // SECURITY: this is the one place the API sends mail to a CALLER-SUPPLIED
+      // address, with caller-supplied content echoed back into the body. That
+      // made it an open relay: anyone could POST {source:'services', email:
+      // <victim>, name: '<phishing copy>'} and have this server deliver
+      // attacker-authored mail to arbitrary recipients from a verified sending
+      // domain - burning the domain's reputation and the Resend quota, and
+      // lending the sender's credibility to the content.
+      //
+      // Two controls now apply. The route is rate limited (emailLimiter above),
+      // and the confirmation body is a fixed template: it no longer reflects
+      // the submitted field values back to the recipient, so an attacker cannot
+      // use it to deliver chosen content. The name is included because it is
+      // length-capped and escaped, and a confirmation without it reads oddly.
+      if (source === 'services' && CONFIRMATION_EMAILS_ENABLED) {
+        const confirmationText = [
+          `Hi ${name},`,
+          '',
+          "Thanks for submitting your project request. I've received your details",
+          'and will get back to you within 24-48 hours.',
+          '',
+          'For your records, a copy of the details you submitted was delivered',
+          'with your request. If you did not submit this form, you can ignore',
+          'this message.',
+          '',
+          '— Tomiwa Aluko',
+        ].join('\n');
 
         // Fire-and-forget so the client confirmation doesn't block our 201.
         // If the confirmation fails we still consider the submission a success
@@ -758,7 +939,7 @@ app.post('/api/collaborate',
           replyTo: adminTo,
           subject: 'Your project request has been received — Tomiwa Aluko',
           text: confirmationText,
-          html: clientConfirmationHtml(confirmationFields),
+          html: clientConfirmationHtml({ name, email }),
         }).then((r) => {
           if (r.error) console.error('Resend client confirmation error:', r.error);
         }).catch((err: unknown) => {
@@ -774,11 +955,16 @@ app.post('/api/collaborate',
   }
 );
 
-// Guestbook endpoint
+// Guestbook endpoint. Unauthenticated by design, so it is rate limited and
+// every field is length-capped - previously both were unbounded, so a script
+// could fill the table with arbitrarily large rows.
 app.post('/api/guestbook',
+  writeLimiter,
   [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('message').notEmpty().withMessage('Message is required'),
+    body('name').trim().notEmpty().isLength({ max: 80 })
+      .withMessage('Name is required (max 80 characters)'),
+    body('message').trim().notEmpty().isLength({ max: 1000 })
+      .withMessage('Message is required (max 1000 characters)'),
   ],
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
@@ -800,62 +986,123 @@ app.post('/api/guestbook',
   }
 );
 
-app.get('/api/guestbook', async (req: Request, res: Response) => {
-  console.log('GET /api/guestbook called');
-  try {
-    const result = await pool.query('SELECT * FROM guestbook ORDER BY created_at DESC');
-    console.log('Query success, rows:', result.rowCount);
-    res.json(result.rows);
-  } catch (err) {
-    console.error('Error fetching guestbook:', err);
-    res.status(500).json({ success: false, error: 'Failed to fetch guestbook entries.' });
+app.get('/api/guestbook',
+  readLimiter,
+  [
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('offset').optional().isInt({ min: 0 }).toInt(),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+    try {
+      // Explicit columns and a bounded page. `SELECT *` with no limit returned
+      // the entire table on every call, which grows without bound and would
+      // expose any column added to this table later.
+      const limit = (req.query.limit as unknown as number) ?? 50;
+      const offset = (req.query.offset as unknown as number) ?? 0;
+      const result = await pool.query(
+        'SELECT id, name, message, created_at FROM guestbook ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+        [limit, offset]
+      );
+      res.json(result.rows);
+    } catch (err) {
+      console.error('Error fetching guestbook:', err);
+      res.status(500).json({ success: false, error: 'Failed to fetch guestbook entries.' });
+    }
   }
-});
+);
 
-app.delete('/api/guestbook/:id', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM guestbook WHERE id = $1', [id]);
-    res.json({ success: true, message: 'Entry deleted' });
-  } catch (err) {
-    console.error('Error deleting guestbook entry:', err);
-    res.status(500).json({ success: false, error: 'Failed to delete entry.' });
-  }
-});
-
-app.get('/api/profile-views', async (req: Request, res: Response) => {
-  try {
-    const response = await fetch('https://komarev.com/ghpvc/?username=tomiwaaluko&label=PROFILE+VIEWS&style=flat', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+/**
+ * SECURITY: admin only.
+ *
+ * This route was completely unauthenticated - anyone who knew the URL could
+ * delete any guestbook entry, or walk the ids and empty the table.
+ */
+app.delete('/api/guestbook/:id',
+  writeLimiter,
+  requireAdminToken,
+  [param('id').isInt({ min: 1 }).toInt()],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ success: false, errors: errors.array() });
+      return;
+    }
+    const { id } = req.params;
+    try {
+      const result = await pool.query('DELETE FROM guestbook WHERE id = $1', [id]);
+      if (result.rowCount === 0) {
+        res.status(404).json({ success: false, error: 'Entry not found.' });
+        return;
       }
-    });
+      res.json({ success: true, message: 'Entry deleted' });
+    } catch (err) {
+      console.error('Error deleting guestbook entry:', err);
+      res.status(500).json({ success: false, error: 'Failed to delete entry.' });
+    }
+  }
+);
+
+/**
+ * Proxy for the GitHub profile-view badge.
+ *
+ * SECURITY / availability: the success path previously computed `matches` and
+ * `views` and then simply ended - it never called res.send/res.json. Every
+ * successful request therefore hung until the client or proxy timed out,
+ * holding a socket and an upstream connection open the whole time. A handful
+ * of concurrent callers could exhaust the connection pool on Render's free
+ * tier. The request timeout below also stops a slow upstream from pinning
+ * resources indefinitely.
+ */
+app.get('/api/profile-views', readLimiter, async (_req: Request, res: Response) => {
+  try {
+    const response = await fetch(
+      'https://komarev.com/ghpvc/?username=tomiwaaluko&label=PROFILE+VIEWS&style=flat',
+      {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
+        signal: AbortSignal.timeout(8000),
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch from Komarev: ${response.statusText}`);
     }
 
     const svgText = await response.text();
-    // Simple regex to find the number in the SVG
-    // Looking for the last occurrence of a number in text tags usually
-    // The SVG structure roughly has: <text ...>3,523</text>
-    // We can strip commas and look for digits
 
-    // Logic from frontend was: last text node.
-    // Regex strategy:
+    // The badge renders the count as the last <text> node, e.g. <text ...>3,523</text>.
     const matches = svgText.match(/>\s*([\d,]+)\s*<\/text>/g);
     let views = 0;
 
+    if (matches && matches.length > 0) {
+      const digits = matches[matches.length - 1].replace(/[^\d]/g, '');
+      const parsed = Number.parseInt(digits, 10);
+      if (Number.isFinite(parsed)) {
+        views = parsed;
+      }
+    }
+
+    res.json({ views });
   } catch (error) {
     console.error('Error fetching profile views:', error);
-    res.status(500).json({ error: 'Failed to fetch profile views' });
+    res.status(502).json({ error: 'Failed to fetch profile views' });
   }
 });
 
-app.get('/api/commit-stats', async (req: Request, res: Response) => {
+app.get('/api/commit-stats', readLimiter, async (_req: Request, res: Response) => {
   try {
     // Same GitHub username as DevActivity / frontend
-    const response = await fetch(`https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=tomiwaaluko&t=${new Date().getTime()}`);
+    const response = await fetch(
+      `https://github-profile-summary-cards.vercel.app/api/cards/most-commit-language?username=tomiwaaluko&t=${new Date().getTime()}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch commit stats: ${response.statusText}`);
@@ -867,8 +1114,27 @@ app.get('/api/commit-stats', async (req: Request, res: Response) => {
 
   } catch (error) {
     console.error('Error fetching commit stats:', error);
-    res.status(500).json({ error: 'Failed to fetch commit stats' });
+    res.status(502).json({ error: 'Failed to fetch commit stats' });
   }
+});
+
+/**
+ * Catch-all error handler.
+ *
+ * Without one, Express's default handler responds with the error's stack trace
+ * when NODE_ENV is not 'production' - and it also produces the wall-of-HTML
+ * response for CORS rejections. Log the detail; return a generic body.
+ */
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('Unhandled error:', err);
+  if (res.headersSent) {
+    return;
+  }
+  if (err.message === 'Not allowed by CORS') {
+    res.status(403).json({ success: false, error: 'Origin not allowed.' });
+    return;
+  }
+  res.status(500).json({ success: false, error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {

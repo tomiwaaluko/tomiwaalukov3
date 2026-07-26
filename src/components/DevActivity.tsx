@@ -134,16 +134,26 @@ const DevActivity: React.FC = () => {
         setProfileViewsUnavailable(false);
 
         const username = 'tomiwaaluko';
-        const token = import.meta.env.VITE_GITHUB_TOKEN;
 
-        const headers: HeadersInit = token ? { Authorization: `token ${token}` } : {};
-
-        // Fetch User Data
-        const userRes = await fetch(`https://api.github.com/users/${username}`, { headers });
+        // SECURITY: no Authorization header here.
+        //
+        // This used to read `import.meta.env.VITE_GITHUB_TOKEN` and send it to
+        // api.github.com. Vite inlines every VITE_-prefixed variable into the
+        // production bundle at build time, so setting that variable would have
+        // published a GitHub personal access token to every visitor - readable
+        // with view-source. (No token is in the current build; the variable was
+        // documented in the README but never set.)
+        //
+        // Both endpoints below are public and work unauthenticated. A token
+        // only raised the rate limit from 60 to 5000 requests/hour, which is
+        // not worth publishing a credential for - and if that ceiling is ever
+        // a problem, the proxy in api/index.ts is where a token belongs, since
+        // it runs server-side.
+        const userRes = await fetch(`https://api.github.com/users/${username}`);
         const userData = await userRes.json();
 
         // Fetch Repos (Public) - Still needed for other stats
-        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`, { headers });
+        const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
         const reposData = await reposRes.json();
 
         // --- Fetch External "Most Commit Language" SVG to get accurate Commit Stats ---

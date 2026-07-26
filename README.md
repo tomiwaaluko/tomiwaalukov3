@@ -91,7 +91,16 @@ Create **`api/.env`** with the variables your features need (minimum empty file 
 |----------|---------|
 | `VITE_API_URL` | API base (e.g. `http://localhost:5000/api` in dev). In production, set to your deployed API or a proxied `/api` prefix. |
 | `VITE_CONTACT_EMAIL` | Email shown in the UI (falls back if unset). |
-| `VITE_GITHUB_TOKEN` | Optional GitHub personal token for higher rate limits when **DevActivity** calls the GitHub REST API. |
+
+> [!WARNING]
+> **Never put a secret in a `VITE_`-prefixed variable.** Vite inlines every
+> `VITE_*` value into the production JavaScript bundle at build time, so
+> anything named that way is published to every visitor and readable with
+> view-source. `VITE_GITHUB_TOKEN` was previously documented here — setting it
+> would have leaked a GitHub personal access token. It has been removed, and
+> DevActivity now calls the public GitHub endpoints unauthenticated. If the
+> 60 req/hr limit ever becomes a problem, add the token to the **server-side**
+> proxy in `api/index.ts` instead, where it stays on the server.
 
 ### Backend (`api/.env`)
 
