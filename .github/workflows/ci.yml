@@ -72,6 +72,15 @@ jobs:
 
       # Nothing checked this before, so vulnerable transitive dependencies
       # could reach production unnoticed.
-      - name: npm audit (${{ matrix.workspace }})
+      #
+      # This deliberately does not run `npm audit --audit-level=high`. That
+      # fails on every high/critical advisory including ones with no available
+      # fix, which leaves the job permanently red for reasons no pull request
+      # can address - and a gate nobody can satisfy is one people learn to
+      # scroll past. The gate blocks only on advisories that can actually be
+      # cleared today, and prints the rest with the reason they cannot be.
+      - name: Dependency audit (${{ matrix.workspace }})
         working-directory: ${{ matrix.workspace }}
-        run: npm audit --audit-level=high
+        env:
+          AUDIT_WORKSPACE: ${{ matrix.workspace }}
+        run: node ${{ github.workspace }}/.github/scripts/audit-gate.mjs
