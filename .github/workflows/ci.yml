@@ -32,8 +32,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
+    # `npm ci` rather than `npm install`: the latter silently rewrites the
+    # lockfile when it disagrees with package.json, so CI was not verifying the
+    # dependency tree the repository actually pins. That hid a lockfile which
+    # could not be installed reproducibly at all.
     - name: Install Frontend Dependencies
-      run: npm install
+      run: npm ci
 
     - name: Build Frontend
       run: npm run build
