@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+# Least privilege: these jobs only read the repository.
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -16,6 +20,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        # The checkout token is not needed after this step; leaving it in the
+        # git config would expose it to every later step.
+        persist-credentials: false
 
     # Frontend CI
     - name: Use Node.js ${{ matrix.node-version }} for Frontend
@@ -24,8 +32,12 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
+    # `npm ci` rather than `npm install`: the latter silently rewrites the
+    # lockfile when it disagrees with package.json, so CI was not verifying the
+    # dependency tree the repository actually pins. That hid a lockfile which
+    # could not be installed reproducibly at all.
     - name: Install Frontend Dependencies
-      run: npm install
+      run: npm ci
 
     - name: Build Frontend
       run: npm run build
@@ -45,3 +57,34 @@ jobs:
     - name: Build Backend
       working-directory: ./api
       run: npm run build
+
+  audit:
+    runs-on: ubuntu-latest
+    strategy:
+      # Report every failing workspace, not just the first.
+      fail-fast: false
+      matrix:
+        workspace: [".", "api"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      # Nothing checked this before, so vulnerable transitive dependencies
+      # could reach production unnoticed.
+      #
+      # This deliberately does not run `npm audit --audit-level=high`. That
+      # fails on every high/critical advisory including ones with no available
+      # fix, which leaves the job permanently red for reasons no pull request
+      # can address - and a gate nobody can satisfy is one people learn to
+      # scroll past. The gate blocks only on advisories that can actually be
+      # cleared today, and prints the rest with the reason they cannot be.
+      - name: Dependency audit (${{ matrix.workspace }})
+        working-directory: ${{ matrix.workspace }}
+        env:
+          AUDIT_WORKSPACE: ${{ matrix.workspace }}
+        run: node ${{ github.workspace }}/.github/scripts/audit-gate.mjs

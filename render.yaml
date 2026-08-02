@@ -10,4 +10,32 @@ services:
         value: 18.17.0
       - key: PORT
         value: 10000
+
+      # Marks this as a production deploy. Without it, the CORS allowlist falls
+      # back to localhost origins and 403s every real browser request.
+      - key: NODE_ENV
+        value: production
+
+      # Browser origins allowed to call this API. The API previously used a
+      # bare cors() call, which allows every origin on the internet.
+      # Preview-deployment origins must be added here too, or forms 403 there.
+      - key: ALLOWED_ORIGINS
+        value: https://tomiwaaluko.com,https://www.tomiwaaluko.com
+
+      # Secrets: set these in the Render dashboard. `sync: false` keeps the
+      # value out of version control and out of preview environments.
+      #
+      # ADMIN_TOKEN gates DELETE /api/guestbook/:id, which was previously
+      # unauthenticated. Generate with: openssl rand -base64 48
+      - key: ADMIN_TOKEN
+        sync: false
+
+      - key: DATABASE_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: EMAIL_TO
+        sync: false
     autoDeploy: true

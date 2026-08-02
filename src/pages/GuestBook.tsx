@@ -123,6 +123,15 @@ const GuestBook: React.FC = () => {
         }
     };
 
+    // NOTE: DELETE /api/guestbook/:id now requires an admin bearer token.
+    //
+    // This page is currently unrouted (both the import and the <Route> are
+    // commented out in App.tsx), so nothing calls this today. Before
+    // re-enabling it, decide on an ownership model - the previous behaviour
+    // authorised deletion purely from a localStorage id list, which is what
+    // made the endpoint deletable by anyone. Do NOT ship the admin token to
+    // the browser; if per-user deletion is wanted, have POST return a
+    // per-entry secret and require it on DELETE.
     const handleDelete = async (id: number) => {
         if (!confirm('CONFIRM DELETION COMMAND?')) return;
         try {
@@ -132,6 +141,10 @@ const GuestBook: React.FC = () => {
                 setMyEntryIds(updated);
                 localStorage.setItem('myGuestbookEntries', JSON.stringify(updated));
                 fetchEntries();
+            } else {
+                // Surface the failure instead of silently doing nothing.
+                console.error('Delete rejected:', response.status);
+                alert('DELETION DENIED — this action requires administrator access.');
             }
         } catch (error) {
             console.error('Error deleting entry:', error);
