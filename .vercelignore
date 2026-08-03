@@ -1,0 +1,20 @@
+# The API is deployed to Render, not Vercel.
+#
+# vercel.json rewrites every /api/* request to the Render service, so nothing
+# here is ever reached on Vercel. Without this file Vercel still auto-detects
+# api/ as its serverless-functions directory and compiles api/index.ts on every
+# deploy - installing that workspace's dependencies and invoking whatever
+# TypeScript version they pin.
+#
+# That build was always pointless and is now actively harmful:
+#
+#   1. api/index.ts ends in app.listen() and exports no handler, so the
+#      "function" Vercel produced could never have served a request correctly.
+#   2. It made the frontend deploy fail on a change to a backend-only
+#      dependency - a TypeScript 7 bump broke Vercel's Node builder with
+#      "Cannot read properties of undefined (reading 'readFile')", because the
+#      native compiler port no longer exposes the API that builder calls.
+#
+# Excluding it decouples the two deploys: Render keeps building api/ from this
+# same repo (.vercelignore is Vercel-only), and Vercel builds only the SPA.
+api
