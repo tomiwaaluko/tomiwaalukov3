@@ -111,6 +111,21 @@ Create **`api/.env`** with the variables your features need (minimum empty file 
 | `EMAIL_USER`, `EMAIL_PASS` | Gmail app password path for **POST /api/collaborate** (Nodemailer). |
 | `PORT` | Optional; defaults to **5000**. |
 
+## Render (free tier)
+
+The API is deployed on [Render](https://render.com) as a free web service (`render.yaml`).
+
+If UptimeRobot or the dashboard shows **503 — "This service has been suspended"**, the app code is usually fine. Render suspends free services when monthly limits are hit (most often **750 free instance-hours**). A keep-alive ping every few minutes keeps the dyno running continuously (~720 h/month) and makes this likely.
+
+**Restore the service:**
+
+1. Open the [Render dashboard](https://dashboard.render.com) → **tomiwa-portfolio-api**.
+2. Check **Billing → Monthly Included Usage** for exhausted instance hours or bandwidth.
+3. If hours reset on the 1st of the month, wait for the reset or **upgrade to a paid instance** ($7/mo Starter) to resume immediately.
+4. Click **Resume** if the service shows as suspended and your quota allows it.
+
+After it is back, expect **~1 minute cold starts** when the dyno has been idle 15+ minutes. That is normal on the free plan.
+
 ## API overview
 
 | Method | Path | Notes |

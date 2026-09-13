@@ -1,3 +1,7 @@
+# Free-tier web services get 750 instance-hours/month. Keeping the dyno awake
+# 24/7 (e.g. via a cron ping every 10 min) burns ~720 h and triggers Render to
+# suspend the service with "This service has been suspended." Let it spin down
+# after idle; cold starts are ~1 min. To avoid monthly caps, upgrade the plan.
 services:
   - type: web
     name: tomiwa-portfolio-api
