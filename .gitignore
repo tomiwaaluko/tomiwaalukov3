@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Videos and MP3s are hosted on GitHub Release `media-v1`.
+# Keeping them out of the tree stops Vercel from shipping ~400 MB per deploy.
+public/music/**/*.mp3
+public/project-images/**/*.mp4
+public/project-images/**/*.mov

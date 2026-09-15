@@ -40,7 +40,7 @@ This is Tomiwa Aluko's personal portfolio — a React + Vite SPA with a separate
 
 **Contexts** (`src/context/`):
 - `ThemeContext` — dark/light toggle, persisted in `localStorage`, defaults to dark
-- `MusicContext` — shuffled playlist of `public/music/*.mp3`, autoplay on first user interaction
+- `MusicContext` — shuffled playlist of MP3s hosted on GitHub Release `media-v1` (see `src/data/hostedMedia.ts`), autoplay on first user interaction
 - `TransitionContext` — GSAP timeline ref + `playTransition(path)` for animated route changes
 
 **Project data** (`src/data/`):
@@ -51,11 +51,12 @@ This is Tomiwa Aluko's personal portfolio — a React + Vite SPA with a separate
 **To add a new project:**
 1. Add an entry to `src/data/projects.ts`
 2. Optionally add architecture diagrams to `src/data/projectArchitectures.ts`
-3. Drop images/videos into `public/project-images/<id>/`
+3. Drop still images into `public/project-images/<id>/`. Host large videos on GitHub Release `media-v1` and reference them from `src/data/hostedMedia.ts`.
 
 **To add background music tracks:**
-- Add the `.mp3` to `public/music/`
-- Append the path to `MUSIC_TRACKS` in `src/context/MusicContext.tsx`
+- Upload the `.mp3` to GitHub Release `media-v1`
+- Add a URL in `src/data/hostedMedia.ts` and a track entry in `src/data/musicTracks.ts`
+- Do not put large MP3/MP4 files in `public/` — they are copied into every Vercel deploy
 
 ### Backend (`api/`)
 
