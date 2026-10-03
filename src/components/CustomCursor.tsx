@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { useTronTheme } from '../context/TronThemeContext';
+import { useAccentTheme, type AccentTheme } from '../context/TronThemeContext';
 
 type HitMode = 'default' | 'interactive-link' | 'interactive-button' | 'heading';
 
@@ -15,17 +15,14 @@ function classifyHit(el: Element | null): HitMode {
   return 'default';
 }
 
-const ACCENT = {
-  creamDot: '#C4A572',
-  creamRing: '#8B7355',
-  creamLinkText: '#A68B5B',
-  tronDot: '#41f3f1',
-  tronRing: '#41f3f1',
-  tronLinkText: '#41f3f1',
-} as const;
+const ACCENT: Record<AccentTheme, { dot: string; ring: string; link: string }> = {
+  cream: { dot: '#C4A572', ring: '#8B7355', link: '#A68B5B' },
+  tron: { dot: '#41f3f1', ring: '#41f3f1', link: '#41f3f1' },
+  nigerian: { dot: '#008751', ring: '#006B40', link: '#008751' },
+};
 
 const CustomCursor: React.FC = () => {
-  const { isTronTheme } = useTronTheme();
+  const { accentTheme } = useAccentTheme();
   const cursorRef = useRef<HTMLDivElement>(null);
   const followerRef = useRef<HTMLDivElement>(null);
   const lastPointerKeyRef = useRef('');
@@ -65,7 +62,7 @@ const CustomCursor: React.FC = () => {
     };
 
     const applyHitMode = (mode: HitMode, anchorForTint: HTMLAnchorElement | null) => {
-      const tron = isTronTheme;
+      const accent = ACCENT[accentTheme];
 
       if (mode === 'default') {
         clearLinkTint();
@@ -83,12 +80,12 @@ const CustomCursor: React.FC = () => {
 
       if (mode === 'interactive-link') {
         gsap.to(cursor, {
-          backgroundColor: tron ? ACCENT.tronDot : ACCENT.creamDot,
+          backgroundColor: accent.dot,
           scale: 5.8,
           duration: 0.2,
         });
         gsap.to(follower, {
-          borderColor: tron ? ACCENT.tronRing : ACCENT.creamRing,
+          borderColor: accent.ring,
           scale: 1.5,
           duration: 0.2,
         });
@@ -97,7 +94,7 @@ const CustomCursor: React.FC = () => {
             lastTintedLinkRef.current.style.color = '';
           }
           lastTintedLinkRef.current = anchorForTint;
-          anchorForTint.style.color = tron ? ACCENT.tronLinkText : ACCENT.creamLinkText;
+          anchorForTint.style.color = accent.link;
         }
         return;
       }
@@ -140,7 +137,7 @@ const CustomCursor: React.FC = () => {
       clearLinkTint();
       lastPointerKeyRef.current = '';
     };
-  }, [isTouchDevice, isTronTheme]);
+  }, [isTouchDevice, accentTheme]);
 
   if (isTouchDevice) {
     return null;

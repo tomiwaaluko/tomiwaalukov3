@@ -6,8 +6,13 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
-import { useTronTheme } from './TronThemeContext';
-import { DEFAULT_MUSIC_TRACKS, TRON_LEGACY_TRACKS, type MusicTrack } from '../data/musicTracks';
+import { useAccentTheme, type AccentTheme } from './TronThemeContext';
+import {
+  DEFAULT_MUSIC_TRACKS,
+  NIGERIAN_TRACKS,
+  TRON_LEGACY_TRACKS,
+  type MusicTrack,
+} from '../data/musicTracks';
 
 interface MusicContextType {
   isPlaying: boolean;
@@ -21,7 +26,7 @@ interface MusicContextType {
   duration: number;
   skipNext: () => void;
   skipPrevious: () => void;
-  isTronPlaylist: boolean;
+  playlistLabel: string;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
@@ -38,6 +43,12 @@ interface MusicProviderProps {
   children: React.ReactNode;
 }
 
+function tracksForTheme(theme: AccentTheme): MusicTrack[] {
+  if (theme === 'tron') return [...TRON_LEGACY_TRACKS];
+  if (theme === 'nigerian') return [...NIGERIAN_TRACKS];
+  return [...DEFAULT_MUSIC_TRACKS];
+}
+
 function shuffleInPlace<T>(items: T[]): T[] {
   const a = [...items];
   for (let i = a.length - 1; i > 0; i--) {
@@ -50,7 +61,7 @@ function shuffleInPlace<T>(items: T[]): T[] {
 }
 
 export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
-  const { isTronTheme } = useTronTheme();
+  const { accentTheme } = useAccentTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(0.7);
@@ -68,7 +79,8 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const playbackGenerationRef = useRef(0);
   const cancelPendingPlayRetryRef = useRef<(() => void) | null>(null);
 
-  const isTronPlaylist = isTronTheme;
+  const playlistLabel =
+    accentTheme === 'tron' ? 'TRON · Legacy' : accentTheme === 'nigerian' ? 'Nigeria' : 'Now playing';
 
   const playAfterSourceChange = useCallback((audio: HTMLAudioElement, generation: number) => {
     cancelPendingPlayRetryRef.current?.();
@@ -150,7 +162,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   }, [goToIndex]);
 
   useEffect(() => {
-    const sourceTracks = isTronTheme ? [...TRON_LEGACY_TRACKS] : [...DEFAULT_MUSIC_TRACKS];
+    const sourceTracks = tracksForTheme(accentTheme);
     playlistRef.current = shuffleInPlace(sourceTracks);
     trackIndexRef.current = 0;
 
@@ -275,7 +287,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
       audioRef.current = null;
       playlistRef.current = [];
     };
-  }, [isTronTheme, playAfterSourceChange]);
+  }, [accentTheme, playAfterSourceChange]);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -340,7 +352,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
     duration,
     skipNext,
     skipPrevious,
-    isTronPlaylist,
+    playlistLabel,
   };
 
   return <MusicContext.Provider value={value}>{children}</MusicContext.Provider>;

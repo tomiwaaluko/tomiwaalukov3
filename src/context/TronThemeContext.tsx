@@ -1,38 +1,49 @@
 import React, { createContext, useContext, useLayoutEffect, useState } from 'react';
 
-/** Probability (0–1) that a full page load uses TRON accent + Tron Legacy playlist only. */
-export const TRON_THEME_ROLL_CHANCE = 0.40;
+/** Each full page load picks one accent. The three outcomes are equally likely. */
+export type AccentTheme = 'cream' | 'tron' | 'nigerian';
 
-interface TronThemeContextValue {
-  isTronTheme: boolean;
+export function rollAccentTheme(): AccentTheme {
+  const roll = Math.random();
+  if (roll < 1 / 3) return 'tron';
+  if (roll < 2 / 3) return 'nigerian';
+  return 'cream';
 }
 
-const TronThemeContext = createContext<TronThemeContextValue | undefined>(undefined);
+interface AccentThemeContextValue {
+  accentTheme: AccentTheme;
+}
 
-export function useTronTheme() {
-  const ctx = useContext(TronThemeContext);
+const AccentThemeContext = createContext<AccentThemeContextValue | undefined>(undefined);
+
+export function useAccentTheme() {
+  const ctx = useContext(AccentThemeContext);
   if (!ctx) {
-    throw new Error('useTronTheme must be used within TronThemeProvider');
+    throw new Error('useAccentTheme must be used within TronThemeProvider');
   }
   return ctx;
 }
 
+const THEME_CLASS: Record<AccentTheme, string | null> = {
+  cream: null,
+  tron: 'tron-theme',
+  nigerian: 'nigerian-theme',
+};
+
 export const TronThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isTronTheme] = useState(() => Math.random() < TRON_THEME_ROLL_CHANCE);
+  const [accentTheme] = useState(rollAccentTheme);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
-    if (isTronTheme) {
-      root.classList.add('tron-theme');
-    } else {
-      root.classList.remove('tron-theme');
-    }
-    return () => root.classList.remove('tron-theme');
-  }, [isTronTheme]);
+    root.classList.remove('tron-theme', 'nigerian-theme');
+    const themeClass = THEME_CLASS[accentTheme];
+    if (themeClass) root.classList.add(themeClass);
+    return () => root.classList.remove('tron-theme', 'nigerian-theme');
+  }, [accentTheme]);
 
   return (
-    <TronThemeContext.Provider value={{ isTronTheme }}>
+    <AccentThemeContext.Provider value={{ accentTheme }}>
       {children}
-    </TronThemeContext.Provider>
+    </AccentThemeContext.Provider>
   );
 };

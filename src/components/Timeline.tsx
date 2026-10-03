@@ -244,7 +244,7 @@ const Timeline: React.FC = () => {
                     });
                 }
 
-                gsap.to(year, { opacity: 0.8, scale: 1.5, color: "#C4A572", duration: 0.3 });
+                gsap.to(year, { opacity: 0.8, scale: 1.5, color: "rgb(var(--cream-500-rgb))", duration: 0.3 });
                 gsap.to(line, { height: "100%", opacity: 1, duration: 0.4, ease: "power2.out" });
 
                 gsap.to(item, {

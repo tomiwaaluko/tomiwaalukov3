@@ -19,7 +19,7 @@ const MusicPlayer: React.FC = () => {
     duration,
     skipNext,
     skipPrevious,
-    isTronPlaylist,
+    playlistLabel,
   } = useMusic();
 
   const [minimized, setMinimized] = useState(true);
@@ -72,7 +72,7 @@ const MusicPlayer: React.FC = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500">
-                      {isTronPlaylist ? 'TRON · Legacy' : 'Now playing'}
+                      {playlistLabel}
                     </p>
                     <p className="truncate text-sm font-semibold tracking-tight text-white">
                       {currentTrack?.title ?? '—'}

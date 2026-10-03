@@ -35,4 +35,11 @@ export const hostedMusic = {
   ifIAmWithYou: file('If-I-Am-With-You.mp3'),
   tsukamori: file('A.Huge.Tree.in.the.Tsukamori.Forest.mp3'),
   dearlyBeloved: file('Dearly.Beloved.-.KINGDOM.HEARTS.II.Version-.mp3'),
+  jangolova: file('Jangolova.Bonus.mp3'),
+  terminator: file('Terminator.mp3'),
+  organise: file('Organise.mp3'),
+  suru: file('Suru.feat.Stormzy.mp3'),
+  mms: file('MMS.mp3'),
+  gratitude: file('Gratitude.mp3'),
+  itsPlenty: file('Its.Plenty.mp3'),
 } as const;
