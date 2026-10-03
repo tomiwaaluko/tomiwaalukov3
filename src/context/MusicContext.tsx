@@ -49,6 +49,10 @@ function tracksForTheme(theme: AccentTheme): MusicTrack[] {
   return [...DEFAULT_MUSIC_TRACKS];
 }
 
+function volumeForTheme(theme: AccentTheme): number {
+  return theme === 'nigerian' ? 0.35 : 0.7;
+}
+
 function shuffleInPlace<T>(items: T[]): T[] {
   const a = [...items];
   for (let i = a.length - 1; i > 0; i--) {
@@ -64,7 +68,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
   const { accentTheme } = useAccentTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolume] = useState(() => volumeForTheme(accentTheme));
   const [currentTrack, setCurrentTrack] = useState<MusicTrack | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -168,6 +172,7 @@ export const MusicProvider: React.FC<MusicProviderProps> = ({ children }) => {
 
     const first = playlistRef.current[0]!;
     const audio = new Audio(first.src);
+    audio.volume = volumeForTheme(accentTheme);
     audio.loop = false;
     audio.preload = 'auto';
     audio.setAttribute('playsinline', '');
