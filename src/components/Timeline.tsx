@@ -87,14 +87,29 @@ function MilestoneDescription({
 const milestones: Milestone[] = [
     {
         year: '2026',
+        title: 'SIE Wellness · Incoming Software Engineer',
+        redCompany: true,
+        description: 'Incoming software engineering role.',
+        tags: ['Software Engineering', 'Incoming'],
+    },
+    {
+        year: '2026',
         title: 'Bank of New York · Software Engineering Intern',
         redCompany: true,
         // scrambleCompany: true,
         // descriptionScramblePhrase:
         //     'a global financial technology and investment services company.',
         description:
-            'Summer 2026. Selected for a competitive Software Engineering internship at a global financial technology and investment services company.',
-        tags: ['Software Engineering', 'FinTech', 'Internship'],
+            'Completed Summer 2026 in Lake Mary. Built a multi-stage Python CLI that maps vendor financial schemas to a canonical ontology with LLMs, cutting an outsourced step from 17–83 minutes to under a minute. Helped deploy an 8-agent framework engineering teams now use, saving about 2.5 hours of senior rework per flagged merge request.',
+        tags: ['Python', 'LLMs', 'FinTech', 'Internship'],
+    },
+    {
+        year: '2026',
+        title: 'Freelance · Web Developer',
+        redCompany: true,
+        description:
+            'Schedule calls and build websites for client businesses, including the API integrations and domain management those sites need.',
+        tags: ['Client Work', 'Web Development', 'APIs'],
     },
     {
         year: '2026',
@@ -106,18 +121,19 @@ const milestones: Milestone[] = [
     },
     {
         year: '2025',
-        title: 'Handshake · AI Research & Evaluation Auditor',
+        title: 'Handshake · Software Engineering Fellow',
         redCompany: true,
         description:
-            'Contract · Remote. Conduct quality assurance and review work supporting large-scale AI systems; collaborate cross-functionally for consistency, accuracy, and quality standards across multimodal datasets. Parallel role since Oct 2025: AI Model Quality & Data Annotation Researcher: data review and annotation work to improve reliability and performance across diverse modalities.',
-        tags: ['AI Quality Assurance', 'Multimodal Review', 'Model Evaluation', 'Remote'],
+            'Software Engineering Fellow since October 2025. Build coding-model evaluations from real open-source pull requests: golden fixes, fail-to-pass tests, and Docker environments.',
+        tags: ['AI Evaluation', 'Docker', 'Open Source', 'Remote'],
     },
     {
         year: '2025',
-        title: 'NSBE UCF · Software Engineer',
+        title: 'NSBE UCF · Lead Software Engineer',
+        redCompany: true,
         description:
-            'Architected a full-stack event management system for 100+ users with role-based access, OAuth, and REST APIs for attendance and 50+ annual events. Cut manual attendance processing time by roughly 75% using real-time check-in, validation, and analytics dashboards with Prisma and PostgreSQL. Deployed on Railway and Vercel with Docker, CI/CD, and resilient handling for peak database load.',
-        tags: ['Next.js', 'TypeScript', 'NestJS', 'Prisma', 'PostgreSQL', 'Docker'],
+            'Lead Software Engineer since November 2025. Own the chapter platform for 100+ members and 50+ events, and lead 4 engineers through sprints, standups, and retros. Real-time QR and short-code check-in, on a React frontend built with Next.js, cut manual attendance work by about 75%.',
+        tags: ['React', 'Next.js', 'NestJS', 'Prisma', 'PostgreSQL', 'Docker'],
     },
     // {
     //     year: '2025',
@@ -137,14 +153,14 @@ const milestones: Milestone[] = [
         year: '2024',
         title: 'NSBE UCF · Senator',
         description:
-            'Facilitated chapter participation in regional and national conventions: voting and conference logistics, procedural guidance, budgeting oversight, and member communications.',
+            'Two terms, April 2024 to April 2026. Coordinated convention voting and logistics, and owned a $40,000+ annual conference budget for 100+ students across two trips a year.',
         tags: ['Organization', 'Event Management', 'Leadership'],
     },
     {
         year: '2024',
         title: 'Alpha Phi Alpha · Assistant East Area Director',
         description:
-            'Coordinated communications and district operations for college chapters in the East Area of the Florida district, aligning chapters and supporting collaboration.',
+            'May 2024 to April 2026. Coordinated communications and district operations for college chapters in the East Area of the Florida district, aligning chapters and supporting collaboration.',
         tags: ['Communication', 'Organization', 'Student Orgs'],
     },
     {
